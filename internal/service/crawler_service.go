@@ -9,9 +9,7 @@ import (
 
 
 
-type CrawlerService struct {
-	List_news []entity.News
-}
+type CrawlerService struct {}
 
 func NewCrawler() *CrawlerService {
 	return &CrawlerService{}
