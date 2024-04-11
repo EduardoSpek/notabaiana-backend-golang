@@ -9,15 +9,15 @@ import (
 
 
 
-type Crawler struct {
+type CrawlerService struct {
 	List_news []entity.News
 }
 
-func NewCrawler(list_news []entity.News) *Crawler {
-	return &Crawler{ List_news: list_news }
+func NewCrawler() *CrawlerService {
+	return &CrawlerService{}
 }
 
-func (c *Crawler) GetRSS(url string) entity.RSS {
+func (c *CrawlerService) GetRSS(url string) entity.RSS {
 	// resp, err := http.Get(url)
     // if err != nil {
     //     fmt.Println("Erro ao obter o feed:", err)
