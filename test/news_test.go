@@ -21,6 +21,8 @@ func Resultado(t *testing.T, esperado string, recebido string) {
 }
 
 func TestNewsEntity(t *testing.T) {
+	t.Parallel()
+	
 	news := entity.News{		
 		Title: "Titulo",
 		Text: "Texto",
