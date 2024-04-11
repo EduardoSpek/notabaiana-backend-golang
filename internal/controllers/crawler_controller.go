@@ -41,6 +41,6 @@ func (c *CrawlerController) Crawler(w http.ResponseWriter, r http.Request) {
 		"message": "Notícias resgatadas!",
 
 	}
-	ResponseJson(w, msg, http.StatusNotFound)
+	ResponseJson(w, msg, http.StatusOK)
 	
 }
