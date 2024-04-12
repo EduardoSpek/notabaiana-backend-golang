@@ -28,10 +28,10 @@ func main() {
 	crawler_service := service.NewCrawler()
 	crawler_controller := controllers.NewCrawlerController(*news_service, *crawler_service)
 
-	router := web.NewServerWeb()
+	server := web.NewServerWeb()
 
-	router.CrawlerController(*crawler_controller)
+	server.CrawlerController(*crawler_controller)
 
-	router.Start()
+	server.Start()
 
 }
