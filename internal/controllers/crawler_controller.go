@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 	"github.com/eduardospek/bn-api/internal/service"
@@ -17,7 +19,14 @@ func NewCrawlerController(newsservice service.NewsService, crawlerservice servic
 	return &CrawlerController{ news_service: newsservice, crawler_service: crawlerservice }
 }
 
-func (c *CrawlerController) Crawler(w http.ResponseWriter, r http.Request) {
+func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
+
+	cwd, err := os.Getwd()
+	diretorio := strings.Replace(cwd, "test", "", -1) + "images/"
+
+	if err != nil {
+        fmt.Println("Erro ao obter o caminho do executável:", err)
+    }
 
 	rss := c.crawler_service.GetRSS(os.Getenv("URL_RSS"))
 
@@ -29,11 +38,21 @@ func (c *CrawlerController) Crawler(w http.ResponseWriter, r http.Request) {
 			Image: item.Media.URL,
 		}
 		
-		err := c.news_service.CreateNews(n)
+		new, err := c.news_service.CreateNews(n)
 
 		if err != nil {
-			continue
+			fmt.Println("Erro ao Salvar News: ", err)			
+		} else {		
+					
+			err = c.news_service.SaveImage(new.ID, new.Image, diretorio)
+
+			if err != nil {
+				fmt.Println("Erro ao Salvar Image: ", err)			
+			}
+
 		}
+
+		
 	}
 
 	msg := map[string]any{

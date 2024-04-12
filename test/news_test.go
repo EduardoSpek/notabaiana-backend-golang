@@ -6,6 +6,7 @@ import (
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 	database "github.com/eduardospek/bn-api/internal/infra/database/memorydb"
 	"github.com/eduardospek/bn-api/internal/service"
+	"github.com/eduardospek/bn-api/internal/utils"
 )
 
 type TestCase struct {
@@ -61,7 +62,8 @@ func TestNewsService(t *testing.T) {
 	t.Parallel()
 
 	news_repo := database.NewNewsMemoryRepository()
-	news_service := service.NewNewsService(news_repo)
+	imagedownloader := utils.NewImgDownloader()
+	news_service := service.NewNewsService(news_repo, imagedownloader)
 
 	t.Run("Deve criar uma nova noticia no banco", func (t *testing.T)  {
 		news := entity.News{		
@@ -71,7 +73,7 @@ func TestNewsService(t *testing.T) {
 			Image: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73825/IMAGEM_NOTICIA_original.jpg",
 		}
 	
-		err := news_service.CreateNews(news)
+		_, err := news_service.CreateNews(news)
 	
 		if err != nil {
 			t.Error(err)

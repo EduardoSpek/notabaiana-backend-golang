@@ -7,8 +7,6 @@ import (
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 )
 
-
-
 type CrawlerService struct {}
 
 func NewCrawler() *CrawlerService {

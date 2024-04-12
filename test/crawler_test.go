@@ -2,10 +2,15 @@ package test
 
 import (
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/eduardospek/bn-api/internal/controllers"
+	database "github.com/eduardospek/bn-api/internal/infra/database/memorydb"
 	"github.com/eduardospek/bn-api/internal/service"
+	"github.com/eduardospek/bn-api/internal/utils"
 	"github.com/joho/godotenv"
 )
 
@@ -45,6 +50,49 @@ func TestCrawler(t *testing.T) {
 		for _, teste := range testcases {
 			Resultado(t, teste.Esperado, teste.Recebido)
 		}
+
+	})
+}
+
+func TestCrawlerController(t *testing.T) {
+	t.Parallel()
+
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatalf("Erro ao carregar arquivo .env: %v", err)
+	}
+
+	t.Run("Deve cadastrar as noticias no banco e retornar status 200", func(t *testing.T) {
+
+		req, err := http.NewRequest("GET", "/crawler", nil)
+		
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		repo := database.NewNewsMemoryRepository()
+		imagedownloader := utils.NewImgDownloader()
+		news := service.NewNewsService(repo, imagedownloader)
+		crawler := service.NewCrawler()
+		controller := controllers.NewCrawlerController(*news, *crawler)
+		
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(controller.Crawler)
+
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v",
+				status, http.StatusOK)
+		}
+
+		expected := `{"message":"Notícias resgatadas!","ok":true}`
+		if rr.Body.String() != expected {
+			t.Errorf("handler returned unexpected body: got %v want %v",
+				rr.Body.String(), expected)
+		}
+
+		t.Error("Fim")
 
 	})
 }
