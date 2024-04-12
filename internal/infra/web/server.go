@@ -21,7 +21,7 @@ func NewServerWeb () *ServerWeb {
 
 // Start run the application
 func (serverweb *ServerWeb) Start() {
-	api := serverweb.router.PathPrefix("/v1").Subrouter()
+	api := serverweb.router
 
 	api.Use(middlewares.CorsMiddleware)
 

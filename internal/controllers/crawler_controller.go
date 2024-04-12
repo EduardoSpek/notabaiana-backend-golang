@@ -22,7 +22,7 @@ func NewCrawlerController(newsservice service.NewsService, crawlerservice servic
 func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
 
 	cwd, err := os.Getwd()
-	diretorio := strings.Replace(cwd, "test", "", -1) + "images/"
+	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"
 
 	if err != nil {
         fmt.Println("Erro ao obter o caminho do executável:", err)
