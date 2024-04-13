@@ -26,7 +26,8 @@ func main() {
 	news_service := service.NewNewsService(newsrepo, imagedownloader)	
 
 	crawler_service := service.NewCrawler()
-	crawler_controller := controllers.NewCrawlerController(*news_service, *crawler_service)
+	disparador_service := service.NewDisparador(*news_service, *crawler_service)
+	crawler_controller := controllers.NewCrawlerController(*disparador_service)
 
 	news_controller := controllers.NewNewsController(*news_service)
 

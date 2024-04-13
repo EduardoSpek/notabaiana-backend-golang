@@ -65,7 +65,7 @@ func TestCrawlerController(t *testing.T) {
 
 	t.Run("Deve cadastrar as noticias no banco e retornar status 200", func(t *testing.T) {
 
-		req, err := http.NewRequest("GET", "/crawler/12345", nil)
+		req, err := http.NewRequest("GET", "/crawler/" + os.Getenv("KEY"), nil)
 		
 		if err != nil {
 			t.Fatal(err)
@@ -75,7 +75,8 @@ func TestCrawlerController(t *testing.T) {
 		imagedownloader := utils.NewImgDownloader()
 		news := service.NewNewsService(repo, imagedownloader)
 		crawler := service.NewCrawler()
-		controller := controllers.NewCrawlerController(*news, *crawler)
+		disparador := service.NewDisparador(*news, *crawler)
+		controller := controllers.NewCrawlerController(*disparador)
 		
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
