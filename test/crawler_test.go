@@ -11,6 +11,7 @@ import (
 	database "github.com/eduardospek/bn-api/internal/infra/database/memorydb"
 	"github.com/eduardospek/bn-api/internal/service"
 	"github.com/eduardospek/bn-api/internal/utils"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
@@ -64,7 +65,7 @@ func TestCrawlerController(t *testing.T) {
 
 	t.Run("Deve cadastrar as noticias no banco e retornar status 200", func(t *testing.T) {
 
-		req, err := http.NewRequest("GET", "/crawler", nil)
+		req, err := http.NewRequest("GET", "/crawler/12345", nil)
 		
 		if err != nil {
 			t.Fatal(err)
@@ -77,9 +78,10 @@ func TestCrawlerController(t *testing.T) {
 		controller := controllers.NewCrawlerController(*news, *crawler)
 		
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(controller.Crawler)
+		router := mux.NewRouter()
+		router.HandleFunc("/crawler/{key}", controller.Crawler)
 
-		handler.ServeHTTP(rr, req)
+		router.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("handler returned wrong status code: got %v want %v",
@@ -90,9 +92,7 @@ func TestCrawlerController(t *testing.T) {
 		if rr.Body.String() != expected {
 			t.Errorf("handler returned unexpected body: got %v want %v",
 				rr.Body.String(), expected)
-		}
-
-		t.Error("Fim")
+		}		
 
 	})
 }

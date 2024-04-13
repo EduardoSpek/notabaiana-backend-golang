@@ -82,7 +82,7 @@ func TestNewsService(t *testing.T) {
 
 	t.Run("Deve listar as noticias do banco", func (t *testing.T)  {
 
-		lista := news_service.FindAllNews()
+		lista := news_service.FindAllNews(1, 4)
 	
 		if string(lista[0].Title) == "" {
 			t.Error("Nenhuma notícia no banco")

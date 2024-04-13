@@ -160,7 +160,7 @@ func (repo *NewsSQLiteRepository) GetById(id string) (entity.News, error) {
     return *news, err
 }
 
-func (repo *NewsSQLiteRepository) FindAll() ([]entity.News, error) {
+func (repo *NewsSQLiteRepository) FindAll(page, limit int) ([]entity.News, error) {
 	
 	db, err := conn.Connect()	
 
@@ -169,8 +169,10 @@ func (repo *NewsSQLiteRepository) FindAll() ([]entity.News, error) {
 	}
 
     defer db.Close()
+
+    offset := (page - 1) * limit
     
-    rows, err := db.Query("SELECT * FROM news ORDER BY id DESC")
+    rows, err := db.Query("SELECT * FROM news ORDER BY id DESC LIMIT ? OFFSET ?", limit, offset)
     if err != nil {        
         return nil, err
     }    

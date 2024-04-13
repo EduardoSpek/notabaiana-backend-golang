@@ -8,7 +8,8 @@ import (
 
 type NewsRepository interface {
 	Create(news entity.News) (entity.News, error)
-	FindAll() ([]entity.News, error)
+	FindAll(page, limit int) ([]entity.News, error)
+	NewsExists(title string) error
 }
 
 type ImageDownloader interface {
@@ -28,8 +29,14 @@ func NewNewsService(repository NewsRepository, downloader ImageDownloader) *News
 func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	
 	new := *entity.NewNews(news)
+
+	err := s.newsrepository.NewsExists(new.Title)
+
+	if err != nil {
+		return entity.News{}, err
+	}
 	
-	_, err := s.newsrepository.Create(new)
+	_, err = s.newsrepository.Create(new)
 	
 	if err != nil {
 		return entity.News{}, err
@@ -38,9 +45,9 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	return new, nil
 }
 
-func (s *NewsService) FindAllNews() []entity.News {
+func (s *NewsService) FindAllNews(page, limit int) []entity.News {
 	
-	news, _ := s.newsrepository.FindAll()
+	news, _ := s.newsrepository.FindAll(page, limit)
 	
 	return news
 
