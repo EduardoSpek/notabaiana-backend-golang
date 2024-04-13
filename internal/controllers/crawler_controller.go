@@ -8,6 +8,7 @@ import (
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 	"github.com/eduardospek/bn-api/internal/service"
+	"github.com/gorilla/mux"
 )
 
 type CrawlerController struct {
@@ -20,6 +21,12 @@ func NewCrawlerController(newsservice service.NewsService, crawlerservice servic
 }
 
 func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["key"]
+
+	if key != os.Getenv("KEY") {
+		return
+	}
 
 	cwd, err := os.Getwd()
 	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"

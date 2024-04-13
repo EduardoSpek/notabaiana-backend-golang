@@ -1,15 +1,14 @@
 package service
 
 import (
-	"fmt"
 	"image"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 )
 
 type NewsRepository interface {
-	Create(news entity.News) error
-	FindAll() []entity.News
+	Create(news entity.News) (entity.News, error)
+	FindAll() ([]entity.News, error)
 }
 
 type ImageDownloader interface {
@@ -30,7 +29,7 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	
 	new := *entity.NewNews(news)
 	
-	err := s.newsrepository.Create(new)
+	_, err := s.newsrepository.Create(new)
 	
 	if err != nil {
 		return entity.News{}, err
@@ -41,7 +40,7 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 
 func (s *NewsService) FindAllNews() []entity.News {
 	
-	news := s.newsrepository.FindAll()
+	news, _ := s.newsrepository.FindAll()
 	
 	return news
 
@@ -52,20 +51,23 @@ func (s *NewsService) SaveImage(id, url, diretorio string) error {
 	img, err := s.imagedownloader.DownloadImage(url)
 	
 	if err != nil {
-		fmt.Println("Erro ao baixar a imagem:", err)
+		//fmt.Println("Erro ao baixar a imagem:", err)
 		return err
 	}
 	
 	outputPath := diretorio + id + ".jpg"
 
-	err = s.imagedownloader.ResizeAndSaveImage(img, 400, 267, outputPath)
+	width := 400
+	height := int(float64(img.Bounds().Dy()) * (float64(width) / float64(img.Bounds().Dx()))) 
+
+	err = s.imagedownloader.ResizeAndSaveImage(img, width, height, outputPath)
 	
 	if err != nil {
-		fmt.Println("Erro ao redimensionar e salvar a imagem:", err)
+		//fmt.Println("Erro ao redimensionar e salvar a imagem:", err)
 		return err
 	}
 
-	fmt.Println("Imagem redimensionada e salva com sucesso em", outputPath)
+	//fmt.Println("Imagem redimensionada e salva com sucesso em", outputPath)
 	
 	return nil
 

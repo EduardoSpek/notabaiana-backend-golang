@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/eduardospek/bn-api/internal/controllers"
-	database "github.com/eduardospek/bn-api/internal/infra/database/memorydb"
+	database "github.com/eduardospek/bn-api/internal/infra/database/sqlite"
 	"github.com/eduardospek/bn-api/internal/infra/web"
 	"github.com/eduardospek/bn-api/internal/service"
 	"github.com/eduardospek/bn-api/internal/utils"
@@ -20,8 +20,8 @@ func init() {
 
 func main() {	
 
-	//userRepo := database.NewUserMysqlRepository()
-	newsrepo := database.NewNewsMemoryRepository()
+	newsrepo := database.NewNewsSQLiteRepository()
+	//newsrepo := database.NewNewsMemoryRepository()
 	imagedownloader := utils.NewImgDownloader()	
 	news_service := service.NewNewsService(newsrepo, imagedownloader)	
 
