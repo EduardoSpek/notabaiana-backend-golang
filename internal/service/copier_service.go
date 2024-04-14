@@ -8,16 +8,22 @@ import (
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 )
 
-type DisparadorService struct {
+type CopierService struct {
 	news_service    NewsService
 	crawler_service CrawlerService
 }
 
-func NewDisparador(newsservice NewsService, crawlerservice CrawlerService) *DisparadorService {
-	return &DisparadorService{news_service: newsservice, crawler_service: crawlerservice}
+func NewCopier(newsservice NewsService, crawlerservice CrawlerService) *CopierService {
+	return &CopierService{news_service: newsservice, crawler_service: crawlerservice}
 }
 
-func (c *DisparadorService) Start() {
+func (c *CopierService) Start() {
+
+	err := os.MkdirAll("images", os.ModePerm)
+	if err != nil {
+		fmt.Println("Erro ao criar pasta:", err)
+		return
+	}
 
 	cwd, err := os.Getwd()
 	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"
@@ -42,7 +48,7 @@ func (c *DisparadorService) Start() {
 			fmt.Println("Erro ao Salvar News: ", err)
 		} else {
 
-			err = c.news_service.SaveImage(new.ID, new.Image, diretorio)
+			err = c.news_service.SaveImage(new.ID, n.Image, diretorio)
 
 			if err != nil {
 				fmt.Println("Erro ao Salvar Image: ", err)

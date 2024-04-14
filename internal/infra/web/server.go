@@ -22,6 +22,9 @@ func NewServerWeb () *ServerWeb {
 // Start run the application
 func (serverweb *ServerWeb) Start() {
 	api := serverweb.router
+	// Rota para servir arquivos estáticos
+    api.PathPrefix("/images/").Handler(http.StripPrefix("/images/", http.FileServer(http.Dir("images"))))
+
 
 	api.Use(middlewares.CorsMiddleware)
 

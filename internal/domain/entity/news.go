@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 )
 
 type News struct {
@@ -13,6 +14,7 @@ type News struct {
 	Text  string `json:"text"`
 	Link  string `json:"link"`
 	Image string `json:"image"`
+	Slug string `json:"slug"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
@@ -24,7 +26,12 @@ func NewNews(news News) *News {
 		Text:  strings.TrimSpace(news.Text),
 		Link:  strings.TrimSpace(news.Link),
 		Image: strings.TrimSpace(news.Image),
+		Slug: SlugTitle(news.Title),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),	
 	}
+}
+
+func SlugTitle(title string) string {
+	return slug.Make(strings.TrimSpace(title))
 }

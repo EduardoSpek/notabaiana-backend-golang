@@ -9,11 +9,11 @@ import (
 )
 
 type CrawlerController struct {
-	Disparador service.DisparadorService	
+	Copier service.CopierService	
 }
 
-func NewCrawlerController(disparador service.DisparadorService) *CrawlerController {
-	return &CrawlerController{ Disparador: disparador }
+func NewCrawlerController(copier service.CopierService) *CrawlerController {
+	return &CrawlerController{ Copier: copier }
 }
 
 func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +24,7 @@ func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.Disparador.Start()
+	c.Copier.Start()
 
 	msg := map[string]any{
 		"ok": true,

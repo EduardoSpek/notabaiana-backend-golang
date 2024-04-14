@@ -10,6 +10,7 @@ type NewsRepository interface {
 	Create(news entity.News) (entity.News, error)
 	FindAll(page, limit int) ([]entity.News, error)
 	NewsExists(title string) error
+	GetBySlug(slug string) (entity.News, error)
 }
 
 type ImageDownloader interface {
@@ -29,6 +30,8 @@ func NewNewsService(repository NewsRepository, downloader ImageDownloader) *News
 func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	
 	new := *entity.NewNews(news)
+	new = RenamePathImage(new)
+	new = ChangeLink(new)
 
 	err := s.newsrepository.NewsExists(new.Title)
 
@@ -43,6 +46,18 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	}
 	
 	return new, nil
+}
+
+func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
+	
+	new, err := s.newsrepository.GetBySlug(slug)
+
+	if err != nil {
+		return entity.News{}, err
+	}
+	
+	return new, nil
+
 }
 
 func (s *NewsService) FindAllNews(page, limit int) []entity.News {
@@ -78,4 +93,13 @@ func (s *NewsService) SaveImage(id, url, diretorio string) error {
 	
 	return nil
 
+}
+
+func RenamePathImage(news entity.News) entity.News {
+	news.Image = news.ID + ".jpg"
+	return news
+}
+func ChangeLink(news entity.News) entity.News {
+	news.Link = "/news/" + news.Slug
+	return news
 }

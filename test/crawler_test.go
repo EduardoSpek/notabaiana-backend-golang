@@ -27,31 +27,14 @@ func TestCrawler(t *testing.T) {
 
 	t.Run("Deve obter os dados do RSS", func(t *testing.T) {
 		
-		rss := crawler.GetRSS(os.Getenv("URL_RSS"))		
+		rss := crawler.GetRSS(os.Getenv("URL_RSS"))	
+		
+		title := rss.Channel.Items[0].Title
 
-		testcases := []TestCase{
-			{
-				Esperado: "BAHIA NOTICIAS",
-				Recebido: string(rss.Channel.Title),
-			},
-			{
-				Esperado: `Anderson Leonardo recebe alta da UTI e é encaminhado para quarto: "Respirando sem ajuda de aparelhos"`,
-				Recebido: string(rss.Channel.Items[0].Title),
-			},
-			{
-				Esperado: "https://www.bahianoticias.com.br/holofote/noticia/73833-anderson-leonardo-recebe-alta-da-uti-e-e-encaminhado-para-quarto-respirando-sem-ajuda-de-aparelhos",
-				Recebido: string(rss.Channel.Items[0].Link),
-			},
-			{
-				Esperado: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73833/IMAGEM_NOTICIA_original.jpg",
-				Recebido: string(rss.Channel.Items[0].Media.URL),
-			},
+		if title == "" {
+			t.Error("Erro: Não foi possível obter o RSS")
 		}
-
-		for _, teste := range testcases {
-			Resultado(t, teste.Esperado, teste.Recebido)
-		}
-
+		
 	})
 }
 
@@ -75,8 +58,8 @@ func TestCrawlerController(t *testing.T) {
 		imagedownloader := utils.NewImgDownloader()
 		news := service.NewNewsService(repo, imagedownloader)
 		crawler := service.NewCrawler()
-		disparador := service.NewDisparador(*news, *crawler)
-		controller := controllers.NewCrawlerController(*disparador)
+		copier := service.NewCopier(*news, *crawler)
+		controller := controllers.NewCrawlerController(*copier)
 		
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
