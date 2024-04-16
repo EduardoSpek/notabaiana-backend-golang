@@ -83,8 +83,12 @@ func TestNewsService(t *testing.T) {
 	t.Run("Deve listar as noticias do banco", func (t *testing.T)  {
 
 		lista := news_service.FindAllNews(1, 4)
+		
+		newsList := lista.(struct {
+			Lista []entity.News `json:"news"`
+		});
 	
-		if string(lista[0].Title) == "" {
+		if string(newsList.Lista[0].Title) == "" {
 			t.Error("Nenhuma notícia no banco")
 		}		
 	})

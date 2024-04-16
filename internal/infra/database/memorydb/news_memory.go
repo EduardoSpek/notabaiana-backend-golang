@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
+	"github.com/eduardospek/bn-api/internal/utils"
 )
 
 var (
@@ -33,12 +34,23 @@ func (r *NewsMemoryRepository) GetBySlug(slug string) (entity.News, error) {
 	return entity.News{}, ErrNotNewSlug
 }
 
-func (r *NewsMemoryRepository) FindAll(page, limit int) ([]entity.News, error) {
+func (r *NewsMemoryRepository) FindAll(page, limit int) (interface{}, error) {
 	var news []entity.News
 	for _, n := range r.Newsdb {
 		news = append(news, n)
 	}
-	return news, nil
+
+	pagination := utils.Pagination(page, len(r.Newsdb))
+
+    result := struct{
+        List_news []entity.News `json:"news"`
+        Pagination map[string][]int `json:"pagination"`
+    }{
+        List_news: news,
+        Pagination: pagination,
+    }
+
+	return result, nil
 }
 
 //VALIDATIONS

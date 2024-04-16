@@ -8,7 +8,7 @@ import (
 
 type NewsRepository interface {
 	Create(news entity.News) (entity.News, error)
-	FindAll(page, limit int) ([]entity.News, error)
+	FindAll(page, limit int) (interface{}, error)
 	NewsExists(title string) error
 	GetBySlug(slug string) (entity.News, error)
 }
@@ -60,7 +60,7 @@ func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
 
 }
 
-func (s *NewsService) FindAllNews(page, limit int) []entity.News {
+func (s *NewsService) FindAllNews(page, limit int) interface{} {
 	
 	news, _ := s.newsrepository.FindAll(page, limit)
 	

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
+	"github.com/eduardospek/bn-api/internal/utils"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -211,7 +212,7 @@ func (repo *NewsSQLiteRepository) GetBySlug(slug string) (entity.News, error) {
     return *news, err
 }
 
-func (repo *NewsSQLiteRepository) FindAll(page, limit int) ([]entity.News, error) {
+func (repo *NewsSQLiteRepository) FindAll(page, limit int) (interface{}, error) {
 	
 	db, err := conn.Connect()	
 
@@ -243,8 +244,29 @@ func (repo *NewsSQLiteRepository) FindAll(page, limit int) ([]entity.News, error
         news.UpdatedAt = news.UpdatedAt.Local()
         list_news = append(list_news, news)
     }
+
+    countQuery := "SELECT COUNT(*) as total FROM news"
+    row := db.QueryRow(countQuery)
+    var total int
+
+    err = row.Scan(&total)
+    if err != nil {        
+        if err == sql.ErrNoRows {            
+            return nil, err
+        }
+    }
+
+    pagination := utils.Pagination(page, total)
+
+    result := struct{
+        List_news []entity.News `json:"news"`
+        Pagination map[string][]int `json:"pagination"`
+    }{
+        List_news: list_news,
+        Pagination: pagination,
+    }
     
-    return list_news, nil
+    return result, nil
 }
 
 func (repo *NewsSQLiteRepository) Delete(id string) (error) {
