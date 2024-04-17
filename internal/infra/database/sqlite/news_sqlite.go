@@ -224,7 +224,7 @@ func (repo *NewsSQLiteRepository) FindAll(page, limit int) (interface{}, error) 
 
     offset := (page - 1) * limit
     
-    rows, err := db.Query("SELECT * FROM news ORDER BY id DESC LIMIT ? OFFSET ?", limit, offset)
+    rows, err := db.Query("SELECT * FROM news ORDER BY created_at DESC LIMIT ? OFFSET ?", limit, offset)
     if err != nil {        
         return nil, err
     }    
