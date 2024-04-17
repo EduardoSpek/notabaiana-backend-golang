@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/eduardospek/bn-api/internal/controllers"
-	database "github.com/eduardospek/bn-api/internal/infra/database/sqlite"
+	database "github.com/eduardospek/bn-api/internal/infra/database/memorydb"
 	"github.com/eduardospek/bn-api/internal/infra/web"
 	"github.com/eduardospek/bn-api/internal/service"
 	"github.com/eduardospek/bn-api/internal/utils"
@@ -17,8 +17,8 @@ import (
 
 func main() {	
 
-	newsrepo := database.NewNewsSQLiteRepository()
-	//newsrepo := database.NewNewsMemoryRepository()
+	//newsrepo := database.NewNewsSQLiteRepository()
+	newsrepo := database.NewNewsMemoryRepository()
 	imagedownloader := utils.NewImgDownloader()	
 	news_service := service.NewNewsService(newsrepo, imagedownloader)	
 
