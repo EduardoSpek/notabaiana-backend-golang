@@ -29,6 +29,6 @@ func (serverweb *ServerWeb) Start() {
 	api.Use(middlewares.CorsMiddleware)
 
 	fmt.Println("O Servidor foi iniciado na porta "+ os.Getenv("PORT"))
-	log.Fatal(http.ListenAndServe(os.Getenv("PORT"), api))
+	log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), api))
 
 }
