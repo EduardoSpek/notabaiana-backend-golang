@@ -84,13 +84,15 @@ func TestNewsService(t *testing.T) {
 
 		lista := news_service.FindAllNews(1, 4)
 		
-		newsList := lista.(struct {
-			Lista []entity.News `json:"news"`
-		});
+		newsList := lista.(struct{
+			List_news []entity.News `json:"news"`
+			Pagination map[string][]int `json:"pagination"`
+		})		
+
+		if string(newsList.List_news[0].Title) != "Titulo" {
+			t.Error("Erro: Não foi possível retornar as notícias")			
+		}
 	
-		if string(newsList.Lista[0].Title) == "" {
-			t.Error("Nenhuma notícia no banco")
-		}		
 	})
 	
 
