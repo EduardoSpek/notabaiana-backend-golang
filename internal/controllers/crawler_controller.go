@@ -17,6 +17,7 @@ func NewCrawlerController(copier service.CopierService) *CrawlerController {
 }
 
 func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
+	
 	vars := mux.Vars(r)
 	key := vars["key"]
 
