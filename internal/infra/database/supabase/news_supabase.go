@@ -97,12 +97,17 @@ func (repo *NewsSupabaseRepository) CreateNewsTable() error {
 // insertNews insere um novo usuário no banco de dados
 func (repo *NewsSupabaseRepository) Create(news entity.News) (entity.News, error) {    
     db, _ := conn.Connect()
-	defer db.Close()
+	defer db.Close()    
 
-    insertQuery := "INSERT INTO news (id, title, text, link, image, slug) VALUES (?, ?, ?, ?, ?, ?)"
-    _, err := db.Exec(insertQuery, news.ID, news.Title, news.Text, news.Link, news.Image, news.Slug)
+    sql, err := db.Prepare(`INSERT INTO news (id, title, text, link, image, slug) VALUES ($1, $2, $3, $4, $5, $6)`)
 
-    if err != nil {
+    if err != nil {        
+		return entity.News{}, err
+	}  
+    
+    _, err = sql.Exec(news.ID, news.Title, news.Text, news.Link, news.Image, news.Slug)
+
+    if err != nil {        
 		return entity.News{}, err
 	}     
     
@@ -119,38 +124,18 @@ func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error
 		return entity.News{}, err
 	}    
 
-    query := "UPDATE news SET"
-    if news.Title != "" {
-		query += " name = '" + news.Title + "'"
-	}
-    if news.Text != "" {
-		if news.Title != "" {
-			query += ","
-		}
-		query += " text = '" + news.Text + "'"
-	}
-    if news.Link != "" {
-		if news.Title != "" {
-			query += ","
-		}
-		query += " text = '" + news.Link + "'"
-	}
-    if news.Image != "" {
-		if news.Title != "" {
-			query += ","
-		}
-		query += " text = '" + news.Image + "'"
-	}
-    if news.Slug != "" {
-		if news.Title != "" {
-			query += ","
-		}
-		query += " text = '" + news.Slug + "'"
-	}
-	query += " WHERE id = '" + fmt.Sprint(news.ID) + "'"    
+    query := "UPDATE news SET title = $1, text = $2, link = $3, image = $4, slug = $5 WHERE id = $6"
+
+    sql, err := db.Prepare(query)
+    
+    if err != nil {
+        fmt.Println(err)
+        return entity.News{}, err
+    }	
+
 
     if news.Title != "" || news.Text != "" || news.Link != "" || news.Image != "" || news.Slug != "" {
-		_, err := db.Exec(query)
+		_, err := sql.Exec(news.Title, news.Text, news.Link, news.Image, news.Slug, news.ID)
 		if err != nil {
 			fmt.Println(err)
 			return entity.News{}, err
@@ -264,13 +249,19 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
     defer db.Close()
 
     offset := (page - 1) * limit
+
+    sql, err := db.Prepare("SELECT * FROM news ORDER BY created_at DESC LIMIT $1 OFFSET $2")
     
-    rows, err := db.Query("SELECT * FROM news ORDER BY created_at DESC LIMIT ? OFFSET ?", limit, offset)
+    if err != nil {        
+        return nil, err
+    }  
+
+    rows, err := sql.Query(limit, offset)
     if err != nil {        
         return nil, err
     }    
 
-    defer rows.Close()
+    defer sql.Close()
 
     var list_news []entity.News
     list_news = []entity.News{}
@@ -286,15 +277,18 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
         list_news = append(list_news, news)
     }
 
-    countQuery := "SELECT COUNT(*) as total FROM news"
-    row := db.QueryRow(countQuery)
+    sql, err = db.Prepare("SELECT COUNT(*) as total FROM news")
+
+    if err != nil {
+        return nil, err
+    }
+
+    row := sql.QueryRow()
     var total int
 
     err = row.Scan(&total)
-    if err != nil {        
-        if err == sql.ErrNoRows {            
-            return nil, err
-        }
+    if err != nil {                
+        return nil, err        
     }
 
     pagination := utils.Pagination(page, total)
@@ -326,7 +320,12 @@ func (repo *NewsSupabaseRepository) Delete(id string) (error) {
 		return err
 	}
 
-    _ , err = db.Exec("DELETE FROM news WHERE id = ?", id)
+    sql, err := db.Prepare("DELETE FROM news WHERE id = $1")
+
+    if err != nil {
+        return err
+    }
+    _ , err = sql.Exec(id)
 
     if err != nil {        
 		return err
@@ -341,15 +340,18 @@ func (repo *NewsSupabaseRepository) NewsExists(title string) error {
     db, _ := conn.Connect()
 	defer db.Close()    
 
-    newsQuery := "SELECT title FROM news WHERE title = ?"
-    row := db.QueryRow(newsQuery, title)    
+    sql, err := db.Prepare("SELECT title FROM news WHERE title = $1")    
+
+    if err != nil {
+        return err
+    }
+    
+    row := sql.QueryRow(title)    
 
     // Recuperando os valores do banco de dados
-    err := row.Scan(&title)
-    if err != nil {        
-        if err == sql.ErrNoRows {            
-            return nil
-        }
+    err = row.Scan(&title)
+    if err != nil {                   
+        return nil
     }
   
     return ErrNewsExists

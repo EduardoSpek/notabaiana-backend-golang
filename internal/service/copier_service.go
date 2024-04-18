@@ -42,6 +42,8 @@ func (c *CopierService) Start() {
 			Image: item.Media.URL,
 		}
 
+		fmt.Println("Item: ", item.Title)
+
 		new, err := c.news_service.CreateNews(n)
 
 		if err != nil {
