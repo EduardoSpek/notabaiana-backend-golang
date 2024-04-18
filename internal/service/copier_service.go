@@ -19,6 +19,9 @@ func NewCopier(newsservice NewsService, crawlerservice CrawlerService) *CopierSe
 }
 
 func (c *CopierService) Start() {
+	
+	go c.Run()
+
 	ticker := time.NewTicker(10 * time.Minute)
     defer ticker.Stop()
 

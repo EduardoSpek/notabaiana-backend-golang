@@ -25,7 +25,7 @@ func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.Copier.Start()
+	go c.Copier.Start()
 
 	msg := map[string]any{
 		"ok": true,
