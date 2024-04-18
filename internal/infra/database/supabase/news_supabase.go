@@ -205,8 +205,13 @@ func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) 
     
     defer db.Close()
 
-    newsQuery := "SELECT * FROM news WHERE slug = ?"
-    row := db.QueryRow(newsQuery, slug)    
+    sql, err := db.Prepare("SELECT * FROM news WHERE slug = $1")
+
+    if err != nil {
+        return entity.News{}, err
+    }
+    defer sql.Close()
+    row := sql.QueryRow(slug)    
 
     // Variáveis para armazenar os dados do usuário
     var id, title, text, link, image string
@@ -214,13 +219,8 @@ func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) 
 
     // Recuperando os valores do banco de dados
     err = row.Scan(&id, &title, &text, &link, &image, &slug, &created_at,  &updated_at)
-    if err != nil {        
-        // Se não houver usuário correspondente ao ID fornecido, retornar nil
-        if err == sql.ErrNoRows {            
-            return entity.News{}, ErrNewsNotExistsWithID
-        }
-        // Se ocorrer outro erro, retornar o erro        
-        return entity.News{}, err
+    if err != nil {                          
+        return entity.News{}, ErrNewsNotExistsWithID
     }
 
     // Criando um objeto models.News com os dados recuperados

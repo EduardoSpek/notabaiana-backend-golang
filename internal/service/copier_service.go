@@ -40,9 +40,7 @@ func (c *CopierService) Start() {
 			Text:  item.Description,
 			Link:  item.Link,
 			Image: item.Media.URL,
-		}
-
-		fmt.Println("Item: ", item.Title)
+		}		
 
 		new, err := c.news_service.CreateNews(n)
 
