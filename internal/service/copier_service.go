@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 )
@@ -18,6 +19,15 @@ func NewCopier(newsservice NewsService, crawlerservice CrawlerService) *CopierSe
 }
 
 func (c *CopierService) Start() {
+	ticker := time.NewTicker(10 * time.Minute)
+    defer ticker.Stop()
+
+    for range ticker.C {
+		go c.Run()
+	}
+}
+
+func (c *CopierService) Run() {
 
 	err := os.MkdirAll("images", os.ModePerm)
 	if err != nil {
