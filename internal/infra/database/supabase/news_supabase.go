@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -48,18 +49,49 @@ func (repo *NewsSupabaseRepository) CreateNewsTable() error {
         slug VARCHAR(250) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE OR REPLACE FUNCTION update_updated_at()
-		RETURNS TRIGGER AS $$
-		BEGIN
-			NEW.updated_at = now();
-			RETURN NEW;
-		END;
-		$$ LANGUAGE plpgsql;
-		
-		CREATE TRIGGER news_update_trigger
-		BEFORE UPDATE ON news
-		FOR EACH ROW EXECUTE FUNCTION update_updated_at();`)
+    );`)
+    if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Tabela 'news' criada com sucesso!")
+
+	// Verificando se o trigger já existe
+	var triggerExists bool
+	err = db.QueryRow(`
+		SELECT EXISTS (
+			SELECT 1
+			FROM   pg_trigger
+			WHERE  tgname = 'news_update_trigger'
+		);
+	`).Scan(&triggerExists)
+	
+    if err != nil {
+		log.Fatal(err)
+	}
+
+	// Criando o trigger somente se ele não existir
+	if !triggerExists {
+		_, err = db.Exec(`
+			CREATE OR REPLACE FUNCTION update_updated_at()
+			RETURNS TRIGGER AS $$
+			BEGIN
+				NEW.updated_at = now();
+				RETURN NEW;
+			END;
+			$$ LANGUAGE plpgsql;
+			
+			CREATE TRIGGER news_update_trigger
+			BEFORE UPDATE ON news
+			FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+		`)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Trigger 'news_update_trigger' criada com sucesso!")
+	} else {
+		fmt.Println("Trigger 'news_update_trigger' já existe.")
+	}
+    
     return err
 }
 
