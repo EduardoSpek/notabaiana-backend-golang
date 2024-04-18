@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
@@ -340,9 +339,7 @@ func (repo *NewsSupabaseRepository) Delete(id string) (error) {
 //VALIDATIONS
 func (repo *NewsSupabaseRepository) NewsExists(title string) error {
     db, _ := conn.Connect()
-	defer db.Close()
-
-    title = strings.TrimSpace(title)
+	defer db.Close()    
 
     newsQuery := "SELECT title FROM news WHERE title = ?"
     row := db.QueryRow(newsQuery, title)    
@@ -355,5 +352,5 @@ func (repo *NewsSupabaseRepository) NewsExists(title string) error {
         }
     }
   
-    return errors.New("já existe notícia com este título")
+    return ErrNewsExists
 }
