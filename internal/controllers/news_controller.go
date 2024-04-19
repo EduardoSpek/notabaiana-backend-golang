@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/eduardospek/bn-api/internal/service"
@@ -56,4 +57,35 @@ func (c *NewsController) News(w http.ResponseWriter, r *http.Request) {
 	
 	ResponseJson(w, listnews, http.StatusOK)
 	
+}
+
+func (c *NewsController) NewsTruncateTable(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	key := vars["key"]
+
+	if key != os.Getenv("KEY") {
+		return
+	}
+
+	err := c.news_service.NewsTruncateTable()
+
+	var msg map[string]any
+
+	if err != nil {
+		msg = map[string]any{
+			"ok": false,
+			"message": "Não foi possível limpar a tabela news",
+		}
+		ResponseJson(w, msg, http.StatusOK)
+		return
+	}
+
+	msg = map[string]any{
+		"ok": true,
+		"message": "Tabela news Limpada com sucesso!",
+	}
+
+	ResponseJson(w, msg, http.StatusOK)
+
 }

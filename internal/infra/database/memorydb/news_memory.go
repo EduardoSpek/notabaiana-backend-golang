@@ -52,6 +52,12 @@ func (r *NewsMemoryRepository) FindAll(page, limit int) (interface{}, error) {
 
 	return result, nil
 }
+func (r *NewsMemoryRepository) NewsTruncateTable() error {
+    
+	r.Newsdb = make(map[string]entity.News)
+
+    return nil
+}
 
 //VALIDATIONS
 func (r *NewsMemoryRepository) NewsExists(title string) error {

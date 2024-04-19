@@ -11,6 +11,7 @@ type NewsRepository interface {
 	FindAll(page, limit int) (interface{}, error)
 	NewsExists(title string) error
 	GetBySlug(slug string) (entity.News, error)
+	NewsTruncateTable() error
 }
 
 type ImageDownloader interface {
@@ -65,6 +66,18 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 	news, _ := s.newsrepository.FindAll(page, limit)
 	
 	return news
+
+}
+
+func (s *NewsService) NewsTruncateTable() error {
+	
+	err := s.newsrepository.NewsTruncateTable()
+
+	if err != nil {
+		return err
+	}
+	
+	return nil
 
 }
 

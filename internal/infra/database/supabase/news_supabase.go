@@ -335,6 +335,19 @@ func (repo *NewsSupabaseRepository) Delete(id string) (error) {
 
 }
 
+func (repo *NewsSupabaseRepository) NewsTruncateTable() error {
+    db, _ := conn.Connect()
+	defer db.Close()  
+
+    _, err := db.Exec("TRUNCATE TABLE news")
+    
+    if err != nil {
+        return err
+    }
+
+    return nil
+}
+
 //VALIDATIONS
 func (repo *NewsSupabaseRepository) NewsExists(title string) error {
     db, _ := conn.Connect()
