@@ -168,7 +168,7 @@ func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
     }
     sql.Close()
 
-    row := sql.QueryRow(id, true)    
+    row := sql.QueryRow(id)    
 
     // Variáveis para armazenar os dados do usuário
     var title, text, link, image, slug string
@@ -212,7 +212,7 @@ func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) 
         return entity.News{}, err
     }
     defer sql.Close()
-    row := sql.QueryRow(slug, "true")
+    row := sql.QueryRow(slug)
 
     // Variáveis para armazenar os dados do usuário
     var id, title, text, link, image string
@@ -252,7 +252,7 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
 
     offset := (page - 1) * limit
 
-    sql, err := db.Prepare("SELECT * FROM news WHERE visible = true ORDER BY created_at DESC LIMIT $2 OFFSET $3")
+    sql, err := db.Prepare("SELECT * FROM news WHERE visible = true ORDER BY created_at DESC LIMIT $1 OFFSET $2")
     
     if err != nil {        
         return nil, err
