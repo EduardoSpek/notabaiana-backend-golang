@@ -53,6 +53,7 @@ func (c *CopierService) Run() {
 			Text:  item.Description,
 			Link:  item.Link,
 			Image: item.Media.URL,
+			Visible: true,
 		}		
 
 		new, err := c.news_service.CreateNews(n)

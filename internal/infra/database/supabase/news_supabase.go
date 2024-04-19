@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -47,7 +46,8 @@ func (repo *NewsSupabaseRepository) CreateNewsTable() error {
         image VARCHAR(250) NOT NULL,
         slug VARCHAR(250) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        visible BOOLEAN NOT NULL DEFAULT 'true'
     );`)
     if err != nil {
 		log.Fatal(err)
@@ -124,23 +124,22 @@ func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error
 		return entity.News{}, err
 	}    
 
-    query := "UPDATE news SET title = $1, text = $2, link = $3, image = $4, slug = $5 WHERE id = $6"
+    query := "UPDATE news SET title = $1, text = $2, link = $3, image = $4, slug = $5, visible = $6 WHERE id = $7"
 
     sql, err := db.Prepare(query)
     
     if err != nil {
         fmt.Println(err)
         return entity.News{}, err
-    }	
+    }
 
+	_, err = sql.Exec(news.Title, news.Text, news.Link, news.Image, news.Slug, news.ID, news.Visible)
 
-    if news.Title != "" || news.Text != "" || news.Link != "" || news.Image != "" || news.Slug != "" {
-		_, err := sql.Exec(news.Title, news.Text, news.Link, news.Image, news.Slug, news.ID)
-		if err != nil {
-			fmt.Println(err)
-			return entity.News{}, err
-		}	
-	}
+	if err != nil {
+		fmt.Println(err)
+		return entity.News{}, err
+	}	
+
 
     updatenews, err := repo.GetById(news.ID)
 
@@ -162,22 +161,24 @@ func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
     
     defer db.Close()
 
-    newsQuery := "SELECT * FROM news WHERE id = ?"
-    row := db.QueryRow(newsQuery, id)    
+    sql, err := db.Prepare("SELECT * FROM news WHERE id = $1 and visible = $2")
+    
+    if err != nil {
+        return entity.News{}, err
+    }
+    sql.Close()
+
+    row := sql.QueryRow(id, true)    
 
     // Variáveis para armazenar os dados do usuário
     var title, text, link, image, slug string
     var created_at, updated_at time.Time
-
+    var visible bool
     // Recuperando os valores do banco de dados
-    err = row.Scan(&id, &title, &text, &link, &image, &slug, &created_at,  &updated_at)
-    if err != nil {        
-        // Se não houver usuário correspondente ao ID fornecido, retornar nil
-        if err == sql.ErrNoRows {            
-            return entity.News{}, ErrNewsNotExistsWithID
-        }
-        // Se ocorrer outro erro, retornar o erro        
-        return entity.News{}, err
+    err = row.Scan(&id, &title, &text, &link, &image, &slug, &created_at,  &updated_at, &visible)
+
+    if err != nil {                        
+        return entity.News{}, ErrNewsNotExistsWithID      
     }
 
     // Criando um objeto models.News com os dados recuperados
@@ -205,20 +206,21 @@ func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) 
     
     defer db.Close()
 
-    sql, err := db.Prepare("SELECT * FROM news WHERE slug = $1")
+    sql, err := db.Prepare("SELECT * FROM news WHERE slug = $1 and visible = $2")
 
     if err != nil {
         return entity.News{}, err
     }
     defer sql.Close()
-    row := sql.QueryRow(slug)    
+    row := sql.QueryRow(slug, true)
 
     // Variáveis para armazenar os dados do usuário
     var id, title, text, link, image string
     var created_at, updated_at time.Time
+    var visible bool
 
     // Recuperando os valores do banco de dados
-    err = row.Scan(&id, &title, &text, &link, &image, &slug, &created_at,  &updated_at)
+    err = row.Scan(&id, &title, &text, &link, &image, &slug, &created_at,  &updated_at, &visible)
     if err != nil {                          
         return entity.News{}, ErrNewsNotExistsWithID
     }
@@ -250,13 +252,13 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
 
     offset := (page - 1) * limit
 
-    sql, err := db.Prepare("SELECT * FROM news ORDER BY created_at DESC LIMIT $1 OFFSET $2")
+    sql, err := db.Prepare("SELECT * FROM news WHERE visible = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3")
     
     if err != nil {        
         return nil, err
     }  
 
-    rows, err := sql.Query(limit, offset)
+    rows, err := sql.Query(true, limit, offset)
     if err != nil {        
         return nil, err
     }    

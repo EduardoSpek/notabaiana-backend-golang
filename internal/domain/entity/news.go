@@ -17,6 +17,7 @@ type News struct {
 	Slug string `json:"slug"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
+	Visible bool `json:"-"`
 }
 
 func NewNews(news News) *News {
@@ -28,7 +29,8 @@ func NewNews(news News) *News {
 		Image: strings.TrimSpace(news.Image),
 		Slug: SlugTitle(news.Title),
 		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),	
+		UpdatedAt: time.Now(),
+		Visible: news.Visible,
 	}
 }
 

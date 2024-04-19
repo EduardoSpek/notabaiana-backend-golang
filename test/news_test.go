@@ -10,11 +10,11 @@ import (
 )
 
 type TestCase struct {
-	Esperado string
-	Recebido string
+	Esperado any
+	Recebido any
 }
 
-func Resultado(t *testing.T, esperado string, recebido string) {
+func Resultado(t *testing.T, esperado any, recebido any) {
     t.Helper()
     if esperado != recebido {
         t.Errorf("Esperado: %s | Recebido: %s", esperado, recebido)
@@ -49,6 +49,10 @@ func TestNewsEntity(t *testing.T) {
 		{
 			Esperado: news.Image,
 			Recebido: n.Image,
+		},
+		{
+			Esperado: true,
+			Recebido: n.Visible,
 		},
 	}
 
