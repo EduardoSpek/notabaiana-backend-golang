@@ -161,7 +161,7 @@ func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
     
     defer db.Close()
 
-    sql, err := db.Prepare("SELECT * FROM news WHERE id = $1 and visible = $2")
+    sql, err := db.Prepare("SELECT * FROM news WHERE id = $1 and visible = true")
     
     if err != nil {
         return entity.News{}, err
@@ -206,7 +206,7 @@ func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) 
     
     defer db.Close()
 
-    sql, err := db.Prepare("SELECT * FROM news WHERE slug = $1 and visible = $2")
+    sql, err := db.Prepare("SELECT * FROM news WHERE slug = $1 and visible = true")
 
     if err != nil {
         return entity.News{}, err
@@ -252,13 +252,13 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
 
     offset := (page - 1) * limit
 
-    sql, err := db.Prepare("SELECT * FROM news WHERE visible = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3")
+    sql, err := db.Prepare("SELECT * FROM news WHERE visible = true ORDER BY created_at DESC LIMIT $2 OFFSET $3")
     
     if err != nil {        
         return nil, err
     }  
 
-    rows, err := sql.Query("true", limit, offset)
+    rows, err := sql.Query(limit, offset)
     if err != nil {        
         return nil, err
     }    
