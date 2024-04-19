@@ -133,7 +133,7 @@ func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error
         return entity.News{}, err
     }
 
-	_, err = sql.Exec(news.Title, news.Text, news.Link, news.Image, news.Slug, news.ID, news.Visible)
+	_, err = sql.Exec(news.Title, news.Text, news.Link, news.Image, news.Slug, news.Visible, news.ID)
 
 	if err != nil {
 		fmt.Println(err)
