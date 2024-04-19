@@ -34,7 +34,7 @@ func main() {
 	server.CrawlerController(*crawler_controller)
 	server.NewsController(*news_controller)
 
-	copier_service.Start()
+	go copier_service.Start()
 	server.Start()
 
 }
