@@ -270,7 +270,7 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
     
     for rows.Next() {
         var news entity.News
-        err := rows.Scan(&news.ID, &news.Title, &news.Text, &news.Link, &news.Image, &news.Slug, &news.CreatedAt, &news.UpdatedAt)
+        err := rows.Scan(&news.ID, &news.Title, &news.Text, &news.Link, &news.Image, &news.Slug, &news.CreatedAt, &news.UpdatedAt, &news.Visible)
         if err != nil {            
             return nil, err
         }
