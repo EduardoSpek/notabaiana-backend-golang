@@ -58,9 +58,7 @@ func (c *CopierService) Run(rss_url string) {
 
 		new, err := c.news_service.CreateNews(n)
 
-		if err != nil {
-			fmt.Println("Erro ao Salvar News: ", err)
-		} else {
+		if err == nil {			
 
 			err = c.news_service.SaveImage(new.ID, n.Image, diretorio)
 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"image"
+	"strings"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 )
@@ -115,4 +116,12 @@ func RenamePathImage(news entity.News) entity.News {
 func ChangeLink(news entity.News) entity.News {
 	news.Link = "/news/" + news.Slug
 	return news
+}
+func contemPalavra(titulo string, palavras []string) bool {
+    for _, palavra := range palavras {
+        if strings.Contains(strings.ToLower(titulo), strings.ToLower(palavra)) {
+            return true
+        }
+    }
+    return false
 }
