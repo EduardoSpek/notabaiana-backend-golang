@@ -72,7 +72,7 @@ func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
     defer tx.Rollback()    
 
     var news entity.News
-    repo.db.Model(&entity.News{}).Where("id = ?", id).First(news)
+    repo.db.Model(&entity.News{}).Where("id = ?", id).First(&news)
 
     if repo.db.Error != nil {
         return entity.News{}, repo.db.Error
@@ -90,7 +90,7 @@ func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) 
     defer tx.Rollback()    
 
     var news entity.News
-    repo.db.Model(&entity.News{}).Where("slug = ?", slug).First(news)
+    repo.db.Model(&entity.News{}).Where("slug = ?", slug).First(&news)
     
     if repo.db.Error != nil {
         return entity.News{}, repo.db.Error
