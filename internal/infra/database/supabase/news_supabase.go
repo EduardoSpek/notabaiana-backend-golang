@@ -29,11 +29,11 @@ func (repo *NewsSupabaseRepository) Create(news entity.News) (entity.News, error
     tx := repo.db.Begin()
     defer tx.Rollback()    
 
-    repo.db.Model(&entity.News{}).Create(&news)
+    result := repo.db.Create(&news)
     
-    if repo.db.Error != nil {
+    if result.Error != nil {
         tx.Rollback() 
-        return entity.News{}, repo.db.Error
+        return entity.News{}, result.Error
     }
 
     tx.Commit()
@@ -47,11 +47,11 @@ func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error
     tx := repo.db.Begin()
     defer tx.Rollback()    
 
-    repo.db.Model(&entity.News{}).Updates(&news)
-
-    if repo.db.Error != nil {
+    result := repo.db.Updates(&news)
+    
+    if result.Error != nil {
         tx.Rollback() 
-        return entity.News{}, repo.db.Error
+        return entity.News{}, result.Error
     }
 
     tx.Commit()
