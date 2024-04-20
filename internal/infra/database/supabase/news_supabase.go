@@ -3,8 +3,6 @@ package sqlite
 import (
 	"errors"
 	"fmt"
-	"log"
-	"time"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 	"github.com/eduardospek/bn-api/internal/utils"
@@ -19,127 +17,47 @@ var (
 type NewsSupabaseRepository struct {}
 
 func NewNewsSupabaseRepository() *NewsSupabaseRepository {
-	repo := &NewsSupabaseRepository{}
-	err := repo.CreateNewsTable()
-
-    if err != nil {
-        fmt.Println(err)
-        panic(err)
-    }
 	return &NewsSupabaseRepository{}
-}
-
-func (repo *NewsSupabaseRepository) CreateNewsTable() error {    
-    db, err := conn.Connect()
-	
-	if err != nil {
-        fmt.Println(err)
-		return err
-	}
-
-    defer db.Close()
-    _, err = db.Exec(`CREATE TABLE IF NOT EXISTS news (
-        id VARCHAR(36) PRIMARY KEY NOT NULL,
-        title VARCHAR(250) NOT NULL,
-        text TEXT NOT NULL,
-        link VARCHAR(250) NOT NULL,
-        image VARCHAR(250) NOT NULL,
-        slug VARCHAR(250) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        visible BOOLEAN NOT NULL DEFAULT 'true'
-    );`)
-    if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Tabela 'news' criada com sucesso!")
-
-	// Verificando se o trigger já existe
-	var triggerExists bool
-	err = db.QueryRow(`
-		SELECT EXISTS (
-			SELECT 1
-			FROM   pg_trigger
-			WHERE  tgname = 'news_update_trigger'
-		);
-	`).Scan(&triggerExists)
-	
-    if err != nil {
-		log.Fatal(err)
-	}
-
-	// Criando o trigger somente se ele não existir
-	if !triggerExists {
-		_, err = db.Exec(`
-			CREATE OR REPLACE FUNCTION update_updated_at()
-			RETURNS TRIGGER AS $$
-			BEGIN
-				NEW.updated_at = now();
-				RETURN NEW;
-			END;
-			$$ LANGUAGE plpgsql;
-			
-			CREATE TRIGGER news_update_trigger
-			BEFORE UPDATE ON news
-			FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-		`)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("Trigger 'news_update_trigger' criada com sucesso!")
-	} else {
-		fmt.Println("Trigger 'news_update_trigger' já existe.")
-	}
-    
-    return err
 }
 
 // insertNews insere um novo usuário no banco de dados
 func (repo *NewsSupabaseRepository) Create(news entity.News) (entity.News, error) {    
-    db, _ := conn.Connect()
-	defer db.Close()    
+    db, err := conn.Connect()
 
-    sql, err := db.Prepare(`INSERT INTO news (id, title, text, link, image, slug) VALUES ($1, $2, $3, $4, $5, $6)`)
-
-    if err != nil {        
-		return entity.News{}, err
-	}  
-    
-    _, err = sql.Exec(news.ID, news.Title, news.Text, news.Link, news.Image, news.Slug)
-
-    if err != nil {        
-		return entity.News{}, err
-	}     
-    
-    return news, err
-}
-
-func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error)  {    
-    db, _ := conn.Connect()
-	defer db.Close()
-    
-    _, err := repo.GetById(news.ID)
     if err != nil {
-        fmt.Println(err)
-		return entity.News{}, err
-	}    
+        return entity.News{}, err
+    }
+	
+    tx := db.Begin()
+    defer tx.Rollback()    
 
-    query := "UPDATE news SET title = $1, text = $2, link = $3, image = $4, slug = $5, visible = $6 WHERE id = $7"
-
-    sql, err := db.Prepare(query)
-    
-    if err != nil {
-        fmt.Println(err)
+    if err := db.Create(&news).Error; err != nil {
+        tx.Rollback()
         return entity.News{}, err
     }
 
-	_, err = sql.Exec(news.Title, news.Text, news.Link, news.Image, news.Slug, news.Visible, news.ID)
+    tx.Commit()
 
-	if err != nil {
-		fmt.Println(err)
-		return entity.News{}, err
-	}	
+    return news, nil
+    
+}
 
+func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error)  {    
+    db, err := conn.Connect()
+
+    if err != nil {
+        return entity.News{}, err
+    }
+	
+    tx := db.Begin()
+    defer tx.Rollback()    
+
+    if err := db.Updates(&news).Error; err != nil {
+        tx.Rollback()
+        return entity.News{}, err
+    }
+
+    tx.Commit()
 
     updatenews, err := repo.GetById(news.ID)
 
@@ -152,154 +70,69 @@ func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error
 }
 
 func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
-	db, err := conn.Connect()	
-	
-	if err != nil {
-        fmt.Println("Erro ao conectar ao DB")
-		return entity.News{}, err
-	}   
-    
-    defer db.Close()
+	db, err := conn.Connect()
 
-    sql, err := db.Prepare("SELECT * FROM news WHERE id = $1 and visible = true")
-    
     if err != nil {
         return entity.News{}, err
     }
-    sql.Close()
+	
+    tx := db.Begin()
+    defer tx.Rollback()    
 
-    row := sql.QueryRow(id)    
+    var news entity.News
+    db.Where("id = ?", id).First(news)
 
-    // Variáveis para armazenar os dados do usuário
-    var title, text, link, image, slug string
-    var created_at, updated_at time.Time
-    var visible bool
-    // Recuperando os valores do banco de dados
-    err = row.Scan(&id, &title, &text, &link, &image, &slug, &created_at,  &updated_at, &visible)
+    tx.Commit()
 
-    if err != nil {                        
-        return entity.News{}, ErrNewsNotExistsWithID      
-    }
-
-    // Criando um objeto models.News com os dados recuperados
-    news := &entity.News{
-        ID: id,
-        Title: title,
-        Text:    text,
-        Link: link,
-        Image: image,
-        Slug: slug,
-        CreatedAt: created_at.Local(),
-        UpdatedAt: updated_at.Local(),
-    }
-    
-    return *news, err
+    return news, nil
 }
 
 func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) {
-	db, err := conn.Connect()	
-	
-	if err != nil {
-        fmt.Println("Erro ao conectar ao DB")
-		return entity.News{}, err
-	}   
-    
-    defer db.Close()
-
-    sql, err := db.Prepare("SELECT * FROM news WHERE slug = $1 and visible = true")
+	db, err := conn.Connect()
 
     if err != nil {
         return entity.News{}, err
     }
-    defer sql.Close()
-    row := sql.QueryRow(slug)
+	
+    tx := db.Begin()
+    defer tx.Rollback()    
 
-    // Variáveis para armazenar os dados do usuário
-    var id, title, text, link, image string
-    var created_at, updated_at time.Time
-    var visible bool
+    var news entity.News
+    db.Where("slug = ?", slug).First(news)
 
-    // Recuperando os valores do banco de dados
-    err = row.Scan(&id, &title, &text, &link, &image, &slug, &created_at,  &updated_at, &visible)
-    if err != nil {                          
-        return entity.News{}, ErrNewsNotExistsWithID
-    }
+    tx.Commit()
 
-    // Criando um objeto models.News com os dados recuperados
-    news := &entity.News{
-        ID: id,
-        Title: title,
-        Text:    text,
-        Link: link,
-        Image: image,
-        Slug: slug,
-        CreatedAt: created_at.Local(),
-        UpdatedAt: updated_at.Local(),
-    }
-    
-    return *news, err
+    return news, nil
 }
 
 func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error) {
 	
-	db, err := conn.Connect()	
+	offset := (page - 1) * limit
 
-	if err != nil {        
-		return nil, err
-	}
-
-    defer db.Close()
-
-    offset := (page - 1) * limit
-
-    sql, err := db.Prepare("SELECT * FROM news WHERE visible = true ORDER BY created_at DESC LIMIT $1 OFFSET $2")
-    
-    if err != nil {        
-        return nil, err
-    }  
-
-    rows, err := sql.Query(limit, offset)
-    if err != nil {        
-        return nil, err
-    }    
-
-    defer sql.Close()
-
-    var list_news []entity.News
-    list_news = []entity.News{}
-    
-    for rows.Next() {
-        var news entity.News
-        err := rows.Scan(&news.ID, &news.Title, &news.Text, &news.Link, &news.Image, &news.Slug, &news.CreatedAt, &news.UpdatedAt, &news.Visible)
-        if err != nil {            
-            return nil, err
-        }
-        news.CreatedAt = news.CreatedAt.Local()
-        news.UpdatedAt = news.UpdatedAt.Local()
-        list_news = append(list_news, news)
-    }
-
-    sql, err = db.Prepare("SELECT COUNT(*) as total FROM news")
+    db, err := conn.Connect()
 
     if err != nil {
-        return nil, err
+        return entity.News{}, err
     }
+	
+    tx := db.Begin()
+    defer tx.Rollback()    
 
-    row := sql.QueryRow()
-    var total int
+    var news []entity.News
+    db.Model(&entity.News{}).Where("visible = true").Limit(limit).Offset(offset).Find(&news)
 
-    err = row.Scan(&total)
-    if err != nil {                
-        return nil, err        
-    }
+    tx.Commit()
 
-    pagination := utils.Pagination(page, total)
+    var total int64
+    db.Model(&entity.News{}).Count(&total)
+
+    pagination := utils.Pagination(page, int(total))
 
     result := struct{
         List_news []entity.News `json:"news"`
         Pagination map[string][]int `json:"pagination"`
     }{
-        List_news: list_news,
+        List_news: news,
         Pagination: pagination,
     }
     
@@ -308,66 +141,69 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
 
 func (repo *NewsSupabaseRepository) Delete(id string) (error) {
 	
-	db, err := conn.Connect()	
-
-    if err != nil {        
-		return err
-	}
-
-    defer db.Close()
-
-    _, err = repo.GetById(id)
-
-    if err != nil {        
-		return err
-	}
-
-    sql, err := db.Prepare("DELETE FROM news WHERE id = $1")
+	db, err := conn.Connect()
 
     if err != nil {
         return err
     }
-    _ , err = sql.Exec(id)
+	
+    tx := db.Begin()
+    defer tx.Rollback()    
 
-    if err != nil {        
-		return err
-	}
+    var news entity.News
+    
+    // Utilize o método `Delete` e passe o ID do registro como argumento
+    err = db.Model(&news).Where("id = ?", id).Delete(&news).Error
+    if err != nil {
+        return err
+    }
+    
+    tx.Commit()
 
     return nil
 
 }
 
 func (repo *NewsSupabaseRepository) NewsTruncateTable() error {
-    db, _ := conn.Connect()
-	defer db.Close()  
+    db, err := conn.Connect()
 
-    _, err := db.Exec("TRUNCATE TABLE news")
+    if err != nil {
+        return err
+    }
+
+	tx := db.Begin()
+    defer tx.Rollback() 
+
+    err = db.Exec("TRUNCATE TABLE users").Error
     
     if err != nil {
         return err
     }
+
+    tx.Commit()
 
     return nil
 }
 
 //VALIDATIONS
 func (repo *NewsSupabaseRepository) NewsExists(title string) error {
-    db, _ := conn.Connect()
-	defer db.Close()    
-
-    sql, err := db.Prepare("SELECT title FROM news WHERE title = $1")    
+    db, err := conn.Connect()
 
     if err != nil {
         return err
     }
-    
-    row := sql.QueryRow(title)    
+	
+    tx := db.Begin()
+    defer tx.Rollback()    
 
-    // Recuperando os valores do banco de dados
-    err = row.Scan(&title)
-    if err != nil {                   
+    var news entity.News
+    err = db.Where("title = ?", title).First(news).Error
+
+    if err != nil {
         return nil
     }
+
+    tx.Commit()    
   
     return ErrNewsExists
 }

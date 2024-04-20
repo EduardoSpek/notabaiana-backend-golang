@@ -12,12 +12,13 @@ import (
 type TestCase struct {
 	Esperado any
 	Recebido any
+	Descricao string
 }
 
-func Resultado(t *testing.T, esperado any, recebido any) {
+func Resultado(t *testing.T, esperado any, recebido any, descricao string) {
     t.Helper()
     if esperado != recebido {
-        t.Errorf("Esperado: %s | Recebido: %s", esperado, recebido)
+        t.Errorf("Descricao: %s | Esperado: %s | Recebido: %s", descricao, esperado, recebido)
     }
 }
 
@@ -29,6 +30,7 @@ func TestNewsEntity(t *testing.T) {
 		Text: "Texto",
 		Link: "http://www.eduardospek.com.br",
 		Image: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73825/IMAGEM_NOTICIA_original.jpg",
+		Visible: true,
 	}
 
 	n := entity.NewNews(news)
@@ -37,27 +39,32 @@ func TestNewsEntity(t *testing.T) {
 		{
 			Esperado: news.Title,
 			Recebido: n.Title,
+			Descricao: "Title",
 		},
 		{
 			Esperado: news.Text,
 			Recebido: n.Text,
+			Descricao: "Text",
 		},
 		{
 			Esperado: news.Link,
 			Recebido: n.Link,
+			Descricao: "Link",
 		},
 		{
 			Esperado: news.Image,
 			Recebido: n.Image,
+			Descricao: "Image",
 		},
 		{
 			Esperado: true,
 			Recebido: n.Visible,
+			Descricao: "Visible",
 		},
 	}
 
 	for _, teste := range testcases {
-		Resultado(t, teste.Esperado, teste.Recebido)
+		Resultado(t, teste.Esperado, teste.Recebido, teste.Descricao)
 	}
 
 }
