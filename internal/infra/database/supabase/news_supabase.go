@@ -31,9 +31,11 @@ func (repo *NewsSupabaseRepository) Create(news entity.News) (entity.News, error
     tx := db.Begin()
     defer tx.Rollback()    
 
-    if err := db.Create(&news).Error; err != nil {
-        tx.Rollback()
-        return entity.News{}, err
+    db.Create(&news)
+    
+    if db.Error != nil {
+        tx.Rollback() 
+        return entity.News{}, db.Error
     }
 
     tx.Commit()
@@ -52,9 +54,11 @@ func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error
     tx := db.Begin()
     defer tx.Rollback()    
 
-    if err := db.Updates(&news).Error; err != nil {
-        tx.Rollback()
-        return entity.News{}, err
+    db.Updates(&news)
+
+    if db.Error != nil {
+        tx.Rollback() 
+        return entity.News{}, db.Error
     }
 
     tx.Commit()
@@ -82,6 +86,10 @@ func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
     var news entity.News
     db.Where("id = ?", id).First(news)
 
+    if db.Error != nil {
+        return entity.News{}, db.Error
+    }
+
     tx.Commit()
 
     return news, nil
@@ -99,6 +107,10 @@ func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) 
 
     var news entity.News
     db.Where("slug = ?", slug).First(news)
+    
+    if db.Error != nil {
+        return entity.News{}, db.Error
+    }
 
     tx.Commit()
 
@@ -120,6 +132,10 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
 
     var news []entity.News
     db.Model(&entity.News{}).Where("visible = true").Limit(limit).Offset(offset).Find(&news)
+
+    if db.Error != nil {
+        return entity.News{}, db.Error
+    }
 
     tx.Commit()
 
@@ -153,9 +169,10 @@ func (repo *NewsSupabaseRepository) Delete(id string) (error) {
     var news entity.News
     
     // Utilize o método `Delete` e passe o ID do registro como argumento
-    err = db.Model(&news).Where("id = ?", id).Delete(&news).Error
-    if err != nil {
-        return err
+    db.Model(&news).Where("id = ?", id).Delete(&news)
+    
+    if db.Error != nil {
+        return nil
     }
     
     tx.Commit()
@@ -174,10 +191,10 @@ func (repo *NewsSupabaseRepository) NewsTruncateTable() error {
 	tx := db.Begin()
     defer tx.Rollback() 
 
-    err = db.Exec("TRUNCATE TABLE users").Error
+    db.Exec("TRUNCATE TABLE users")
     
-    if err != nil {
-        return err
+    if db.Error != nil {
+        return nil
     }
 
     tx.Commit()
@@ -197,9 +214,9 @@ func (repo *NewsSupabaseRepository) NewsExists(title string) error {
     defer tx.Rollback()    
 
     var news entity.News
-    err = db.Where("title = ?", title).First(news).Error
+    db.Model(&entity.News{}).Where("title = ?", title).First(&news)
 
-    if err != nil {
+    if db.Error != nil {
         return nil
     }
 
