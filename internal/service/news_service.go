@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"image"
 	"strings"
 
@@ -34,6 +35,14 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	new := *entity.NewNews(news)
 	new = RenamePathImage(new)
 	new = ChangeLink(new)
+
+	result := containsWordsInTitle(new.Title)
+
+	if result {
+		return entity.News{}, errors.New("título com palavra bloqueada")
+	}
+	
+	new.Text = changeWords(new.Text)
 
 	err := s.newsrepository.NewsExists(new.Title)
 
@@ -117,11 +126,20 @@ func ChangeLink(news entity.News) entity.News {
 	news.Link = "/news/" + news.Slug
 	return news
 }
-func contemPalavra(titulo string, palavras []string) bool {
+func containsWordsInTitle(titulo string) bool {
+	palavras := []string {
+		"Bahia Notícias",
+		"BN",
+		"Curtas e Venenosas",
+	}
     for _, palavra := range palavras {
-        if strings.Contains(strings.ToLower(titulo), strings.ToLower(palavra)) {
+        if strings.Contains(titulo, palavra) {
             return true
         }
     }
     return false
+}
+func changeWords(text string) string {
+	text = strings.Replace(text, "Bahia Notícias", "BN", -1)	
+    return text
 }
