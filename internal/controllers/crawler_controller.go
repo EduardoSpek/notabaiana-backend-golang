@@ -25,7 +25,8 @@ func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go c.Copier.Start()
+	go c.Copier.Start("https://www.bahianoticias.com.br/principal/rss.xml", 10)
+	go c.Copier.Start("https://www.bahianoticias.com.br/holofote/rss.xml", 20)
 
 	msg := map[string]any{
 		"ok": true,

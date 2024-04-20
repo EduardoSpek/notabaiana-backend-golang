@@ -36,7 +36,8 @@ func main() {
 	server.CrawlerController(*crawler_controller)
 	server.NewsController(*news_controller)
 
-	go copier_service.Start()
+	go copier_service.Start("https://www.bahianoticias.com.br/principal/rss.xml", 10)
+	go copier_service.Start("https://www.bahianoticias.com.br/holofote/rss.xml", 20)
 	server.Start()
 
 }

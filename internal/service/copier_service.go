@@ -18,19 +18,19 @@ func NewCopier(newsservice NewsService, crawlerservice CrawlerService) *CopierSe
 	return &CopierService{news_service: newsservice, crawler_service: crawlerservice}
 }
 
-func (c *CopierService) Start() {
+func (c *CopierService) Start(rss string, minutes time.Duration) {
 	
-	go c.Run()
+	go c.Run(rss)
 
-	ticker := time.NewTicker(10 * time.Minute)
+	ticker := time.NewTicker(minutes * time.Minute)
     defer ticker.Stop()
 
     for range ticker.C {
-		go c.Run()
+		go c.Run(rss)
 	}
 }
 
-func (c *CopierService) Run() {
+func (c *CopierService) Run(rss_url string) {
 
 	err := os.MkdirAll("images", os.ModePerm)
 	if err != nil {
@@ -45,7 +45,7 @@ func (c *CopierService) Run() {
 		fmt.Println("Erro ao obter o caminho do executável:", err)
 	}
 
-	rss := c.crawler_service.GetRSS(os.Getenv("URL_RSS"))
+	rss := c.crawler_service.GetRSS(rss_url)
 
 	for _, item := range rss.Channel.Items {
 		n := entity.News{
