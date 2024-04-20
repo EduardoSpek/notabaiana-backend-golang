@@ -172,17 +172,12 @@ func (repo *NewsSupabaseRepository) NewsTruncateTable() error {
 //VALIDATIONS
 func (repo *NewsSupabaseRepository) NewsExists(title string) error {
 	
-    tx := repo.db.Begin()
-    defer tx.Rollback()    
-
     var news entity.News
-    repo.db.Model(&entity.News{}).Where("title = ?", title).First(&news)
+    result := repo.db.Model(&entity.News{}).Where("title = ?", title).First(&news)
 
-    if repo.db.Error != nil {
+    if result.Error != nil {
         return nil
     }
-
-    tx.Commit()    
   
     return ErrNewsExists
 }
