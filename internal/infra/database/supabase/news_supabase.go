@@ -29,7 +29,7 @@ func (repo *NewsSupabaseRepository) Create(news entity.News) (entity.News, error
     tx := repo.db.Begin()
     defer tx.Rollback()    
 
-    repo.db.Create(&news)
+    repo.db.Model(&entity.News{}).Create(&news)
     
     if repo.db.Error != nil {
         tx.Rollback() 
@@ -47,7 +47,7 @@ func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error
     tx := repo.db.Begin()
     defer tx.Rollback()    
 
-    repo.db.Updates(&news)
+    repo.db.Model(&entity.News{}).Updates(&news)
 
     if repo.db.Error != nil {
         tx.Rollback() 
@@ -72,7 +72,7 @@ func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
     defer tx.Rollback()    
 
     var news entity.News
-    repo.db.Where("id = ?", id).First(news)
+    repo.db.Model(&entity.News{}).Where("id = ?", id).First(news)
 
     if repo.db.Error != nil {
         return entity.News{}, repo.db.Error
@@ -90,7 +90,7 @@ func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) 
     defer tx.Rollback()    
 
     var news entity.News
-    repo.db.Where("slug = ?", slug).First(news)
+    repo.db.Model(&entity.News{}).Where("slug = ?", slug).First(news)
     
     if repo.db.Error != nil {
         return entity.News{}, repo.db.Error
@@ -109,7 +109,7 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
     defer tx.Rollback()    
 
     var news []entity.News
-    repo.db.Model(&entity.News{}).Where("visible = true").Limit(limit).Offset(offset).Find(&news)
+    repo.db.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
     if repo.db.Error != nil {
         return entity.News{}, repo.db.Error
