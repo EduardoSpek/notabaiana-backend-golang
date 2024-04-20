@@ -7,6 +7,7 @@ import (
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 	"github.com/eduardospek/bn-api/internal/utils"
 	_ "github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 var (
@@ -14,28 +15,25 @@ var (
     ErrNewsNotExistsWithID = errors.New("não existe notícia com este ID")
 )
 
-type NewsSupabaseRepository struct {}
+type NewsSupabaseRepository struct {
+    db *gorm.DB
+}
 
-func NewNewsSupabaseRepository() *NewsSupabaseRepository {
-	return &NewsSupabaseRepository{}
+func NewNewsSupabaseRepository(db *gorm.DB) *NewsSupabaseRepository {
+	return &NewsSupabaseRepository{ db: db }
 }
 
 // insertNews insere um novo usuário no banco de dados
 func (repo *NewsSupabaseRepository) Create(news entity.News) (entity.News, error) {    
-    db, err := conn.Connect()
-
-    if err != nil {
-        return entity.News{}, err
-    }
-	
-    tx := db.Begin()
+    
+    tx := repo.db.Begin()
     defer tx.Rollback()    
 
-    db.Create(&news)
+    repo.db.Create(&news)
     
-    if db.Error != nil {
+    if repo.db.Error != nil {
         tx.Rollback() 
-        return entity.News{}, db.Error
+        return entity.News{}, repo.db.Error
     }
 
     tx.Commit()
@@ -45,20 +43,15 @@ func (repo *NewsSupabaseRepository) Create(news entity.News) (entity.News, error
 }
 
 func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error)  {    
-    db, err := conn.Connect()
-
-    if err != nil {
-        return entity.News{}, err
-    }
 	
-    tx := db.Begin()
+    tx := repo.db.Begin()
     defer tx.Rollback()    
 
-    db.Updates(&news)
+    repo.db.Updates(&news)
 
-    if db.Error != nil {
+    if repo.db.Error != nil {
         tx.Rollback() 
-        return entity.News{}, db.Error
+        return entity.News{}, repo.db.Error
     }
 
     tx.Commit()
@@ -73,21 +66,16 @@ func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error
     return updatenews, err
 }
 
-func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
-	db, err := conn.Connect()
+func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {	
 
-    if err != nil {
-        return entity.News{}, err
-    }
-	
-    tx := db.Begin()
+    tx := repo.db.Begin()
     defer tx.Rollback()    
 
     var news entity.News
-    db.Where("id = ?", id).First(news)
+    repo.db.Where("id = ?", id).First(news)
 
-    if db.Error != nil {
-        return entity.News{}, db.Error
+    if repo.db.Error != nil {
+        return entity.News{}, repo.db.Error
     }
 
     tx.Commit()
@@ -96,20 +84,16 @@ func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
 }
 
 func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) {
-	db, err := conn.Connect()
-
-    if err != nil {
-        return entity.News{}, err
-    }
 	
-    tx := db.Begin()
+	
+    tx := repo.db.Begin()
     defer tx.Rollback()    
 
     var news entity.News
-    db.Where("slug = ?", slug).First(news)
+    repo.db.Where("slug = ?", slug).First(news)
     
-    if db.Error != nil {
-        return entity.News{}, db.Error
+    if repo.db.Error != nil {
+        return entity.News{}, repo.db.Error
     }
 
     tx.Commit()
@@ -121,26 +105,20 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
 	
 	offset := (page - 1) * limit
 
-    db, err := conn.Connect()
-
-    if err != nil {
-        return entity.News{}, err
-    }
-	
-    tx := db.Begin()
+    tx := repo.db.Begin()
     defer tx.Rollback()    
 
     var news []entity.News
-    db.Model(&entity.News{}).Where("visible = true").Limit(limit).Offset(offset).Find(&news)
+    repo.db.Model(&entity.News{}).Where("visible = true").Limit(limit).Offset(offset).Find(&news)
 
-    if db.Error != nil {
-        return entity.News{}, db.Error
+    if repo.db.Error != nil {
+        return entity.News{}, repo.db.Error
     }
 
     tx.Commit()
 
     var total int64
-    db.Model(&entity.News{}).Count(&total)
+    repo.db.Model(&entity.News{}).Count(&total)
 
     pagination := utils.Pagination(page, int(total))
 
@@ -156,22 +134,16 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
 }
 
 func (repo *NewsSupabaseRepository) Delete(id string) (error) {
-	
-	db, err := conn.Connect()
 
-    if err != nil {
-        return err
-    }
-	
-    tx := db.Begin()
+    tx := repo.db.Begin()
     defer tx.Rollback()    
 
     var news entity.News
     
     // Utilize o método `Delete` e passe o ID do registro como argumento
-    db.Model(&news).Where("id = ?", id).Delete(&news)
+    repo.db.Model(&news).Where("id = ?", id).Delete(&news)
     
-    if db.Error != nil {
+    if repo.db.Error != nil {
         return nil
     }
     
@@ -182,18 +154,13 @@ func (repo *NewsSupabaseRepository) Delete(id string) (error) {
 }
 
 func (repo *NewsSupabaseRepository) NewsTruncateTable() error {
-    db, err := conn.Connect()
-
-    if err != nil {
-        return err
-    }
-
-	tx := db.Begin()
+    
+	tx := repo.db.Begin()
     defer tx.Rollback() 
 
-    db.Exec("TRUNCATE TABLE users")
+    repo.db.Exec("TRUNCATE TABLE users")
     
-    if db.Error != nil {
+    if repo.db.Error != nil {
         return nil
     }
 
@@ -204,19 +171,14 @@ func (repo *NewsSupabaseRepository) NewsTruncateTable() error {
 
 //VALIDATIONS
 func (repo *NewsSupabaseRepository) NewsExists(title string) error {
-    db, err := conn.Connect()
-
-    if err != nil {
-        return err
-    }
 	
-    tx := db.Begin()
+    tx := repo.db.Begin()
     defer tx.Rollback()    
 
     var news entity.News
-    db.Model(&entity.News{}).Where("title = ?", title).First(&news)
+    repo.db.Model(&entity.News{}).Where("title = ?", title).First(&news)
 
-    if db.Error != nil {
+    if repo.db.Error != nil {
         return nil
     }
 

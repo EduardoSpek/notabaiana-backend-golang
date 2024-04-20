@@ -19,7 +19,9 @@ func main() {
 
 	//newsrepo := database.NewNewsSQLiteRepository()
 	//newsrepo := database.NewNewsMemoryRepository()
-	newsrepo := database.NewNewsSupabaseRepository()
+	supabase := database.NewSupabase()
+	db, _ := supabase.Connect()
+	newsrepo := database.NewNewsSupabaseRepository(db)
 	imagedownloader := utils.NewImgDownloader()	
 	news_service := service.NewNewsService(newsrepo, imagedownloader)	
 

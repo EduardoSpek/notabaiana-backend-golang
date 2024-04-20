@@ -11,7 +11,9 @@ import (
 
 type Supabase struct {}
 
-var conn Supabase
+func NewSupabase() *Supabase {
+	return &Supabase{}
+}
 
 func (repo *Supabase) Connect() (*gorm.DB, error) {
 	
