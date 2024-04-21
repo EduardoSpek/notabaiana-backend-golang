@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
+	"github.com/gocolly/colly"
 )
 
 type NewsRepository interface {
@@ -118,6 +119,34 @@ func (s *NewsService) SaveImage(id, url, diretorio string) error {
 
 }
 
+func (s *NewsService) GetImagesPage(url string) string {
+
+	var html string
+
+	collector := colly.NewCollector(
+        colly.AllowedDomains("www.bahianoticias.com.br"),
+    )	
+
+    // Definindo o callback OnHTML
+	collector.OnHTML("img", func(e *colly.HTMLElement) {
+		// Obter o valor do atributo "src" da imagem
+		src := e.Attr("src")
+	
+		// Verificar se o valor "src" contém o endereço de destino
+		if strings.Contains(src, "www.bahianoticias.com.br/fotos/") {
+			
+			html += `<div class="imagem_anexada"><img scr="` + src + `" width="100%"></div>`
+						
+		}
+	})
+
+    // Visitando a URL inicial
+    collector.Visit(url)
+
+	return html
+
+}
+
 func RenamePathImage(news entity.News) entity.News {
 	news.Image = news.ID + ".jpg"
 	return news
@@ -141,5 +170,6 @@ func containsWordsInTitle(titulo string) bool {
 }
 func changeWords(text string) string {
 	text = strings.Replace(text, "Bahia Notícias", "BN", -1)	
+	text = strings.Replace(text, "bahianoticias", "bn", -1)
     return text
 }

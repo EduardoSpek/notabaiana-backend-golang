@@ -54,7 +54,14 @@ func (c *CopierService) Run(rss_url string) {
 			Link:  item.Link,
 			Image: item.Media.URL,
 			Visible: true,
-		}		
+		}
+		
+		html_imagens_anexadas := c.news_service.GetImagesPage(n.Link)
+
+		if html_imagens_anexadas != "" {
+			n.Text += "<br><br>"
+			n.Text += html_imagens_anexadas
+		}
 
 		new, err := c.news_service.CreateNews(n)
 
@@ -64,7 +71,7 @@ func (c *CopierService) Run(rss_url string) {
 
 			if err != nil {
 				fmt.Println("Erro ao Salvar Image: ", err)
-			}
+			}			
 
 		}
 
