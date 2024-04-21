@@ -169,7 +169,6 @@ func containsWordsInTitle(titulo string) bool {
     return false
 }
 func changeWords(text string) string {
-	text = strings.Replace(text, "Bahia Notícias", "BN", -1)	
-	text = strings.Replace(text, "bahianoticias", "bn", -1)
+	text = strings.Replace(text, "Bahia Notícias", "BN", -1)
     return text
 }
