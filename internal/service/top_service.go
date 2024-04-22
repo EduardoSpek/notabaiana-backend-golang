@@ -18,7 +18,7 @@ type TopService struct {
 }
 
 func NewTopService(toprepo TopRepository, newsservice NewsService) *TopService {
-	return &TopService{  NewsService: newsservice }
+	return &TopService{  TopRepository: toprepo, NewsService: newsservice }
 }
 
 func (t *TopService) TopCreate() {
