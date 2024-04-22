@@ -21,7 +21,7 @@ func (repo *TopPostgresRepository) Create(tops []entity.Top)  error {
     tx := repo.db.Begin()
     defer tx.Rollback() 
 	
-	result := repo.db.Exec("TRUNCATE TABLE top")
+	result := repo.db.Exec("TRUNCATE TABLE tops")
 
 	if result.Error != nil {
         tx.Rollback()
