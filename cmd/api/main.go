@@ -49,7 +49,7 @@ func main() {
 	
 	
 	//Função para gerar as top notícias a cada 60 minutos
-	//go top_service.Start(60)
+	go top_service.Start(60)
 
 	server.Start()
 
