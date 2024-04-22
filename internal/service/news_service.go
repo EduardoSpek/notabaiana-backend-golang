@@ -131,6 +131,8 @@ func (s *NewsService) GetImagesPage(url string) string {
 	collector.OnHTML("img", func(e *colly.HTMLElement) {
 		// Obter o valor do atributo "src" da imagem
 		src := e.Attr("src")
+
+		src = strings.Replace(src, " ", "%20", -1)
 	
 		// Verificar se o valor "src" contém o endereço de destino
 		if strings.Contains(src, "bahianoticias.com.br/fotos/") {
