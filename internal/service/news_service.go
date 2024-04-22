@@ -137,7 +137,7 @@ func (s *NewsService) GetImagesPage(url string) string {
 		// Verificar se o valor "src" contém o endereço de destino
 		if strings.Contains(src, "bahianoticias.com.br/fotos/") {
 			
-			html += `<div class="imagem_anexada"><img scr="` + src + `" width="100%"></div>`
+			html += `<div class="imagem_anexada"><img src="` + src + `" width="100%"></div>`
 						
 		}
 	})
