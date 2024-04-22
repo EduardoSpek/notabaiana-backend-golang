@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
@@ -20,35 +21,34 @@ func NewTopService(newsservice NewsService) *TopService {
 	return &TopService{  NewsService: newsservice }
 }
 
-func (t *TopService) TopCreate() error {
+func (t *TopService) TopCreate() {
 
 	news, err := t.NewsService.FindAllViews()
 
 	if err != nil {
-		return err
+		fmt.Println(err)
 	}
 
 	var tops []entity.Top
+	var newtop entity.Top
 	
 	for _, top := range news {
 		
-		newtop := &entity.Top{
+		newtop = entity.Top{
 			Title: top.Title,
 			Link: top.Link,
 			Image: top.Image,
 			CreatedAt: top.CreatedAt,
 		}
 
-		tops = append(tops, *newtop)
+		tops = append(tops, newtop)
 	}
 
 	err = t.TopRepository.Create(tops)
 
 	if err != nil {
-		return err
-	}
-
-	return nil
+		fmt.Println(err)
+	}	
 }
 
 func (t *TopService) FindAll() ([]entity.Top, error) {
