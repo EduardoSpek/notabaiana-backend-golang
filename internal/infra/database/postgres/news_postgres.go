@@ -155,6 +155,17 @@ func (repo *NewsPostgresRepository) FindAllViews() ([]entity.News, error) {
     return news, nil
 }
 
+func (repo *NewsPostgresRepository) ClearViews() error {	
+    
+    result := repo.db.Model(&entity.News{}).Update("views", 0)
+
+    if result.Error != nil {
+        return result.Error
+    }
+
+    return nil
+}
+
 func (repo *NewsPostgresRepository) Delete(id string) (error) {
 
     tx := repo.db.Begin()

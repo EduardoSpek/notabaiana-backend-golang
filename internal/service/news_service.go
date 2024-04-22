@@ -16,6 +16,7 @@ type NewsRepository interface {
 	GetBySlug(slug string) (entity.News, error)
 	NewsTruncateTable() error
 	FindAllViews() ([]entity.News, error)
+	ClearViews() error
 }
 
 type ImageDownloader interface {
@@ -90,6 +91,18 @@ func (s *NewsService) FindAllViews() ([]entity.News, error) {
 	}
 	
 	return news, nil
+
+}
+
+func (s *NewsService) ClearViews() error {
+	
+	err := s.newsrepository.ClearViews()
+
+	if err != nil {
+		return err
+	}
+	
+	return nil
 
 }
 
