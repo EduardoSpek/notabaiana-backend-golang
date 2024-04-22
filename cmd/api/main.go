@@ -31,10 +31,12 @@ func main() {
 
 	news_controller := controllers.NewNewsController(*news_service)
 
-	
+	top_service := service.NewTopService(*news_service)
+	top_controller := controllers.NewTopController(*top_service)
 
 	server := web.NewServerWeb()
 
+	server.TopController(*top_controller)
 	server.CrawlerController(*crawler_controller)
 	server.NewsController(*news_controller)
 
@@ -44,7 +46,7 @@ func main() {
 	go copier_service.Start("https://www.bahianoticias.com.br/justica/rss.xml", 40)	
 
 	
-	//top_service := service.NewTopService(*news_service)
+	
 	//Função para gerar as top notícias a cada 60 minutos
 	//go top_service.Start(60)
 
