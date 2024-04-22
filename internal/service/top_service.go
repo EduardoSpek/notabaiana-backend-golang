@@ -44,6 +44,8 @@ func (t *TopService) TopCreate() {
 
 		ntop = *entity.NewTop(newtop)
 
+		fmt.Println("Ntop", ntop)
+
 		tops = append(tops, ntop)
 	}	
 
