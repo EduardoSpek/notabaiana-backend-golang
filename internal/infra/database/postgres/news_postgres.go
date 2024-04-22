@@ -1,8 +1,9 @@
-package sqlite
+package supabase
 
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 	"github.com/eduardospek/bn-api/internal/utils"
@@ -15,16 +16,16 @@ var (
     ErrNewsNotExistsWithID = errors.New("não existe notícia com este ID")
 )
 
-type NewsSupabaseRepository struct {
+type NewsPostgresRepository struct {
     db *gorm.DB
 }
 
-func NewNewsSupabaseRepository(db *gorm.DB) *NewsSupabaseRepository {
-	return &NewsSupabaseRepository{ db: db }
+func NewNewsPostgresRepository(db *gorm.DB) *NewsPostgresRepository {
+	return &NewsPostgresRepository{ db: db }
 }
 
 // insertNews insere um novo usuário no banco de dados
-func (repo *NewsSupabaseRepository) Create(news entity.News) (entity.News, error) {    
+func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error) {    
     
     tx := repo.db.Begin()
     defer tx.Rollback()    
@@ -42,7 +43,7 @@ func (repo *NewsSupabaseRepository) Create(news entity.News) (entity.News, error
     
 }
 
-func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error)  {    
+func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error)  {    
 	
     tx := repo.db.Begin()
     defer tx.Rollback()    
@@ -66,7 +67,7 @@ func (repo *NewsSupabaseRepository) Update(news entity.News) (entity.News, error
     return updatenews, err
 }
 
-func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {	
+func (repo *NewsPostgresRepository) GetById(id string) (entity.News, error) {	
 
     tx := repo.db.Begin()
     defer tx.Rollback()    
@@ -83,17 +84,25 @@ func (repo *NewsSupabaseRepository) GetById(id string) (entity.News, error) {
     return news, nil
 }
 
-func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) {
+func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) {
 	
 	
     tx := repo.db.Begin()
-    defer tx.Rollback()    
+    defer tx.Rollback()
 
     var news entity.News
-    repo.db.Model(&entity.News{}).Where("slug = ?", slug).First(&news)
+    result := repo.db.Model(&entity.News{}).Where("slug = ?", slug).First(&news)
     
-    if repo.db.Error != nil {
-        return entity.News{}, repo.db.Error
+    if result.Error != nil {
+        return entity.News{}, result.Error
+    }
+
+    news.Views += 1
+
+    result = repo.db.Save(&news)
+
+    if result.Error != nil {
+        return entity.News{}, result.Error
     }
 
     tx.Commit()
@@ -101,7 +110,7 @@ func (repo *NewsSupabaseRepository) GetBySlug(slug string) (entity.News, error) 
     return news, nil
 }
 
-func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error) {
+func (repo *NewsPostgresRepository) FindAll(page, limit int) (interface{}, error) {
 	
 	offset := (page - 1) * limit
 
@@ -133,7 +142,20 @@ func (repo *NewsSupabaseRepository) FindAll(page, limit int) (interface{}, error
     return result, nil
 }
 
-func (repo *NewsSupabaseRepository) Delete(id string) (error) {
+func (repo *NewsPostgresRepository) FindAllViews() ([]entity.News, error) {	
+
+    var news []entity.News
+    
+    result := repo.db.Model(&entity.News{}).Where("visible = true AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -1), time.Now()).Order("views DESC").Limit(10).Find(&news)
+
+    if result.Error != nil {
+        return []entity.News{}, result.Error
+    }
+
+    return news, nil
+}
+
+func (repo *NewsPostgresRepository) Delete(id string) (error) {
 
     tx := repo.db.Begin()
     defer tx.Rollback()    
@@ -153,7 +175,7 @@ func (repo *NewsSupabaseRepository) Delete(id string) (error) {
 
 }
 
-func (repo *NewsSupabaseRepository) NewsTruncateTable() error {
+func (repo *NewsPostgresRepository) NewsTruncateTable() error {
     
 	tx := repo.db.Begin()
     defer tx.Rollback() 
@@ -170,7 +192,7 @@ func (repo *NewsSupabaseRepository) NewsTruncateTable() error {
 }
 
 //VALIDATIONS
-func (repo *NewsSupabaseRepository) NewsExists(title string) error {
+func (repo *NewsPostgresRepository) NewsExists(title string) error {
 	
     var news entity.News
     result := repo.db.Model(&entity.News{}).Where("title = ?", title).First(&news)

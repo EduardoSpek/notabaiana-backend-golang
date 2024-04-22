@@ -1,4 +1,4 @@
-package sqlite
+package supabase
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func (repo *Supabase) Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&entity.News{})
+	db.AutoMigrate(&entity.News{}, &entity.Top{})
 
 	return db, nil
 }

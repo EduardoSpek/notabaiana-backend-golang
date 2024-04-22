@@ -52,6 +52,14 @@ func (r *NewsMemoryRepository) FindAll(page, limit int) (interface{}, error) {
 
 	return result, nil
 }
+
+func (r *NewsMemoryRepository) FindAllViews() ([]entity.News, error) {
+	var news []entity.News
+	for _, n := range r.Newsdb {
+		news = append(news, n)
+	}
+	return news, nil
+}
 func (r *NewsMemoryRepository) NewsTruncateTable() error {
     
 	r.Newsdb = make(map[string]entity.News)

@@ -21,6 +21,7 @@ type News struct {
 	CreatedAt  time.Time `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt  time.Time `gorm:"column:updated_at" json:"updated_at"`
 	Visible bool `gorm:"column:visible;default:true" json:"-"`
+	Views int `gorm:"column:views;default:0"`
 }
 
 func NewNews(news News) *News {
@@ -33,7 +34,7 @@ func NewNews(news News) *News {
 		Slug: SlugTitle(news.Title),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),	
-		Visible: news.Visible,	
+		Visible: news.Visible,
 	}
 }
 

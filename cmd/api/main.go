@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/eduardospek/bn-api/internal/controllers"
-	database "github.com/eduardospek/bn-api/internal/infra/database/supabase"
+	database "github.com/eduardospek/bn-api/internal/infra/database/postgres"
 	"github.com/eduardospek/bn-api/internal/infra/web"
 	"github.com/eduardospek/bn-api/internal/service"
 	"github.com/eduardospek/bn-api/internal/utils"
@@ -21,7 +21,7 @@ func main() {
 	//newsrepo := database.NewNewsMemoryRepository()
 	supabase := database.NewSupabase()
 	db, _ := supabase.Connect()
-	newsrepo := database.NewNewsSupabaseRepository(db)
+	newsrepo := database.NewNewsPostgresRepository(db)
 	imagedownloader := utils.NewImgDownloader()	
 	news_service := service.NewNewsService(newsrepo, imagedownloader)	
 
@@ -30,6 +30,8 @@ func main() {
 	crawler_controller := controllers.NewCrawlerController(*copier_service)
 
 	news_controller := controllers.NewNewsController(*news_service)
+
+	
 
 	server := web.NewServerWeb()
 
@@ -40,6 +42,12 @@ func main() {
 	go copier_service.Start("https://www.bahianoticias.com.br/holofote/rss.xml", 20)
 	go copier_service.Start("https://www.bahianoticias.com.br/esportes/rss.xml", 30)
 	go copier_service.Start("https://www.bahianoticias.com.br/justica/rss.xml", 40)	
+
+	
+	//top_service := service.NewTopService(*news_service)
+	//Função para gerar as top notícias a cada 60 minutos
+	//go top_service.Start(60)
+
 	server.Start()
 
 }
