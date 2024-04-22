@@ -40,6 +40,7 @@ func (t *TopService) TopCreate() {
 			Link: top.Link,
 			Image: top.Image,
 			CreatedAt: top.CreatedAt,
+			Views: top.Views,
 		}
 
 		ntop = *entity.NewTop(newtop)
