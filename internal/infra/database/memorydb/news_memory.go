@@ -67,6 +67,10 @@ func (r *NewsMemoryRepository) NewsTruncateTable() error {
     return nil
 }
 
+func (repo *NewsMemoryRepository) ClearViews() error {		
+	return nil
+}
+
 //VALIDATIONS
 func (r *NewsMemoryRepository) NewsExists(title string) error {
 	title = strings.TrimSpace(title)
