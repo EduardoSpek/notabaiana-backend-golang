@@ -36,3 +36,22 @@ func (t *TopController) CreateTop(w http.ResponseWriter, r *http.Request) {
 	
 	
 }
+
+func (t *TopController) FindAll(w http.ResponseWriter, r *http.Request) {
+
+
+	tops, err := t.TopService.FindAll()	
+
+	if err != nil {
+		msg := map[string]any{
+			"ok": false,
+			"message": "Não foi possível retornar Top Notícias",
+	
+		}
+		ResponseJson(w, msg, http.StatusOK)
+		return
+	}
+
+	ResponseJson(w, tops, http.StatusOK)
+	
+}
