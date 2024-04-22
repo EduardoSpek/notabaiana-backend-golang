@@ -1,8 +1,6 @@
 package supabase
 
 import (
-	"fmt"
-
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
@@ -21,9 +19,7 @@ func NewTopPostgresRepository(db *gorm.DB) *TopPostgresRepository {
 func (repo *TopPostgresRepository) Create(tops []entity.Top)  error {    
     
     tx := repo.db.Begin()
-    defer tx.Rollback()
-
-    fmt.Println("Chegou no Truncate")
+    defer tx.Rollback()    
 	
 	result := repo.db.Exec("TRUNCATE TABLE tops")
 
@@ -37,9 +33,7 @@ func (repo *TopPostgresRepository) Create(tops []entity.Top)  error {
     if result.Error != nil {
         tx.Rollback() 
         return result.Error
-    }
-
-    fmt.Println("Criou")
+    }    
 
     tx.Commit()
 

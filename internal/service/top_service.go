@@ -17,7 +17,7 @@ type TopService struct {
 	NewsService NewsService
 }
 
-func NewTopService(newsservice NewsService) *TopService {
+func NewTopService(toprepo TopRepository, newsservice NewsService) *TopService {
 	return &TopService{  NewsService: newsservice }
 }
 
@@ -54,8 +54,7 @@ func (t *TopService) TopCreate() {
 
 	if err != nil {
 		fmt.Println(err)
-	}
-	fmt.Println("Foi pro repository", tops)
+	}	
 }
 
 func (t *TopService) FindAll() ([]entity.Top, error) {
