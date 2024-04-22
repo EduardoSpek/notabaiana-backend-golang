@@ -30,18 +30,21 @@ func (t *TopService) TopCreate() {
 	}	
 
 	var tops []entity.Top
-	var newtop *entity.Top
+	var newtop entity.Top
+	var ntop entity.Top
 	
 	for _, top := range news {
 		
-		newtop = &entity.Top{
+		newtop = entity.Top{
 			Title: top.Title,
 			Link: top.Link,
 			Image: top.Image,
 			CreatedAt: top.CreatedAt,
 		}
 
-		tops = append(tops, *newtop)
+		ntop = *entity.NewTop(newtop)
+
+		tops = append(tops, ntop)
 	}	
 
 	err = t.TopRepository.Create(tops)
