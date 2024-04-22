@@ -29,6 +29,8 @@ func (t *TopService) TopCreate() {
 		fmt.Println(err)
 	}
 
+	fmt.Println("Listou", news)
+
 	var tops []entity.Top
 	var newtop entity.Top
 	
@@ -44,11 +46,14 @@ func (t *TopService) TopCreate() {
 		tops = append(tops, newtop)
 	}
 
+	fmt.Println("Fez o range", tops)
+
 	err = t.TopRepository.Create(tops)
 
 	if err != nil {
 		fmt.Println(err)
-	}	
+	}
+	fmt.Println("Foi pro repository", tops)
 }
 
 func (t *TopService) FindAll() ([]entity.Top, error) {
