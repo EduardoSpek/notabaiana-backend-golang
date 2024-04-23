@@ -119,6 +119,8 @@ func (s *NewsService) NewsTruncateTable() error {
 }
 
 func (s *NewsService) SaveImage(id, url, diretorio string) error {
+
+	url = strings.Replace(url, "_original.jpg", "_5.jpg", -1)
 	
 	img, err := s.imagedownloader.DownloadImage(url)
 	
@@ -200,5 +202,12 @@ func changeWords(text string) string {
 	text = strings.Replace(text, "Bahia Notícias", "BN", -1)
 	text = strings.Replace(text, "@BahiaNoticias", "@", -1)
 	text = strings.Replace(text, "@bhall", "@", -1)
+	text = strings.Replace(text, "@bnholofote", "@", -1)
+	text = strings.Replace(text, "BN Holofote", "", -1)
+	text = strings.Replace(text, "Siga o @bnhall_ no Instagram e fique de olho nas principais notícias.", "", -1)
+	text = strings.Replace(text, "As informações são do Metrópoles, parceiro do BN", ".", -1)
+	text = strings.Replace(text, " parceiro do BN,", "", -1)
+	text = strings.Replace(text, "Assine a newsletter de Esportes do BN e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
+	
     return text
 }
