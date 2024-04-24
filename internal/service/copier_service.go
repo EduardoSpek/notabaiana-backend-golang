@@ -54,14 +54,14 @@ func (c *CopierService) Run(rss_url string) {
 			Link:  item.Link,
 			Image: item.Media.URL,
 			Visible: true,
-		}
-		
-		html_imagens_anexadas := c.news_service.GetImagesPage(n.Link)
+		}	
 
-		if html_imagens_anexadas != "" {
+		embed := c.news_service.GetEmded(n.Link)
+
+		if embed != "" {
 			n.Text += "<br><br>"
-			n.Text += html_imagens_anexadas
-		}
+			n.Text += embed
+		}		
 
 		new, err := c.news_service.CreateNews(n)
 

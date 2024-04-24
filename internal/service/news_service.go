@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"image"
+	"net/url"
 	"strings"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
@@ -156,15 +157,44 @@ func (s *NewsService) SaveImage(id, url, diretorio string) error {
 
 }
 
-func (s *NewsService) GetImagesPage(url string) string {
-
-	var html string
+func (s *NewsService) GetEmded(link string) string {
+	var html, conteudo, script string
+	//var err error
 
 	collector := colly.NewCollector(
-        colly.AllowedDomains("www.bahianoticias.com.br"),
-    )	
+		colly.AllowedDomains("www.bahianoticias.com.br"),
+	)
 
-    // Definindo o callback OnHTML
+	collector.OnHTML(".lazyload-placeholder", func(e *colly.HTMLElement) {
+		// Obter o valor do atributo "src" da imagem
+		conteudo = e.Attr("data-content")
+		conteudo_decoded, err := url.QueryUnescape(conteudo)
+
+		if err != nil {			
+			return
+		}	
+
+		html += conteudo_decoded
+	
+	})
+
+	collector.OnHTML(".lazyload-scripts", func(e *colly.HTMLElement) {
+		// Obter o valor do atributo "src" da imagem
+		script = e.Attr("data-scripts")
+
+		script_decoded, err := url.QueryUnescape(script)
+
+		if err != nil {			
+			return
+		}
+		
+		if !strings.Contains(html, script_decoded) {
+			html += script_decoded
+		}
+		
+	})
+
+	// Definindo o callback OnHTML
 	collector.OnHTML("img", func(e *colly.HTMLElement) {
 		// Obter o valor do atributo "src" da imagem
 		src := e.Attr("src")
@@ -179,11 +209,10 @@ func (s *NewsService) GetImagesPage(url string) string {
 		}
 	})
 
-    // Visitando a URL inicial
-    collector.Visit(url)
+	// Visitando a URL inicial
+	collector.Visit(link)
 
 	return html
-
 }
 
 func RenamePathImage(news entity.News) entity.News {
