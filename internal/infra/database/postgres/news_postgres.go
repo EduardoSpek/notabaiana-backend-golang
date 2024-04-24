@@ -119,8 +119,9 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) inte
     repo.db.Model(&entity.News{}).Where("visible = true AND title LIKE ?", "%"+str_search+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
 	total := len(news)
+    fmt.Println(total)    
 
-    pagination := utils.Pagination(page, int(total))
+    pagination := utils.Pagination(page, total)
 
     result := struct{
         List_news []entity.News `json:"news"`
