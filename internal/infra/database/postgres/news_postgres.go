@@ -171,7 +171,7 @@ func (repo *NewsPostgresRepository) FindAllViews() ([]entity.News, error) {
 
     var news []entity.News
     
-    result := repo.db.Model(&entity.News{}).Where("visible = true AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -1), time.Now()).Order("views DESC").Limit(10).Find(&news)
+    result := repo.db.Model(&entity.News{}).Where("visible = true AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -1), time.Now()).Order("created_at DESC, views DESC").Limit(10).Find(&news)
 
     if result.Error != nil {
         return []entity.News{}, result.Error
