@@ -157,7 +157,7 @@ func (repo *NewsPostgresRepository) FindAll(page, limit int) (interface{}, error
     var total int64
     repo.db.Model(&entity.News{}).Count(&total)
 
-    pagination := utils.Pagination(page, int(total)-1)
+    pagination := utils.Pagination(page, int(total))
 
     result := struct{
         List_news []entity.News `json:"news"`
