@@ -110,6 +110,31 @@ func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) 
     return news, nil
 }
 
+func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) interface{} {
+
+    limit := 10
+    offset := (page - 1) * 10
+
+	var news []entity.News
+    query := repo.db.Model(&entity.News{}).Where("visible = true AND title LIKE '%?%'", str_search).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+
+	total := query.RowsAffected
+
+    pagination := utils.Pagination(page, int(total))
+
+    result := struct{
+        List_news []entity.News `json:"news"`
+        Pagination map[string][]int `json:"pagination"`
+        Search string `json:"search"`
+    }{
+        List_news: news,
+        Pagination: pagination,
+        Search: str_search,
+    }
+
+	return result
+}
+
 func (repo *NewsPostgresRepository) FindAll(page, limit int) (interface{}, error) {
 	
 	offset := (page - 1) * limit

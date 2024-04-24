@@ -53,6 +53,31 @@ func (r *NewsMemoryRepository) FindAll(page, limit int) (interface{}, error) {
 	return result, nil
 }
 
+func (r *NewsMemoryRepository) SearchNews(page int, str_search string) interface{} {
+	var news []entity.News
+	for _, n := range r.Newsdb {
+		if strings.Contains(n.Title, str_search) {
+			news = append(news, n)
+		}
+	}
+
+	total := len(r.Newsdb)
+
+    pagination := utils.Pagination(page, int(total))
+
+    result := struct{
+        List_news []entity.News `json:"news"`
+        Pagination map[string][]int `json:"pagination"`
+        Search string `json:"search"`
+    }{
+        List_news: news,
+        Pagination: pagination,
+        Search: str_search,
+    }
+
+	return result
+}
+
 func (r *NewsMemoryRepository) FindAllViews() ([]entity.News, error) {
 	var news []entity.News
 	for _, n := range r.Newsdb {

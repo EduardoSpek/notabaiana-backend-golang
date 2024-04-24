@@ -44,13 +44,13 @@ func main() {
 	server.CrawlerController(*crawler_controller)
 	server.NewsController(*news_controller)
 
-	go copier_service.Start("https://www.bahianoticias.com.br/principal/rss.xml", 10)
-	go copier_service.Start("https://www.bahianoticias.com.br/holofote/rss.xml", 20)
-	go copier_service.Start("https://www.bahianoticias.com.br/esportes/rss.xml", 30)
-	go copier_service.Start("https://www.bahianoticias.com.br/justica/rss.xml", 40)
-	go copier_service.Start("https://www.bahianoticias.com.br/hall/rss.xml", 50)
-	go copier_service.Start("https://www.bahianoticias.com.br/saude/rss.xml", 60)
-	go copier_service.Start("https://www.bahianoticias.com.br/municipios/rss.xml", 70)
+	// go copier_service.Start("https://www.bahianoticias.com.br/principal/rss.xml", 10)
+	// go copier_service.Start("https://www.bahianoticias.com.br/holofote/rss.xml", 20)
+	// go copier_service.Start("https://www.bahianoticias.com.br/esportes/rss.xml", 30)
+	// go copier_service.Start("https://www.bahianoticias.com.br/justica/rss.xml", 40)
+	// go copier_service.Start("https://www.bahianoticias.com.br/hall/rss.xml", 50)
+	// go copier_service.Start("https://www.bahianoticias.com.br/saude/rss.xml", 60)
+	// go copier_service.Start("https://www.bahianoticias.com.br/municipios/rss.xml", 70)
 
 	
 	

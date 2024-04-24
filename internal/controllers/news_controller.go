@@ -89,3 +89,20 @@ func (c *NewsController) NewsTruncateTable(w http.ResponseWriter, r *http.Reques
 	ResponseJson(w, msg, http.StatusOK)
 
 }
+
+func (c *NewsController) SearchNews(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	pageStr := vars["page"]
+	str_search := r.URL.Query().Get("search")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1		
+	}
+
+	listnews := c.news_service.SearchNews(page, str_search)
+	
+	ResponseJson(w, listnews, http.StatusOK)
+	
+}

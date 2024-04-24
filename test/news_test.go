@@ -1,12 +1,20 @@
 package test
 
 import (
+	"fmt"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 
+	"github.com/eduardospek/bn-api/internal/controllers"
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 	database "github.com/eduardospek/bn-api/internal/infra/database/memorydb"
 	"github.com/eduardospek/bn-api/internal/service"
 	"github.com/eduardospek/bn-api/internal/utils"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 type TestCase struct {
@@ -82,13 +90,42 @@ func TestNewsService(t *testing.T) {
 			Text: "Texto",
 			Link: "http://www.eduardospek.com.br",
 			Image: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73825/IMAGEM_NOTICIA_original.jpg",
+			Visible: true,
 		}
 	
 		_, err := news_service.CreateNews(news)
 	
 		if err != nil {
 			t.Error(err)
-		}		
+		}
+
+		news = entity.News{		
+			Title: "Eduardo Spek",
+			Text: "Texto",
+			Link: "http://www.eduardospek.com.br",
+			Image: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73825/IMAGEM_NOTICIA_original.jpg",
+			Visible: true,
+		}
+	
+		_, err = news_service.CreateNews(news)
+	
+		if err != nil {
+			t.Error(err)
+		}
+
+		news = entity.News{		
+			Title: "Eduardo Spek na tela da globo",
+			Text: "Texto",
+			Link: "http://www.eduardospek.com.br",
+			Image: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73825/IMAGEM_NOTICIA_original.jpg",
+			Visible: true,
+		}
+	
+		_, err = news_service.CreateNews(news)
+	
+		if err != nil {
+			t.Error(err)
+		}
 	})
 
 	t.Run("Deve listar as noticias do banco", func (t *testing.T)  {
@@ -105,6 +142,95 @@ func TestNewsService(t *testing.T) {
 		}
 	
 	})
+
+	t.Run("Deve buscar noticias do banco", func (t *testing.T)  {
+
+		str_search := "Eduardo"
+
+		lista := news_service.SearchNews(1, str_search)
+		
+		newsList := lista.(struct{
+			List_news []entity.News `json:"news"`
+			Pagination map[string][]int `json:"pagination"`
+		})
+
+		var passou bool = false
+
+		for _, news := range newsList.List_news {
+			if strings.Contains(news.Title, str_search) {
+				passou = true				
+			}
+			
+		}
+
+		if len(newsList.List_news) < 2 {
+			t.Error("Erro: Não encontrou os dois registros")			
+		}
+
+		if !passou {
+			t.Error("Erro: Não foi possível retornar as notícias da busca")			
+		}
+	
+	})
+}
+
+func TestNewsController(t *testing.T) {
+	t.Parallel()
+
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatalf("Erro ao carregar arquivo .env: %v", err)
+	}
 	
 
+	t.Run("Deve buscar noticias no banco e retornar status 200", func(t *testing.T) {
+
+		str_search := "Eduardo"
+
+		req, err := http.NewRequest("GET", "/news/busca/1?search=" + str_search, nil)
+		
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		repo := database.NewNewsMemoryRepository()
+		imagedownloader := utils.NewImgDownloader()
+		news_service := service.NewNewsService(repo, imagedownloader)		
+		controller := controllers.NewNewsController(*news_service)
+
+		news := entity.News{		
+			Title: "Eduardo Spek",
+			Text: "Texto",
+			Link: "http://www.eduardospek.com.br",
+			Image: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73825/IMAGEM_NOTICIA_original.jpg",
+			Visible: true,
+		}
+	
+		_, err = news_service.CreateNews(news)
+	
+		if err != nil {
+			t.Error(err)
+		}
+		
+		rr := httptest.NewRecorder()
+		router := mux.NewRouter()
+		router.HandleFunc("/news/busca/{page}", controller.SearchNews)
+
+		router.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v",
+				status, http.StatusOK)
+		}
+
+		fmt.Println(rr.Body.String())
+
+		expected := str_search
+
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v",
+				rr.Body.String(), expected)
+		}		
+
+	})
 }
