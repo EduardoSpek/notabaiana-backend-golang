@@ -116,7 +116,7 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) inte
     offset := (page - 1) * limit
 
 	var news []entity.News
-    query := repo.db.Model(&entity.News{}).Where("visible = true AND title LIKE '%?%'", str_search).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+    query := repo.db.Model(&entity.News{}).Where("visible = true AND title LIKE '?'", "%"+str_search+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
 	total := query.RowsAffected
 
@@ -182,7 +182,7 @@ func (repo *NewsPostgresRepository) FindAllViews() ([]entity.News, error) {
 
 func (repo *NewsPostgresRepository) ClearViews() error {	
     
-    result := repo.db.Model(&entity.News{}).Update("views", 0)
+    result := repo.db.Exec("UPDATE news SET views = 0")
 
     if result.Error != nil {
         return result.Error
