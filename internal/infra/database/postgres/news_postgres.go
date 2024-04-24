@@ -115,11 +115,16 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) inte
     limit := 10
     offset := (page - 1) * limit
 
-	var news []entity.News
-    repo.db.Model(&entity.News{}).Where("visible = true AND title LIKE ?", "%"+str_search+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+    query := `"visible = true AND title LIKE ?", "%"+str_search+"%"
+    "visible = true AND title LIKE ?", "%"+str_search+"%"`
 
-	total := len(news)
-    fmt.Println(total)    
+    var count int64
+    repo.db.Model(&entity.News{}).Where(query).Count(&count)
+
+	var news []entity.News
+    repo.db.Model(&entity.News{}).Where(query).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+
+	total := int(count)  
 
     pagination := utils.Pagination(page, total)
 
