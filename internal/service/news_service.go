@@ -10,6 +10,8 @@ import (
 	"github.com/gocolly/colly"
 )
 
+var AllowedDomains = "www.bahianoticias.com.br"
+
 type NewsRepository interface {
 	Create(news entity.News) (entity.News, error)
 	FindAll(page, limit int) (interface{}, error)
@@ -157,14 +159,24 @@ func (s *NewsService) SaveImage(id, url, diretorio string) error {
 
 }
 
-func (s *NewsService) GetEmded(link string) string {
-	var html, conteudo, script string
+func (s *NewsService) GetEmded(link string) (string, string) {
+	var html, conteudo, script, text, str_text string
 	//var err error
 
 	collector := colly.NewCollector(
-		colly.AllowedDomains("www.bahianoticias.com.br"),
+		colly.AllowedDomains(AllowedDomains),
 	)
 
+	//Obtém o texto da notícia
+	collector.OnHTML(".sc-16306eb7-3.lbjQbj", func(e *colly.HTMLElement) {
+		
+		str_text = e.DOM.Text()		
+
+		text += str_text + "<br><br>"
+	
+	})
+
+	//Obtém os embeds das redes sociais
 	collector.OnHTML(".lazyload-placeholder", func(e *colly.HTMLElement) {
 		// Obter o valor do atributo "src" da imagem
 		conteudo = e.Attr("data-content")
@@ -174,10 +186,11 @@ func (s *NewsService) GetEmded(link string) string {
 			return
 		}	
 
-		html += conteudo_decoded
+		html +=  "<br><br>" + conteudo_decoded
 	
 	})
 
+	//Obtém os scrits
 	collector.OnHTML(".lazyload-scripts", func(e *colly.HTMLElement) {
 		// Obter o valor do atributo "src" da imagem
 		script = e.Attr("data-scripts")
@@ -187,9 +200,12 @@ func (s *NewsService) GetEmded(link string) string {
 		if err != nil {			
 			return
 		}
+
+		if strings.Contains(script_decoded, "instagram") || strings.Contains(script_decoded, "twitter") || strings.Contains(script_decoded, "youtube") {
 		
-		if !strings.Contains(html, script_decoded) {
-			html += script_decoded
+			if !strings.Contains(html, script_decoded) {
+				html += script_decoded
+			}
 		}
 		
 	})
@@ -212,7 +228,9 @@ func (s *NewsService) GetEmded(link string) string {
 	// Visitando a URL inicial
 	collector.Visit(link)
 
-	return html
+	html = text + html
+
+	return html, text
 }
 
 func RenamePathImage(news entity.News) entity.News {

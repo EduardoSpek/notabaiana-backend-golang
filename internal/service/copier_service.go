@@ -54,10 +54,14 @@ func (c *CopierService) Run(rss_url string) {
 			Link:  item.Link,
 			Image: item.Media.URL,
 			Visible: true,
+		}			
+
+		embed, text := c.news_service.GetEmded(n.Link)
+
+		if text != "" {
+			n.Text = text			
 		}	
-
-		embed := c.news_service.GetEmded(n.Link)
-
+		
 		if embed != "" {
 			n.Text += "<br><br>"
 			n.Text += embed

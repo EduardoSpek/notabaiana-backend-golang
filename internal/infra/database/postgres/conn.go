@@ -9,13 +9,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type Supabase struct {}
+type Postgres struct {}
 
-func NewSupabase() *Supabase {
-	return &Supabase{}
+func NewPostgres() *Postgres {
+	return &Postgres{}
 }
 
-func (repo *Supabase) Connect() (*gorm.DB, error) {
+func (repo *Postgres) Connect() (*gorm.DB, error) {
 	
 	connStr := "user="+ os.Getenv("POSTGRES_USERNAME") +" password="+ os.Getenv("POSTGRES_PASSWORD") +" host="+ os.Getenv("POSTGRES_HOST") +" port="+ os.Getenv("POSTGRES_PORT") +" dbname="+ os.Getenv("POSTGRES_DB") +""
 	
