@@ -3,6 +3,7 @@ package supabase
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
@@ -116,10 +117,10 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) inte
     offset := (page - 1) * limit
 
     var count int64
-    repo.db.Model(&entity.News{}).Where("visible = true AND title LIKE ?", "%"+str_search+"%").Count(&count)
+    repo.db.Model(&entity.News{}).Where("visible = true AND LOWER(title) LIKE ?", "%"+strings.ToLower(str_search)+"%").Count(&count)
 
 	var news []entity.News
-    repo.db.Model(&entity.News{}).Where("visible = true AND title LIKE ?", "%"+str_search+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+    repo.db.Model(&entity.News{}).Where("visible = true AND LOWER(title) LIKE ?", "%"+strings.ToLower(str_search)+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
 	total := int(count)  
 
