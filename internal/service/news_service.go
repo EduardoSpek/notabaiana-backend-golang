@@ -228,7 +228,7 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 	// Visitando a URL inicial
 	collector.Visit(link)
 
-	html = text + html
+	//html = text + html
 
 	return html, text
 }
