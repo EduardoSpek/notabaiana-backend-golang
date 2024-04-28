@@ -59,6 +59,23 @@ func (c *NewsController) News(w http.ResponseWriter, r *http.Request) {
 	
 }
 
+func (c *NewsController) NewsCategory(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	category := vars["category"]
+	pageStr := vars["page"]
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1		
+	}
+
+	listnews := c.news_service.FindNewsCategory(category, page)
+	
+	ResponseJson(w, listnews, http.StatusOK)
+	
+}
+
 func (c *NewsController) NewsTruncateTable(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)

@@ -91,6 +91,7 @@ func TestNewsService(t *testing.T) {
 			Link: "http://www.eduardospek.com.br",
 			Image: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73825/IMAGEM_NOTICIA_original.jpg",
 			Visible: true,
+			Category: "holofote",
 		}
 	
 		_, err := news_service.CreateNews(news)
@@ -105,6 +106,7 @@ func TestNewsService(t *testing.T) {
 			Link: "http://www.eduardospek.com.br",
 			Image: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73825/IMAGEM_NOTICIA_original.jpg",
 			Visible: true,
+			Category: "principal",
 		}
 	
 		_, err = news_service.CreateNews(news)
@@ -119,6 +121,7 @@ func TestNewsService(t *testing.T) {
 			Link: "http://www.eduardospek.com.br",
 			Image: "https://www.bahianoticias.com.br/fotos/holofote_noticias/73825/IMAGEM_NOTICIA_original.jpg",
 			Visible: true,
+			Category: "holofote",
 		}
 	
 		_, err = news_service.CreateNews(news)
@@ -152,6 +155,7 @@ func TestNewsService(t *testing.T) {
 		newsList := lista.(struct{
 			List_news []entity.News `json:"news"`
 			Pagination map[string][]int `json:"pagination"`
+			Search string `json:"search"`
 		})
 
 		var passou bool = false

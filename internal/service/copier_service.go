@@ -46,6 +46,7 @@ func (c *CopierService) Run(rss_url string) {
 	}
 
 	rss := c.crawler_service.GetRSS(rss_url)
+	category, _ := c.news_service.GetCategory(rss_url)
 
 	for _, item := range rss.Channel.Items {
 		n := entity.News{
@@ -54,6 +55,7 @@ func (c *CopierService) Run(rss_url string) {
 			Link:  item.Link,
 			Image: item.Media.URL,
 			Visible: true,
+			Category: category,
 		}			
 
 		embed, text := c.news_service.GetEmded(n.Link)

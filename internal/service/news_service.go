@@ -10,11 +10,15 @@ import (
 	"github.com/gocolly/colly"
 )
 
-var AllowedDomains = "www.bahianoticias.com.br"
+var (
+		ErrNoCategory = errors.New("nenhuma categoria no rss")
+		AllowedDomains = "www.bahianoticias.com.br"
+	)
 
 type NewsRepository interface {
 	Create(news entity.News) (entity.News, error)
 	FindAll(page, limit int) (interface{}, error)
+	FindCategory(category string, page int) (interface{}, error)
 	NewsExists(title string) error
 	GetBySlug(slug string) (entity.News, error)
 	NewsTruncateTable() error
@@ -93,6 +97,15 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 	return news
 
 }
+
+func (s *NewsService) FindNewsCategory(category string, page int) interface{} {
+	
+	news, _ := s.newsrepository.FindCategory(category, page)
+	
+	return news
+
+}
+
 
 func (s *NewsService) FindAllViews() ([]entity.News, error) {
 	
@@ -266,4 +279,22 @@ func changeWords(text string) string {
 	text = strings.Replace(text, "Assine a newsletter de Esportes do BN e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
 	
     return text
+}
+
+func (s *NewsService) GetCategory(rss string) (string, error) {
+
+	if  strings.Contains(rss, "holofote") {
+		return "famosos", nil
+	} else if  strings.Contains(rss, "esportes") {
+		return "esportes", nil
+	} else if  strings.Contains(rss, "justica") {
+		return "justica", nil
+	} else if  strings.Contains(rss, "saude") {
+		return "saude", nil
+	} else if  strings.Contains(rss, "municipios") {
+		return "municipios", nil
+	} else {
+		return "", ErrNoCategory
+	}
+
 }

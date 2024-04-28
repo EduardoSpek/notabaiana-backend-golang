@@ -171,6 +171,41 @@ func (repo *NewsPostgresRepository) FindAll(page, limit int) (interface{}, error
     return result, nil
 }
 
+func (repo *NewsPostgresRepository) FindCategory(category string, page int) (interface{}, error) {
+	
+    limit := 10
+    offset := (page - 1) * limit
+
+    tx := repo.db.Begin()
+    defer tx.Rollback()    
+
+    var news []entity.News
+    repo.db.Model(&entity.News{}).Where("visible = true AND category=?", category).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+
+    if repo.db.Error != nil {
+        return entity.News{}, repo.db.Error
+    }
+
+    tx.Commit()
+
+    var total int64
+    repo.db.Model(&entity.News{}).Count(&total)
+
+    pagination := utils.Pagination(page, int(total))
+
+    result := struct{
+        List_news []entity.News `json:"news"`
+        Pagination map[string][]int `json:"pagination"`
+		Category string `json:"category"`
+    }{
+        List_news: news,
+        Pagination: pagination,
+		Category: category,
+    }
+
+	return result, nil
+}
+
 func (repo *NewsPostgresRepository) FindAllViews() ([]entity.News, error) {	
 
     var news []entity.News
