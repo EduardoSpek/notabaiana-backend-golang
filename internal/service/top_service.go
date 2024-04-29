@@ -54,11 +54,11 @@ func (t *TopService) TopCreate() {
 		fmt.Println(err)
 	}
 
-	//err = t.NewsService.ClearViews()
+	err = t.NewsService.ClearViews()
 
-	//if err != nil {
-		//fmt.Println(err)
-	//}
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func (t *TopService) FindAll() ([]entity.Top, error) {
