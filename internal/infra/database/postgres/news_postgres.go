@@ -255,7 +255,7 @@ func (repo *NewsPostgresRepository) NewsTruncateTable() error {
 	tx := repo.db.Begin()
     defer tx.Rollback() 
 
-    repo.db.Exec("TRUNCATE TABLE users")
+    repo.db.Exec("TRUNCATE TABLE news")
     
     if repo.db.Error != nil {
         return nil
