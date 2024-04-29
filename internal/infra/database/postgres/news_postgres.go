@@ -156,7 +156,7 @@ func (repo *NewsPostgresRepository) FindAll(page, limit int) (interface{}, error
     tx.Commit()
 
     var total int64
-    repo.db.Model(&entity.News{}).Count(&total)
+    repo.db.Model(&entity.News{}).Where("visible = true").Count(&total)
 
     pagination := utils.Pagination(page, int(total))
 
@@ -189,7 +189,7 @@ func (repo *NewsPostgresRepository) FindCategory(category string, page int) (int
     tx.Commit()
 
     var total int64
-    repo.db.Model(&entity.News{}).Count(&total)
+    repo.db.Model(&entity.News{}).Where("visible = true AND category=?", category).Count(&total)
 
     pagination := utils.Pagination(page, int(total))
 

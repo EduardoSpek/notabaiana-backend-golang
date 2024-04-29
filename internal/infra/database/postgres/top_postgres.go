@@ -15,7 +15,6 @@ func NewTopPostgresRepository(db *gorm.DB) *TopPostgresRepository {
 	return &TopPostgresRepository{ db: db }
 }
 
-// insertNews insere um novo usuário no banco de dados
 func (repo *TopPostgresRepository) Create(tops []entity.Top)  error {    
     
     tx := repo.db.Begin()
