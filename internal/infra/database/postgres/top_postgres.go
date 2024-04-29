@@ -15,18 +15,17 @@ func NewTopPostgresRepository(db *gorm.DB) *TopPostgresRepository {
 	return &TopPostgresRepository{ db: db }
 }
 
-// insertNews insere um novo usuário no banco de dados
 func (repo *TopPostgresRepository) Create(tops []entity.Top)  error {    
     
     tx := repo.db.Begin()
     defer tx.Rollback()    
 	
-	result := repo.db.Exec("TRUNCATE TABLE tops")
+	//result := repo.db.Exec("TRUNCATE TABLE tops")
 
-	if result.Error != nil {
-        tx.Rollback()
-        return result.Error
-    }
+	//if result.Error != nil {
+        //tx.Rollback()
+        //return result.Error
+    //}
 
     result = repo.db.Create(&tops)
     
