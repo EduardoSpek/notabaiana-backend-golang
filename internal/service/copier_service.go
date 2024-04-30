@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
+	"github.com/eduardospek/bn-api/internal/utils"
 )
 
 type CopierService struct {
@@ -73,11 +74,29 @@ func (c *CopierService) Run(rss_url string) {
 
 		if err == nil {			
 
-			err = c.news_service.SaveImage(new.ID, n.Image, diretorio)
+			outputPath, err := c.news_service.SaveImage(new.ID, n.Image, diretorio)
 
 			if err != nil {
 				fmt.Println("Erro ao Salvar Image: ", err)
-			}			
+			}
+
+			// if strings.Contains(new.Title, "hackeada") {
+			// 	err = os.Remove(outputPath)
+			// 	if err != nil {
+			// 		fmt.Println("não foi possível remover o rquivo")
+			// 	}
+			// }	
+			
+			fileExists := utils.FileExsists(outputPath)
+
+			if !fileExists {
+				err := c.news_service.ClearImagePath(new.ID)
+
+				if err != nil {
+					fmt.Println("não foi possível atualizar o caminho da imagem")
+				}
+			}
+			
 
 		}
 

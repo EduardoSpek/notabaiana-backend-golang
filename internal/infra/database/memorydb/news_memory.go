@@ -119,6 +119,19 @@ func (repo *NewsMemoryRepository) ClearViews() error {
 	return nil
 }
 
+func (r *NewsMemoryRepository) ClearImagePath(id string) error {
+    
+	for _, n := range r.Newsdb {
+		if id == n.ID {
+			n.Image = ""
+			r.Newsdb[n.ID] = n
+			return nil
+		}
+	}
+
+    return errors.New("não foi possível atualizar a Image")
+}
+
 //VALIDATIONS
 func (r *NewsMemoryRepository) NewsExists(title string) error {
 	title = strings.TrimSpace(title)

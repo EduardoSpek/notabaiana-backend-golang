@@ -25,6 +25,7 @@ type NewsRepository interface {
 	FindAllViews() ([]entity.News, error)
 	ClearViews() error
 	SearchNews(page int, str_search string) interface{}
+	ClearImagePath(id string) error
 }
 
 type ImageDownloader interface {
@@ -143,7 +144,19 @@ func (s *NewsService) NewsTruncateTable() error {
 
 }
 
-func (s *NewsService) SaveImage(id, url, diretorio string) error {
+func (s *NewsService) ClearImagePath(id string) error {
+	
+	err := s.newsrepository.ClearImagePath(id)
+
+	if err != nil {
+		return err
+	}
+	
+	return nil
+
+}
+
+func (s *NewsService) SaveImage(id, url, diretorio string) (string, error) {
 
 	url = strings.Replace(url, "_original.jpg", "_5.jpg", -1)
 	
@@ -151,7 +164,7 @@ func (s *NewsService) SaveImage(id, url, diretorio string) error {
 	
 	if err != nil {
 		//fmt.Println("Erro ao baixar a imagem:", err)
-		return err
+		return "", err
 	}
 	
 	outputPath := diretorio + id + ".jpg"
@@ -163,12 +176,12 @@ func (s *NewsService) SaveImage(id, url, diretorio string) error {
 	
 	if err != nil {
 		//fmt.Println("Erro ao redimensionar e salvar a imagem:", err)
-		return err
+		return "",err
 	}
 
 	//fmt.Println("Imagem redimensionada e salva com sucesso em", outputPath)
 	
-	return nil
+	return outputPath, nil
 
 }
 

@@ -250,6 +250,25 @@ func (repo *NewsPostgresRepository) Delete(id string) (error) {
 
 }
 
+func (repo *NewsPostgresRepository) ClearImagePath(id string) error {
+    
+	tx := repo.db.Begin()
+    defer tx.Rollback() 
+
+    var news entity.News
+    news.ID = id
+
+    repo.db.Model(&news).Update("image", "")
+    
+    if repo.db.Error != nil {
+        return repo.db.Error
+    }
+
+    tx.Commit()
+
+    return nil
+}
+
 func (repo *NewsPostgresRepository) NewsTruncateTable() error {
     
 	tx := repo.db.Begin()
