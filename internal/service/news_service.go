@@ -214,7 +214,7 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 			return
 		}
 
-		if strings.Contains(script_decoded, "instagram") || strings.Contains(script_decoded, "twitter") || strings.Contains(script_decoded, "youtube") {
+		if strings.Contains(script_decoded, "instagram") || strings.Contains(script_decoded, "twitter") || strings.Contains(script_decoded, "youtube") || strings.Contains(script_decoded, "flickr") {
 		
 			if !strings.Contains(html, script_decoded) {
 				html += script_decoded
