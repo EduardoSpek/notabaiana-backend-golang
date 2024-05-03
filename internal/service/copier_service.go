@@ -49,6 +49,9 @@ func (c *CopierService) Run(rss_url string) {
 	rss := c.crawler_service.GetRSS(rss_url)
 	category, _ := c.news_service.GetCategory(rss_url)
 
+	var lista []entity.News
+	var page string
+
 	for _, item := range rss.Channel.Items {
 		n := entity.News{
 			Title: item.Title,
@@ -57,7 +60,16 @@ func (c *CopierService) Run(rss_url string) {
 			Image: item.Media.URL,
 			Visible: true,
 			Category: category,
-		}			
+		}
+		
+		lista = append(lista, n)
+	}
+
+	page = "https://www.bahianoticias.com.br/holofote"
+	lista_page := c.news_service.GetNewsFromPage(page)
+	lista = append(lista, lista_page...)
+
+	for _, n := range lista {
 
 		embed, text := c.news_service.GetEmded(n.Link)
 
@@ -101,5 +113,7 @@ func (c *CopierService) Run(rss_url string) {
 		}
 
 	}
+
+
 
 }

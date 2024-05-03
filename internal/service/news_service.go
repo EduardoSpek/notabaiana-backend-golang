@@ -2,8 +2,10 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
@@ -310,4 +312,158 @@ func (s *NewsService) GetCategory(rss string) (string, error) {
 		return "", ErrNoCategory
 	}
 
+}
+
+func (s *NewsService) GetNewsFromPage(link string) []entity.News {
+	var conteudo string
+	//var err error
+
+	collector := colly.NewCollector(
+		colly.AllowedDomains(AllowedDomains),
+	)
+
+	var titulos []string
+	var texts []string	
+	var links []string
+	var images []string
+
+	//Obtém titulos
+	collector.OnHTML("h3.sc-b4c8ccf3-1.ireAxk", func(e *colly.HTMLElement) {
+		
+		conteudo = e.DOM.Text()		
+
+		titulos = append(titulos, conteudo)
+	
+	})
+
+	//Obtém links
+	collector.OnHTML(".sc-b4c8ccf3-0.fsXNOt a", func(e *colly.HTMLElement) {
+		
+		conteudo = e.Attr("href")
+
+		conteudo = "https://www.bahianoticias.com.br" + conteudo
+
+		image, err := s.GetImageLink(conteudo)
+
+		if err != nil {
+			return
+		}
+		
+		images = append(images, image)
+
+		links = append(links, conteudo)
+	
+	})
+
+	//Obtém textos
+	collector.OnHTML(".sc-81cf810-3.gCNTHg", func(e *colly.HTMLElement) {
+		
+		conteudo = e.DOM.Text()		
+
+		texts = append(texts, conteudo)
+	
+	})
+
+	//Obtém images 
+	collector.OnHTML(".sc-81cf810-2.hiSMeg div span img", func(e *colly.HTMLElement) {
+		
+		conteudo = e.Attr("src")
+
+		conteudo_decoded, err := url.QueryUnescape(conteudo)		
+
+		if err != nil {			
+			return
+		}	
+
+		images = append(images, conteudo_decoded)
+	
+	})
+	
+	// Visitando a URL inicial
+	collector.Visit(link)
+
+	var lista []entity.News
+
+	
+
+	for i, item := range titulos {
+		
+		category, _ := s.GetCategory(links[i])
+
+		new := entity.NewNews(entity.News{
+			Title: item,
+			Text: texts[i],
+			Image: images[i],
+			Link: links[i],
+			Visible: true,
+			Category: category,
+		})
+		lista = append(lista, *new)
+	}
+
+	return lista
+}
+
+func (s *NewsService) GetIdFromLink(link string) (int, error) {
+	
+	partes := strings.Split(link, "/")
+
+	partes_total := len(partes)
+
+	var maispartes []string
+
+	if partes_total == 6 {
+		maispartes = strings.Split(partes[5], "-")
+	} else if partes_total == 5 {
+		maispartes = strings.Split(partes[4], "-")
+	}
+		
+	id, err := strconv.Atoi(maispartes[0])
+
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+func (s *NewsService) ReturnPathFromLink(link string) (string, error) {
+	if strings.Contains(link, "folha/noticia") {
+		return "folha_noticias", nil
+	} else if strings.Contains(link, "holofote/noticia") {
+		return "holofote_noticias", nil
+	} else if strings.Contains(link, "municipios/noticia") {
+		return "municipios_noticias", nil
+	} else if strings.Contains(link, "saude/noticia") {
+		return "saude_noticias", nil
+	} else if strings.Contains(link, "justica/noticia") {
+		return "justica_noticias", nil
+	} else if strings.Contains(link, "bnhall/noticia") {
+		return "hall_noticias", nil
+	} else if strings.Contains(link, "esportes/vitoria") {
+		return "esportes_vitorias", nil
+	} else if strings.Contains(link, "esportes/bahia") {
+		return "esportes_bahias", nil
+	} else if strings.Contains(link, "esportes/noticia") {
+		return "esportes_noticias", nil
+	} else {
+		return "principal_noticias", nil
+	}	
+}
+
+func (s *NewsService) GetImageLink(link string) (string, error) {
+	id, err := s.GetIdFromLink(link)
+
+	if err != nil {
+		return "", err
+	}
+
+	path, err := s.ReturnPathFromLink(link)
+
+	if err != nil {
+		return "", err
+	}
+
+	newlink := fmt.Sprintf("https://www.bahianoticias.com.br/fotos/%s/%d/IMAGEM_NOTICIA_5.jpg", path, id)
+
+	return newlink, nil
 }
