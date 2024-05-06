@@ -86,8 +86,10 @@ func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
 }
 
 func (s *NewsService) SearchNews(page int, str_search string) interface{} {
+
+	str_search = strings.Replace(str_search, " ", "%", -1)
 	
-	news := s.newsrepository.SearchNews(page, str_search)
+	news := s.newsrepository.SearchNews(page, str_search)	
 	
 	return news
 

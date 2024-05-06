@@ -144,7 +144,7 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) inte
     }{
         List_news: news,
         Pagination: pagination,
-        Search: str_search,
+        Search: strings.Replace(str_search, "%", " ", -1),
     }
 
 	return result
