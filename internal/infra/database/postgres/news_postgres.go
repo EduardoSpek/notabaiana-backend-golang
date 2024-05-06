@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/eduardospek/bn-api/internal/domain/entity"
@@ -19,6 +20,7 @@ var (
 
 type NewsPostgresRepository struct {
     db *gorm.DB
+    mutex sync.RWMutex
 }
 
 func NewNewsPostgresRepository(db *gorm.DB) *NewsPostgresRepository {
@@ -26,7 +28,9 @@ func NewNewsPostgresRepository(db *gorm.DB) *NewsPostgresRepository {
 }
 
 // insertNews insere um novo usuário no banco de dados
-func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error) {    
+func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error) {   
+    repo.mutex.Lock() 
+    defer repo.mutex.Unlock()
     
     tx := repo.db.Begin()
     defer tx.Rollback()    
@@ -44,7 +48,9 @@ func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error
     
 }
 
-func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error)  {    
+func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error)  {   
+    repo.mutex.Lock() 
+    defer repo.mutex.Unlock() 
 	
     tx := repo.db.Begin()
     defer tx.Rollback()    
@@ -68,7 +74,9 @@ func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error
     return updatenews, err
 }
 
-func (repo *NewsPostgresRepository) GetById(id string) (entity.News, error) {	
+func (repo *NewsPostgresRepository) GetById(id string) (entity.News, error) {
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
 
     tx := repo.db.Begin()
     defer tx.Rollback()    
@@ -86,8 +94,9 @@ func (repo *NewsPostgresRepository) GetById(id string) (entity.News, error) {
 }
 
 func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) {
-	
-	
+    repo.mutex.Lock() 
+    defer repo.mutex.Unlock()
+		
     tx := repo.db.Begin()
     defer tx.Rollback()
 
@@ -112,6 +121,8 @@ func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) 
 }
 
 func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) interface{} {
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
 
     limit := 10
     offset := (page - 1) * limit
@@ -140,6 +151,8 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) inte
 }
 
 func (repo *NewsPostgresRepository) FindAll(page, limit int) (interface{}, error) {
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
 	
 	offset := (page - 1) * limit
 
@@ -172,6 +185,8 @@ func (repo *NewsPostgresRepository) FindAll(page, limit int) (interface{}, error
 }
 
 func (repo *NewsPostgresRepository) FindCategory(category string, page int) (interface{}, error) {
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
 	
     limit := 10
     offset := (page - 1) * limit
@@ -207,6 +222,8 @@ func (repo *NewsPostgresRepository) FindCategory(category string, page int) (int
 }
 
 func (repo *NewsPostgresRepository) FindAllViews() ([]entity.News, error) {	
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
 
     var news []entity.News
     
@@ -219,7 +236,9 @@ func (repo *NewsPostgresRepository) FindAllViews() ([]entity.News, error) {
     return news, nil
 }
 
-func (repo *NewsPostgresRepository) ClearViews() error {	
+func (repo *NewsPostgresRepository) ClearViews() error {
+    repo.mutex.Lock() 
+    defer repo.mutex.Unlock()
     
     result := repo.db.Exec("UPDATE news SET views = 0")
 
@@ -231,6 +250,8 @@ func (repo *NewsPostgresRepository) ClearViews() error {
 }
 
 func (repo *NewsPostgresRepository) Delete(id string) (error) {
+    repo.mutex.Lock() 
+    defer repo.mutex.Unlock()
 
     tx := repo.db.Begin()
     defer tx.Rollback()    
@@ -251,6 +272,8 @@ func (repo *NewsPostgresRepository) Delete(id string) (error) {
 }
 
 func (repo *NewsPostgresRepository) ClearImagePath(id string) error {
+    repo.mutex.Lock() 
+    defer repo.mutex.Unlock()
     
 	tx := repo.db.Begin()
     defer tx.Rollback() 
@@ -270,6 +293,8 @@ func (repo *NewsPostgresRepository) ClearImagePath(id string) error {
 }
 
 func (repo *NewsPostgresRepository) NewsTruncateTable() error {
+    repo.mutex.Lock() 
+    defer repo.mutex.Unlock()
     
 	tx := repo.db.Begin()
     defer tx.Rollback() 
@@ -287,6 +312,8 @@ func (repo *NewsPostgresRepository) NewsTruncateTable() error {
 
 //VALIDATIONS
 func (repo *NewsPostgresRepository) NewsExists(title string) error {
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
 	
     var news entity.News
     result := repo.db.Model(&entity.News{}).Where("title = ?", title).First(&news)

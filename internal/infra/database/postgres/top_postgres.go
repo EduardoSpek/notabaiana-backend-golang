@@ -1,6 +1,8 @@
 package supabase
 
 import (
+	"sync"
+
 	"github.com/eduardospek/bn-api/internal/domain/entity"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
@@ -9,6 +11,7 @@ import (
 
 type TopPostgresRepository struct {
     db *gorm.DB
+    mutex sync.RWMutex
 }
 
 func NewTopPostgresRepository(db *gorm.DB) *TopPostgresRepository {
@@ -16,6 +19,8 @@ func NewTopPostgresRepository(db *gorm.DB) *TopPostgresRepository {
 }
 
 func (repo *TopPostgresRepository) Create(tops []entity.Top)  error {    
+    repo.mutex.Lock() 
+    defer repo.mutex.Unlock()
     
     tx := repo.db.Begin()
     defer tx.Rollback()    
@@ -40,7 +45,9 @@ func (repo *TopPostgresRepository) Create(tops []entity.Top)  error {
     
 }
 
-func (repo *TopPostgresRepository) FindAll() ([]entity.Top, error) {  
+func (repo *TopPostgresRepository) FindAll() ([]entity.Top, error) {
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
 
 	var tops []entity.Top
     
