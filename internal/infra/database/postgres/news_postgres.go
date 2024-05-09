@@ -101,7 +101,7 @@ func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) 
     defer tx.Rollback()
 
     var news entity.News
-    result := repo.db.Model(&entity.News{}).Where("slug = ?", slug).First(&news)
+    result := repo.db.Model(&entity.News{}).Where("visible = true AND slug = ?", slug).First(&news)
     
     if result.Error != nil {
         return entity.News{}, result.Error
