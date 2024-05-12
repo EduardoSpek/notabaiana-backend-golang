@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/eduardospek/notabaiana-backend-golang/internal/service"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	"github.com/gorilla/mux"
 )
 

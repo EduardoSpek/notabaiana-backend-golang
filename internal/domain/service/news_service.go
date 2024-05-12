@@ -16,6 +16,8 @@ import (
 var (
 		ErrNoCategory = errors.New("nenhuma categoria no rss")
 		AllowedDomains = "www.bahianoticias.com.br"
+
+		LimitPerPage = 30
 	)
 
 type NewsRepository interface {
@@ -114,6 +116,9 @@ func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 }
 
 func (s *NewsService) FindAllNews(page, limit int) interface{} {
+
+	//Limita o total de registros que deve ser retornado
+	if page > LimitPerPage { page = LimitPerPage }
 	
 	news, _ := s.newsrepository.FindAll(page, limit)
 
