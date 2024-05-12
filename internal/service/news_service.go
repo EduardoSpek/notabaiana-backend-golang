@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"math"
 	"net/url"
 	"strconv"
 	"strings"
@@ -19,15 +20,18 @@ var (
 
 type NewsRepository interface {
 	Create(news entity.News) (entity.News, error)
-	FindAll(page, limit int) (interface{}, error)
-	FindCategory(category string, page int) (interface{}, error)
+	FindAll(page, limit int) ([]entity.News, error)
+	FindCategory(category string, page int) ([]entity.News, error)
 	NewsExists(title string) error
 	GetBySlug(slug string) (entity.News, error)
 	NewsTruncateTable() error
 	FindAllViews() ([]entity.News, error)
 	ClearViews() error
-	SearchNews(page int, str_search string) interface{}
+	SearchNews(page int, str_search string) []entity.News
 	ClearImagePath(id string) error
+	GetTotalNews() int
+	GetTotalNewsBySearch(str_search string) int
+	GetTotalNewsByCategory(category string) int
 }
 
 type ImageDownloader interface {
@@ -89,26 +93,65 @@ func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 
 	str_search = strings.Replace(str_search, " ", "%", -1)
 	
-	news := s.newsrepository.SearchNews(page, str_search)	
+	news := s.newsrepository.SearchNews(page, str_search)
+
+	total := s.newsrepository.GetTotalNewsBySearch(str_search)
+
+	pagination := s.Pagination(page, total)
+
+    result := struct{
+        List_news []entity.News `json:"news"`
+        Pagination map[string][]int `json:"pagination"`
+        Search string `json:"search"`
+    }{
+        List_news: news,
+        Pagination: pagination,
+        Search: strings.Replace(str_search, "%", " ", -1),
+    }
 	
-	return news
+	return result
 
 }
 
 func (s *NewsService) FindAllNews(page, limit int) interface{} {
 	
 	news, _ := s.newsrepository.FindAll(page, limit)
+
+	total := s.newsrepository.GetTotalNews()
+
+	pagination := s.Pagination(page, total)
+
+    result := struct{
+        List_news []entity.News `json:"news"`
+        Pagination map[string][]int `json:"pagination"`
+    }{
+        List_news: news,
+        Pagination: pagination,
+    }
 	
-	return news
+	return result		
 
 }
 
 func (s *NewsService) FindNewsCategory(category string, page int) interface{} {
 	
 	news, _ := s.newsrepository.FindCategory(category, page)
-	
-	return news
 
+	total := s.newsrepository.GetTotalNewsByCategory(category)
+
+	pagination := s.Pagination(page, total)
+
+    result := struct{
+        List_news []entity.News `json:"news"`
+        Pagination map[string][]int `json:"pagination"`
+		Category string `json:"category"`
+    }{
+        List_news: news,
+        Pagination: pagination,
+		Category: category,
+    }
+	
+	return result
 }
 
 
@@ -479,4 +522,85 @@ func (s *NewsService) GetImageLink(link string) (string, error) {
 	newlink := fmt.Sprintf("https://www.bahianoticias.com.br/fotos/%s/%d/IMAGEM_NOTICIA_5.jpg", path, id)
 
 	return newlink, nil
+}
+
+//Pagination recebe a página atual e o total de noticias para retornar a páginação de resultado
+func (s *NewsService) Pagination(currentPage, totalNews int) map[string][]int {
+	
+	// Calcula o total de páginas
+	totalPages := int(math.Ceil(float64(totalNews) / 10)) 
+
+	// Garante que a página atual esteja dentro dos limites
+	if currentPage < 1 {
+		currentPage = 1
+	} else if currentPage > totalPages {
+		currentPage = totalPages
+	}
+
+	previousPages := []int{}
+	nextPages := []int{}
+
+	if currentPage == totalPages {
+		if currentPage > 2 {
+			previousPages = []int{currentPage - 2, currentPage - 1}
+			nextPages = []int{}
+		} else {
+			previousPages = []int{currentPage - 1}
+			nextPages = []int{}
+		}
+	} else if currentPage-2 > 2 && currentPage+2 <= totalPages {
+		previousPages = []int{currentPage - 2, currentPage - 1}
+		nextPages = []int{currentPage + 1, currentPage + 2}
+	} else if currentPage == 1 && currentPage == totalPages {
+		previousPages = []int{}
+		nextPages = []int{}
+	} else if currentPage == 1 && totalPages < 3 {
+		previousPages = []int{}
+		nextPages = []int{currentPage + 1}
+	} else if currentPage == 1 && totalPages > 2 {
+		previousPages = []int{}
+		nextPages = []int{currentPage + 1, currentPage + 2}
+	} else if currentPage == 2 && currentPage == totalPages {
+		previousPages = []int{1}
+		nextPages = []int{}
+	} else if currentPage == 2 && totalPages < 4 {
+		previousPages = []int{currentPage - 1}
+		nextPages = []int{currentPage + 1}
+	} else if currentPage == 2 && totalPages > 3 {
+		previousPages = []int{currentPage - 1}
+		nextPages = []int{currentPage + 1, currentPage + 2}
+	} else if currentPage == 3 && currentPage == totalPages {
+		previousPages = []int{1, 2}
+		nextPages = []int{}
+	} else if currentPage == 3 && totalPages < 5 {
+		previousPages = []int{1, 2}
+		nextPages = []int{currentPage + 1}
+	} else if currentPage == 3 && totalPages > 4 {
+		previousPages = []int{1, 2}
+		nextPages = []int{currentPage + 1, currentPage + 2}
+	} else if currentPage == 4 && currentPage == totalPages {
+		previousPages = []int{currentPage - 2, currentPage - 1}
+		nextPages = []int{}
+	} else if currentPage == 4 && totalPages < 6 {
+		previousPages = []int{currentPage - 2, currentPage - 1}
+		nextPages = []int{currentPage + 1}
+	} else if currentPage == 4 && totalPages > 5 {
+		previousPages = []int{currentPage - 2, currentPage - 1}
+		nextPages = []int{currentPage + 1, currentPage + 2}
+	} else if currentPage == 5 && totalPages < 7 {
+		previousPages = []int{currentPage - 2, currentPage - 1}
+		nextPages = []int{currentPage + 1}
+	} else if currentPage > 3 && totalPages > currentPage && currentPage+1 <= totalPages {
+		previousPages = []int{currentPage - 2, currentPage - 1}
+		nextPages = []int{currentPage + 1}
+	}
+
+	result := map[string][]int{
+		"previousPages": previousPages,
+		"currentPage":   {currentPage},
+		"nextPages":     nextPages,
+		"totalPages":    {totalPages},
+	}
+
+	return result
 }

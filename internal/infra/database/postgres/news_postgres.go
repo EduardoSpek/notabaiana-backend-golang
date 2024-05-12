@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 )
@@ -120,37 +119,55 @@ func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) 
     return news, nil
 }
 
-func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) interface{} {
+func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) []entity.News {
     repo.mutex.RLock() 
     defer repo.mutex.RUnlock()
 
     limit := 10
-    offset := (page - 1) * limit
-
-    var count int64
-    repo.db.Model(&entity.News{}).Where("visible = true AND LOWER(title) LIKE ?", "%"+strings.ToLower(str_search)+"%").Count(&count)
+    offset := (page - 1) * limit    
 
 	var news []entity.News
     repo.db.Model(&entity.News{}).Where("visible = true AND LOWER(title) LIKE ?", "%"+strings.ToLower(str_search)+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
-	total := int(count)  
-
-    pagination := utils.Pagination(page, total)
-
-    result := struct{
-        List_news []entity.News `json:"news"`
-        Pagination map[string][]int `json:"pagination"`
-        Search string `json:"search"`
-    }{
-        List_news: news,
-        Pagination: pagination,
-        Search: strings.Replace(str_search, "%", " ", -1),
-    }
-
-	return result
+	return news
 }
 
-func (repo *NewsPostgresRepository) FindAll(page, limit int) (interface{}, error) {
+func (repo *NewsPostgresRepository) GetTotalNewsBySearch(str_search string) int {
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
+
+    var count int64
+    repo.db.Model(&entity.News{}).Where("visible = true AND LOWER(title) LIKE ?", "%"+strings.ToLower(str_search)+"%").Count(&count)
+
+    total := int(count)
+
+    return total
+
+}
+
+func (repo *NewsPostgresRepository) GetTotalNewsByCategory(category string) int {
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
+
+    var total int64
+    repo.db.Model(&entity.News{}).Where("visible = true AND category=?", category).Count(&total)
+
+    return int(total)
+
+}
+
+func (repo *NewsPostgresRepository) GetTotalNews() int {
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
+
+    var total int64
+    repo.db.Model(&entity.News{}).Where("visible = true").Count(&total)    
+
+    return int(total)
+
+}
+
+func (repo *NewsPostgresRepository) FindAll(page, limit int) ([]entity.News, error) {
     repo.mutex.RLock() 
     defer repo.mutex.RUnlock()
 	
@@ -163,28 +180,15 @@ func (repo *NewsPostgresRepository) FindAll(page, limit int) (interface{}, error
     repo.db.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
     if repo.db.Error != nil {
-        return entity.News{}, repo.db.Error
+        return []entity.News{}, repo.db.Error
     }
 
     tx.Commit()
-
-    var total int64
-    repo.db.Model(&entity.News{}).Where("visible = true").Count(&total)
-
-    pagination := utils.Pagination(page, int(total))
-
-    result := struct{
-        List_news []entity.News `json:"news"`
-        Pagination map[string][]int `json:"pagination"`
-    }{
-        List_news: news,
-        Pagination: pagination,
-    }
     
-    return result, nil
+    return news, nil
 }
 
-func (repo *NewsPostgresRepository) FindCategory(category string, page int) (interface{}, error) {
+func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]entity.News, error) {
     repo.mutex.RLock() 
     defer repo.mutex.RUnlock()
 	
@@ -198,27 +202,12 @@ func (repo *NewsPostgresRepository) FindCategory(category string, page int) (int
     repo.db.Model(&entity.News{}).Where("visible = true AND category=?", category).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
     if repo.db.Error != nil {
-        return entity.News{}, repo.db.Error
+        return []entity.News{}, repo.db.Error
     }
 
     tx.Commit()
 
-    var total int64
-    repo.db.Model(&entity.News{}).Where("visible = true AND category=?", category).Count(&total)
-
-    pagination := utils.Pagination(page, int(total))
-
-    result := struct{
-        List_news []entity.News `json:"news"`
-        Pagination map[string][]int `json:"pagination"`
-		Category string `json:"category"`
-    }{
-        List_news: news,
-        Pagination: pagination,
-		Category: category,
-    }
-
-	return result, nil
+	return news, nil
 }
 
 func (repo *NewsPostgresRepository) FindAllViews() ([]entity.News, error) {	

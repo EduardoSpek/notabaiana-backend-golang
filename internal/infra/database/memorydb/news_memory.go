@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 )
 
 var (
@@ -34,26 +33,16 @@ func (r *NewsMemoryRepository) GetBySlug(slug string) (entity.News, error) {
 	return entity.News{}, ErrNotNewSlug
 }
 
-func (r *NewsMemoryRepository) FindAll(page, limit int) (interface{}, error) {
+func (r *NewsMemoryRepository) FindAll(page, limit int) ([]entity.News, error) {
 	var news []entity.News
 	for _, n := range r.Newsdb {
 		news = append(news, n)
 	}
 
-	pagination := utils.Pagination(page, len(r.Newsdb))
-
-    result := struct{
-        List_news []entity.News `json:"news"`
-        Pagination map[string][]int `json:"pagination"`
-    }{
-        List_news: news,
-        Pagination: pagination,
-    }
-
-	return result, nil
+	return news, nil
 }
 
-func (r *NewsMemoryRepository) FindCategory(category string, page int) (interface{}, error) {
+func (r *NewsMemoryRepository) FindCategory(category string, page int) ([]entity.News, error) {
 	var news []entity.News
 	for _, n := range r.Newsdb {
 		if category == n.Category {
@@ -61,22 +50,10 @@ func (r *NewsMemoryRepository) FindCategory(category string, page int) (interfac
 		}
 	}
 
-	pagination := utils.Pagination(page, len(r.Newsdb))
-
-    result := struct{
-        List_news []entity.News `json:"news"`
-        Pagination map[string][]int `json:"pagination"`
-		Category string `json:"category"`
-    }{
-        List_news: news,
-        Pagination: pagination,
-		Category: category,
-    }
-
-	return result, nil
+	return news, nil
 }
 
-func (r *NewsMemoryRepository) SearchNews(page int, str_search string) interface{} {
+func (r *NewsMemoryRepository) SearchNews(page int, str_search string) []entity.News {
 	var news []entity.News
 	for _, n := range r.Newsdb {
 		if strings.Contains(n.Title, str_search) {
@@ -84,21 +61,36 @@ func (r *NewsMemoryRepository) SearchNews(page int, str_search string) interface
 		}
 	}
 
+	return news
+}
+
+func (r *NewsMemoryRepository) GetTotalNewsBySearch(str_search string) int {
+	var total int = 0
+	for _, n := range r.Newsdb {
+		if strings.Contains(n.Title, str_search) {
+			total++
+		}
+	}
+
+	return total
+}
+
+func (r *NewsMemoryRepository) GetTotalNewsByCategory(category string) int {
+	var total int = 0
+	for _, n := range r.Newsdb {
+		if n.Category == category {
+			total++
+		}
+	}
+
+	return total
+}
+
+func (r *NewsMemoryRepository) GetTotalNews() int {
 	total := len(r.Newsdb)
 
-    pagination := utils.Pagination(page, int(total))
+	return total
 
-    result := struct{
-        List_news []entity.News `json:"news"`
-        Pagination map[string][]int `json:"pagination"`
-        Search string `json:"search"`
-    }{
-        List_news: news,
-        Pagination: pagination,
-        Search: str_search,
-    }
-
-	return result
 }
 
 func (r *NewsMemoryRepository) FindAllViews() ([]entity.News, error) {
