@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/eduardospek/bn-api/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 )
 
 type TopRepository interface {

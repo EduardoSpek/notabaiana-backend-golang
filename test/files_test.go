@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/eduardospek/bn-api/internal/utils"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 )
 
 func TestFileExists(t *testing.T) {

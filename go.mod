@@ -1,6 +1,6 @@
-module github.com/eduardospek/bn-api
+module github.com/eduardospek/notabaiana-backend-golang
 
-go 1.22.1
+go 1.22.3
 
 require (
 	github.com/gocolly/colly v1.2.0

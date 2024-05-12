@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/eduardospek/bn-api/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )

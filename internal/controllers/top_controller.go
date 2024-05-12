@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/eduardospek/bn-api/internal/service"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/service"
 	"github.com/gorilla/mux"
 )
 

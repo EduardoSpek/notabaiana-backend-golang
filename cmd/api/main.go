@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/eduardospek/bn-api/internal/controllers"
-	database "github.com/eduardospek/bn-api/internal/infra/database/postgres"
-	"github.com/eduardospek/bn-api/internal/infra/web"
-	"github.com/eduardospek/bn-api/internal/service"
-	"github.com/eduardospek/bn-api/internal/utils"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/controllers"
+	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/web"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/service"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 )
 
 // func init() {

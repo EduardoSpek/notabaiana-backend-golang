@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/eduardospek/bn-api/internal/domain/entity"
-	"github.com/eduardospek/bn-api/internal/utils"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 )

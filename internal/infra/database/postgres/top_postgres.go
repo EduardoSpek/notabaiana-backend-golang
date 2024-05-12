@@ -3,7 +3,7 @@ package supabase
 import (
 	"sync"
 
-	"github.com/eduardospek/bn-api/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 )

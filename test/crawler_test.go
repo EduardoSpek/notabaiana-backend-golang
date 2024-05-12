@@ -7,10 +7,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/eduardospek/bn-api/internal/controllers"
-	database "github.com/eduardospek/bn-api/internal/infra/database/memorydb"
-	"github.com/eduardospek/bn-api/internal/service"
-	"github.com/eduardospek/bn-api/internal/utils"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/controllers"
+	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/memorydb"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/service"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )

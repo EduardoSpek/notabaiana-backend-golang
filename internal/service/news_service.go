@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/eduardospek/bn-api/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/gocolly/colly"
 )
 

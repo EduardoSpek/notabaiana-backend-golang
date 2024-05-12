@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/eduardospek/bn-api/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 )
 
 type CrawlerService struct {}
