@@ -25,14 +25,7 @@ func (repo *TopPostgresRepository) Create(tops []entity.Top)  error {
     tx := repo.db.Begin()
     defer tx.Rollback()    
 	
-	result := repo.db.Exec("TRUNCATE TABLE tops")
-
-	if result.Error != nil {
-        tx.Rollback()
-        return result.Error
-    }
-
-    result = repo.db.Create(&tops)
+    result := repo.db.Create(&tops)
     
     if result.Error != nil {
         tx.Rollback() 
@@ -59,4 +52,22 @@ func (repo *TopPostgresRepository) FindAll() ([]entity.Top, error) {
 
     return tops, nil
 
+}
+
+func (repo *TopPostgresRepository) TopTruncateTable() error {
+    repo.mutex.Lock() 
+    defer repo.mutex.Unlock()
+    
+	tx := repo.db.Begin()
+    defer tx.Rollback() 
+
+    repo.db.Exec("TRUNCATE TABLE tops")
+    
+    if repo.db.Error != nil {
+        return repo.db.Error
+    }
+
+    tx.Commit()
+
+    return nil
 }

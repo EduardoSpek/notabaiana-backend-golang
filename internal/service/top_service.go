@@ -9,6 +9,7 @@ import (
 
 type TopRepository interface {
 	Create(tops []entity.Top) error
+	TopTruncateTable() error
 	FindAll() ([]entity.Top, error)
 }
 
@@ -47,6 +48,12 @@ func (t *TopService) TopCreate() {
 
 		tops = append(tops, ntop)
 	}	
+
+	err = t.TopRepository.TopTruncateTable()
+
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	err = t.TopRepository.Create(tops)
 
