@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/eduardospek/notabaiana-backend-golang/internal/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/web"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/web/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 )
 

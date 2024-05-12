@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/eduardospek/notabaiana-backend-golang/internal/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/memorydb"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/web/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"

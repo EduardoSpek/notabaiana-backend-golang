@@ -1,6 +1,6 @@
 package web
 
-import "github.com/eduardospek/notabaiana-backend-golang/internal/controllers"
+import "github.com/eduardospek/notabaiana-backend-golang/internal/infra/web/controllers"
 
 func (s *ServerWeb) NewsController(newscontroller controllers.NewsController) {
 	s.router.HandleFunc("/truncate/news/{key}", newscontroller.NewsTruncateTable).Methods("GET")
