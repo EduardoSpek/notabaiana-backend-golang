@@ -65,9 +65,13 @@ func (c *CopierService) Run(rss_url string) {
 		lista = append(lista, n)
 	}
 
-	page = "https://www.bahianoticias.com.br/holofote"
+	page = "https://www.bahianoticias.com.br"
 	lista_page := c.news_service.GetNewsFromPage(page)
 	lista = append(lista, lista_page...)
+
+	// page = "https://www.bahianoticias.com.br/holofote"
+	// lista_page = c.news_service.GetNewsFromPage(page)
+	// lista = append(lista, lista_page...)
 
 	for _, n := range lista {
 
