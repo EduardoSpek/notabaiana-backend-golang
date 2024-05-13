@@ -118,7 +118,7 @@ func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 	//Limita o total de registros que deve ser retornado
-	if page > LimitPerPage { page = LimitPerPage }
+	if limit > LimitPerPage { limit = LimitPerPage }
 	
 	news, _ := s.newsrepository.FindAll(page, limit)
 
