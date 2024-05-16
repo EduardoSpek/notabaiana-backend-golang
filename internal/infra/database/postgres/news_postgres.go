@@ -303,9 +303,11 @@ func (repo *NewsPostgresRepository) NewsTruncateTable() error {
 func (repo *NewsPostgresRepository) NewsExists(title string) error {
     repo.mutex.RLock() 
     defer repo.mutex.RUnlock()
-	
+			
+			title = strings.ToLower(title)
+
     var news entity.News
-    result := repo.db.Model(&entity.News{}).Where("title = ?", title).First(&news)
+    result := repo.db.Model(&entity.News{}).Where("LOWER(title) = ?", title).First(&news)
 
     if result.Error != nil {
         return nil
