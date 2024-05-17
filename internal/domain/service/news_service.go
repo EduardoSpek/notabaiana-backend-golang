@@ -15,8 +15,9 @@ import (
 )
 
 var (
+		ErrWordsBlackList = errors.New("o título contém palavras bloqueadas")
 		ErrNoCategory = errors.New("nenhuma categoria no rss")
-		AllowedDomains = "www.bahianoticias.com.br"
+		AllowedDomains = "www.bahianoticias.com.br"		
 
 		LimitPerPage = 30
 	)
@@ -60,10 +61,10 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	new = RenamePathImage(new)
 	new = ChangeLink(new)
 
-	result := containsWordsInTitle(new.Title)
+	result := listOfBlockedWords(new.Title)
 
 	if result {
-		return entity.News{}, errors.New("título com palavra bloqueada")
+		return entity.News{}, ErrWordsBlackList
 	}
 	
 	new.Text = changeWords(new.Text)
@@ -323,7 +324,7 @@ func ChangeLink(news entity.News) entity.News {
 	news.Link = "/news/" + news.Slug
 	return news
 }
-func containsWordsInTitle(titulo string) bool {
+func listOfBlockedWords(titulo string) bool {
 	palavras := []string {
 		"Bahia Notícias",
 		"BN",
