@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/gocolly/colly"
@@ -44,6 +45,7 @@ type ImageDownloader interface {
 type NewsService struct {
 	newsrepository NewsRepository
 	imagedownloader ImageDownloader
+	mutex sync.Mutex
 }
 
 func NewNewsService(repository NewsRepository, downloader ImageDownloader) *NewsService {
@@ -51,6 +53,8 @@ func NewNewsService(repository NewsRepository, downloader ImageDownloader) *News
 }
 
 func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	
 	new := *entity.NewNews(news)
 	new = RenamePathImage(new)
