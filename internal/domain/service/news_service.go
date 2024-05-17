@@ -46,7 +46,7 @@ type ImageDownloader interface {
 type NewsService struct {
 	newsrepository NewsRepository
 	imagedownloader ImageDownloader
-	mutex sync.Mutex
+	mutex *sync.Mutex
 }
 
 func NewNewsService(repository NewsRepository, downloader ImageDownloader) *NewsService {
