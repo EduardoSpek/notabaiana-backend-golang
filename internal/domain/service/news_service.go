@@ -10,12 +10,14 @@ import (
 	"strings"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gocolly/colly"
 )
 
 var (
 		ErrWordsBlackList = errors.New("o título contém palavras bloqueadas")
 		ErrNoCategory = errors.New("nenhuma categoria no rss")
+		ErrSimilarTitle = errors.New("título similar ao recente adicionado detectado")
 		AllowedDomains = "www.bahianoticias.com.br"		
 
 		LimitPerPage = 30
@@ -25,6 +27,7 @@ type NewsRepository interface {
 	Create(news entity.News) (entity.News, error)
 	FindAll(page, limit int) ([]entity.News, error)
 	FindCategory(category string, page int) ([]entity.News, error)
+	FindRecent() (entity.News, error)
 	NewsExists(title string) error
 	GetBySlug(slug string) (entity.News, error)
 	NewsTruncateTable() error
@@ -44,16 +47,30 @@ type ImageDownloader interface {
 
 type NewsService struct {
 	newsrepository NewsRepository
-	imagedownloader ImageDownloader	
+	imagedownloader ImageDownloader
 }
 
 func NewNewsService(repository NewsRepository, downloader ImageDownloader) *NewsService {
 	return &NewsService{ newsrepository: repository, imagedownloader: downloader }
 }
 
-func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
+func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {	
 	
 	new := *entity.NewNews(news)
+
+	recent, err := s.newsrepository.FindRecent()
+
+	if err != nil {
+		return entity.News{}, err
+	}
+
+	similarity := utils.Similarity(recent.Title, new.Title)
+
+	if similarity > 70 {
+		fmt.Println("***titulo silimar detectado***")
+		return entity.News{}, ErrSimilarTitle
+	}
+
 	new = RenamePathImage(new)
 	new = ChangeLink(new)
 
@@ -65,11 +82,13 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	
 	new.Text = changeWords(new.Text)
 
-	err := s.newsrepository.NewsExists(new.Title)
+	err = s.newsrepository.NewsExists(new.Title)
 
 	if err != nil {
 		return entity.News{}, err
 	}
+
+	
 	
 	_, err = s.newsrepository.Create(new)
 	
@@ -136,6 +155,18 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
     }
 	
 	return result		
+
+}
+
+func (s *NewsService) FindRecent() (entity.News, error) {
+	
+	news, err := s.newsrepository.FindRecent()
+
+	if err != nil {
+		return entity.News{}, err
+	}
+
+	return news, nil
 
 }
 

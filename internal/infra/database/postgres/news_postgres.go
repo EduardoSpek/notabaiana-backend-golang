@@ -188,6 +188,26 @@ func (repo *NewsPostgresRepository) FindAll(page, limit int) ([]entity.News, err
     return news, nil
 }
 
+func (repo *NewsPostgresRepository) FindRecent() (entity.News, error) {
+
+    repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
+
+    tx := repo.db.Begin()
+    defer tx.Rollback()    
+
+    var news entity.News
+    repo.db.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").First(&news)
+
+    if repo.db.Error != nil {
+        return entity.News{}, repo.db.Error
+    }
+
+    tx.Commit()
+
+	return news, nil
+}
+
 func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]entity.News, error) {
     repo.mutex.RLock() 
     defer repo.mutex.RUnlock()

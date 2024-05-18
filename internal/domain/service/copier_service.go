@@ -46,26 +46,26 @@ func (c *CopierService) Run(rss_url string) {
 		fmt.Println("Erro ao obter o caminho do executável:", err)
 	}
 
-	rss := c.crawler_service.GetRSS(rss_url)
-	category, _ := c.news_service.GetCategory(rss_url)
+	// rss := c.crawler_service.GetRSS(rss_url)
+	// category, _ := c.news_service.GetCategory(rss_url)
 
 	var lista []entity.News
-	var page string
+	//var page string
 
-	for _, item := range rss.Channel.Items {
-		n := entity.News{
-			Title: item.Title,
-			Text:  item.Description,
-			Link:  item.Link,
-			Image: item.Media.URL,
-			Visible: true,
-			Category: category,
-		}
+	// for _, item := range rss.Channel.Items {
+	// 	n := entity.News{
+	// 		Title: item.Title,
+	// 		Text:  item.Description,
+	// 		Link:  item.Link,
+	// 		Image: item.Media.URL,
+	// 		Visible: true,
+	// 		Category: category,
+	// 	}
 		
-		lista = append(lista, n)
-	}
+	// 	lista = append(lista, n)
+	// }
 
-	page = "https://www.bahianoticias.com.br"
+	page := "https://www.bahianoticias.com.br"
 	lista_page := c.news_service.GetNewsFromPage(page)
 	lista = append(lista, lista_page...)
 

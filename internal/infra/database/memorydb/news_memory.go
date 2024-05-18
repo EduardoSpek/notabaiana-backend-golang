@@ -3,6 +3,7 @@ package memorydb
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 )
@@ -37,6 +38,22 @@ func (r *NewsMemoryRepository) FindAll(page, limit int) ([]entity.News, error) {
 	var news []entity.News
 	for _, n := range r.Newsdb {
 		news = append(news, n)
+	}
+
+	return news, nil
+}
+
+func (r *NewsMemoryRepository) FindRecent() (entity.News, error) {
+	var news entity.News
+	
+	var latestTime time.Time
+
+	// Iterando sobre o mapa
+	for _, v := range r.Newsdb {
+		if v.CreatedAt.After(latestTime) {
+			latestTime = v.CreatedAt
+			news = v
+		}
 	}
 
 	return news, nil
