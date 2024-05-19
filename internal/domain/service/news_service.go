@@ -20,7 +20,7 @@ var (
 		ErrSimilarTitle = errors.New("título similar ao recente adicionado detectado")
 		AllowedDomains = "www.bahianoticias.com.br"		
 
-		LimitPerPage = 30
+		LimitPerPage = 100
 	)
 
 type NewsRepository interface {
