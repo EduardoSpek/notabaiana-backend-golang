@@ -556,7 +556,13 @@ func (s *NewsService) GetImageLink(link string) (string, error) {
 		return "", err
 	}
 
-	newlink := fmt.Sprintf("https://www.bahianoticias.com.br/fotos/%s/%d/IMAGEM_NOTICIA_5.jpg", path, id)
+	var tag string
+	tag = "NOTICIA"
+	if path == "esportes_bahias" {
+		tag = "BAHIA"
+	} 
+
+	newlink := fmt.Sprintf("https://www.bahianoticias.com.br/fotos/%s/%d/IMAGEM_%s_5.jpg", path, id, tag)
 
 	return newlink, nil
 }
