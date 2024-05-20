@@ -560,6 +560,8 @@ func (s *NewsService) GetImageLink(link string) (string, error) {
 	tag = "NOTICIA"
 	if path == "esportes_bahias" {
 		tag = "BAHIA"
+	} else if path == "esportes_vitorias" {
+		tag = "VITORIA"
 	} 
 
 	newlink := fmt.Sprintf("https://www.bahianoticias.com.br/fotos/%s/%d/IMAGEM_%s_5.jpg", path, id, tag)
