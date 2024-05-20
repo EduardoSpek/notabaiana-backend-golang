@@ -73,6 +73,14 @@ func (c *CopierService) Run(rss_url string) {
 	lista_page = c.news_service.GetNewsFromPage(page)
 	lista = append(lista, lista_page...)
 
+page = "https://www.bahianoticias.com.br/esportes"
+	lista_page = c.news_service.GetNewsFromPage(page)
+	lista = append(lista, lista_page...)
+
+page = "https://www.bahianoticias.com.br/bnhall"
+	lista_page = c.news_service.GetNewsFromPage(page)
+	lista = append(lista, lista_page...)
+
 	for _, n := range lista {
 
 		embed, text := c.news_service.GetEmded(n.Link)
