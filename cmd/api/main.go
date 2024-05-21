@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/web"
@@ -19,9 +20,8 @@ func main() {
 
 	//newsrepo := database.NewNewsSQLiteRepository()
 	//newsrepo := database.NewNewsMemoryRepository()
-	postgres := database.NewPostgres()
-	db, _ := postgres.Connect()
-	newsrepo := database.NewNewsPostgresRepository(db)
+	postgres := adapter.NewPostgresAdapter()	
+	newsrepo := database.NewNewsPostgresRepository(postgres)
 	imagedownloader := utils.NewImgDownloader()	
 	news_service := service.NewNewsService(newsrepo, imagedownloader)	
 
@@ -31,7 +31,7 @@ func main() {
 
 	news_controller := controllers.NewNewsController(*news_service)
 
-	toprepo := database.NewTopPostgresRepository(db)
+	toprepo := database.NewTopPostgresRepository(postgres)
 	top_service := service.NewTopService(toprepo, *news_service)
 	top_controller := controllers.NewTopController(*top_service)
 

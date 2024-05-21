@@ -1,4 +1,4 @@
-package supabase
+package postgres
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 )
@@ -22,7 +23,8 @@ type NewsPostgresRepository struct {
     mutex sync.RWMutex
 }
 
-func NewNewsPostgresRepository(db *gorm.DB) *NewsPostgresRepository {
+func NewNewsPostgresRepository(db_adapter port.DBAdapter) *NewsPostgresRepository {
+    db, _ := db_adapter.Connect()
 	return &NewsPostgresRepository{ db: db }
 }
 

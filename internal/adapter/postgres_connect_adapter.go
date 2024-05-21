@@ -1,4 +1,4 @@
-package supabase
+package adapter
 
 import (
 	"fmt"
@@ -9,13 +9,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type Postgres struct {}
+type PostgresAdapter struct {}
 
-func NewPostgres() *Postgres {
-	return &Postgres{}
+func NewPostgresAdapter() *PostgresAdapter {
+	return &PostgresAdapter{}
 }
 
-func (repo *Postgres) Connect() (*gorm.DB, error) {
+func (repo *PostgresAdapter) Connect() (*gorm.DB, error) {
 	
 	connStr := "user="+ os.Getenv("POSTGRES_USERNAME") +" password="+ os.Getenv("POSTGRES_PASSWORD") +" host="+ os.Getenv("POSTGRES_HOST") +" port="+ os.Getenv("POSTGRES_PORT") +" dbname="+ os.Getenv("POSTGRES_DB") +""
 	

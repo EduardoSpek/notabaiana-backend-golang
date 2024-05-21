@@ -1,9 +1,10 @@
-package supabase
+package postgres
 
 import (
 	"sync"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 )
@@ -14,7 +15,8 @@ type TopPostgresRepository struct {
     mutex sync.RWMutex
 }
 
-func NewTopPostgresRepository(db *gorm.DB) *TopPostgresRepository {
+func NewTopPostgresRepository(db_adapter port.DBAdapter) *TopPostgresRepository {
+    db, _ := db_adapter.Connect()
 	return &TopPostgresRepository{ db: db }
 }
 
