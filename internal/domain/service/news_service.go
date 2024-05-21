@@ -54,6 +54,12 @@ func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloa
 }
 
 func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {	
+
+	newtitle, err := s.ChangeTitleWithGemini(news.Title)
+
+	if err == nil {
+		news.Title = newtitle
+	}
 	
 	new := *entity.NewNews(news)
 
@@ -61,7 +67,7 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 
 	if err != nil {
 		return entity.News{}, err
-	}
+	}	
 
 	similarity := utils.Similarity(recent.Title, new.Title)
 
