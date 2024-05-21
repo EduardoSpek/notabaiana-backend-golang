@@ -1,10 +1,15 @@
 package service
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
+	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
@@ -23,6 +28,22 @@ var (
 		LimitPerPage = 100
 	)
 
+type Response struct {
+	Candidates []Candidate `json:"candidates"`
+}
+
+type Candidate struct {
+	Contents Content `json:"content"`
+}
+
+type Content struct {
+	Parts []Part `json:"parts"`
+}
+
+type Part struct {
+	Text string `json:"text"`
+}
+		
 type NewsService struct {
 	newsrepository port.NewsRepository
 	imagedownloader port.ImageDownloader
@@ -65,8 +86,6 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	if err != nil {
 		return entity.News{}, err
 	}
-
-	
 	
 	_, err = s.newsrepository.Create(new)
 	
@@ -555,6 +574,58 @@ func (s *NewsService) CopierPage(list_pages []string) []entity.News {
 	}
 
 	return lista
+}
+
+func (s *NewsService)  ChangeTitleWithGemini(title string) (string, error) {
+
+	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + os.Getenv("KEY_GEMINI")
+
+	jsonData := `{"contents":[{"parts":[{"text":"Matenha o contexto e refaça o título: ` + title + `"}]}]}`
+
+	reqBody := bytes.NewBuffer([]byte(jsonData))
+
+	req, err := http.NewRequest("POST", url, reqBody)
+	if err != nil {
+		fmt.Println("Erro ao criar a requisição:", err)
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Erro ao fazer a requisição POST:", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Erro ao ler o corpo da resposta:", err)
+		return "", err
+	}
+	
+	// Deserializa o JSON na struct Response
+	var response Response
+	err = json.Unmarshal(respBody, &response)
+	if err != nil {
+		fmt.Println("Erro ao deserializar o JSON:", err)
+		return "", err
+	}	
+
+	var newtitle string
+	// Acessa o valor de "text"
+	for _, candidate := range response.Candidates {
+		for _, part := range candidate.Contents.Parts {
+						
+			newtitle = strings.Replace(part.Text, "**", "", -1)
+			
+		}
+	}
+
+	return newtitle, nil
+
 }
 
 //Pagination recebe a página atual e o total de noticias para retornar a páginação de resultado
