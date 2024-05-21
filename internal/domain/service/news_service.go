@@ -547,6 +547,16 @@ func (s *NewsService) GetImageLink(link string) (string, error) {
 	return newlink, nil
 }
 
+func (s *NewsService) CopierPage(list_pages []string) []entity.News {
+	var lista []entity.News
+	for _, page := range list_pages {		
+		lista_page := s.GetNewsFromPage(page)
+		lista = append(lista, lista_page...)
+	}
+
+	return lista
+}
+
 //Pagination recebe a página atual e o total de noticias para retornar a páginação de resultado
 func (s *NewsService) Pagination(currentPage, totalNews int) map[string][]int {
 	

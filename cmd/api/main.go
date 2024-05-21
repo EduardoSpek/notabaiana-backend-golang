@@ -16,6 +16,16 @@ import (
 //     }
 // }
 
+var list_pages = []string{
+	"https://www.bahianoticias.com.br",
+	"https://www.bahianoticias.com.br/holofote",
+	"https://www.bahianoticias.com.br/esportes",
+	"https://www.bahianoticias.com.br/bnhall",
+	"https://www.bahianoticias.com.br/justica",
+	"https://www.bahianoticias.com.br/saude",
+	"https://www.bahianoticias.com.br/municipios",
+}
+
 func main() {	
 
 	//newsrepo := database.NewNewsSQLiteRepository()
@@ -41,13 +51,7 @@ func main() {
 	server.CrawlerController(*crawler_controller)
 	server.NewsController(*news_controller)
 
-	//go copier_service.Start("https://www.bahianoticias.com.br/holofote/rss.xml", 22)
-	go copier_service.Start("https://www.bahianoticias.com.br/principal/rss.xml", 5)	
-	// go copier_service.Start("https://www.bahianoticias.com.br/esportes/rss.xml", 33)
-	// go copier_service.Start("https://www.bahianoticias.com.br/justica/rss.xml", 44)
-	// go copier_service.Start("https://www.bahianoticias.com.br/hall/rss.xml", 55)
-	// go copier_service.Start("https://www.bahianoticias.com.br/saude/rss.xml", 66)
-	// go copier_service.Start("https://www.bahianoticias.com.br/municipios/rss.xml", 77)
+	go copier_service.Start(list_pages, 10)	
 		
 	//Função para gerar as top notícias a cada 60 minutos
 	go top_service.Start(60)

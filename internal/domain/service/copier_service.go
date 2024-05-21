@@ -19,7 +19,7 @@ func NewCopier(newsservice NewsService, crawlerservice CrawlerService) *CopierSe
 	return &CopierService{news_service: newsservice, crawler_service: crawlerservice}
 }
 
-func (c *CopierService) Start(rss string, minutes time.Duration) {
+func (c *CopierService) Start(rss []string, minutes time.Duration) {
 	
 	go c.Run(rss)
 
@@ -31,7 +31,7 @@ func (c *CopierService) Start(rss string, minutes time.Duration) {
 	}
 }
 
-func (c *CopierService) Run(rss_url string) {
+func (c *CopierService) Run(list_pages []string) {
 
 	err := os.MkdirAll("images", os.ModePerm)
 	if err != nil {
@@ -65,21 +65,7 @@ func (c *CopierService) Run(rss_url string) {
 	// 	lista = append(lista, n)
 	// }
 
-	page := "https://www.bahianoticias.com.br"
-	lista_page := c.news_service.GetNewsFromPage(page)
-	lista = append(lista, lista_page...)
-
-	page = "https://www.bahianoticias.com.br/holofote"
-	lista_page = c.news_service.GetNewsFromPage(page)
-	lista = append(lista, lista_page...)
-
-page = "https://www.bahianoticias.com.br/esportes"
-	lista_page = c.news_service.GetNewsFromPage(page)
-	lista = append(lista, lista_page...)
-
-page = "https://www.bahianoticias.com.br/bnhall"
-	lista_page = c.news_service.GetNewsFromPage(page)
-	lista = append(lista, lista_page...)
+	lista = c.news_service.CopierPage(list_pages)
 
 	for _, n := range lista {
 
