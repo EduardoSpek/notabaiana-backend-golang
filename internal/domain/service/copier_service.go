@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 )
 
@@ -49,7 +48,7 @@ func (c *CopierService) Run(list_pages []string) {
 	// rss := c.crawler_service.GetRSS(rss_url)
 	// category, _ := c.news_service.GetCategory(rss_url)
 
-	var lista []entity.News
+	
 	//var page string
 
 	// for _, item := range rss.Channel.Items {
@@ -65,7 +64,8 @@ func (c *CopierService) Run(list_pages []string) {
 	// 	lista = append(lista, n)
 	// }
 
-	lista = c.news_service.CopierPage(list_pages)
+	
+	lista := c.news_service.CopierPage(list_pages)
 
 	for _, n := range lista {
 
