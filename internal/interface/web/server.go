@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/web/middlewares"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/web/router"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/middlewares"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/router"
 	"github.com/gorilla/mux"
 )
 

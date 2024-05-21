@@ -1,6 +1,6 @@
 package web
 
-import "github.com/eduardospek/notabaiana-backend-golang/internal/infra/web/controllers"
+import "github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/controllers"
 
 func (s *ServerWeb) TopController(topcontroller controllers.TopController) {
 	s.router.HandleFunc("/top/{key}", topcontroller.CreateTop).Methods("GET")

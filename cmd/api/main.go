@@ -4,8 +4,8 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/web"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/web/controllers"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 )
 
