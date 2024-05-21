@@ -55,11 +55,11 @@ func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloa
 
 func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {	
 
-	newtitle, err := s.ChangeTitleWithGemini(news.Title)
+	// newtitle, err := s.ChangeTitleWithGemini(news.Title)
 
-	if err == nil && newtitle != "" {
-		news.Title = newtitle
-	}
+	// if err == nil && newtitle != "" {
+	// 	news.Title = newtitle
+	// }
 	
 	new := *entity.NewNews(news)
 
