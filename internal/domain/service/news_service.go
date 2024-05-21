@@ -57,7 +57,7 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 
 	newtitle, err := s.ChangeTitleWithGemini(news.Title)
 
-	if err == nil {
+	if err == nil && newtitle != "" {
 		news.Title = newtitle
 	}
 	
@@ -586,7 +586,7 @@ func (s *NewsService)  ChangeTitleWithGemini(title string) (string, error) {
 
 	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + os.Getenv("KEY_GEMINI")
 
-	jsonData := `{"contents":[{"parts":[{"text":"Matenha o contexto e refaça o título: ` + title + `"}]}]}`
+	jsonData := `{"contents":[{"parts":[{"text":"Matenha o contexto e refaça o título usando palavras-chaves para melhorar o SEO. Tente gerar curiosidade para o leitor querer ler a notícia completa. Retorne apenas o título com no máximo 60 caracteres. O título para ser refeito é: ` + title + `"}]}]}`
 
 	reqBody := bytes.NewBuffer([]byte(jsonData))
 
