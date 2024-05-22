@@ -55,11 +55,7 @@ func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloa
 
 func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {	
 
-	newtitle, err := s.ChangeTitleWithGemini(news.Title)
-
-	if err == nil && newtitle != "" {
-	 	news.TitleAi = strings.TrimSpace(newtitle)
-	}
+	
 	
 	new := *entity.NewNews(news)
 
@@ -91,6 +87,12 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 
 	if err != nil {
 		return entity.News{}, err
+	}
+
+	newtitle, err := s.ChangeTitleWithGemini(news.Title)
+
+	if err == nil && newtitle != "" {
+	 	news.TitleAi = strings.TrimSpace(newtitle)
 	}
 	
 	_, err = s.newsrepository.Create(new)
