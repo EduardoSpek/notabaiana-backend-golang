@@ -89,10 +89,10 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 		return entity.News{}, err
 	}
 
-	newtitle, err := s.ChangeTitleWithGemini(news.Title)
+	newtitle, err := s.ChangeTitleWithGemini(new.Title)
 
 	if err == nil && newtitle != "" {
-	 	news.TitleAi = strings.TrimSpace(newtitle)
+	 	new.TitleAi = strings.TrimSpace(newtitle)
 	}
 	
 	_, err = s.newsrepository.Create(new)
