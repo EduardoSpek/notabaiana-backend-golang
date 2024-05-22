@@ -14,6 +14,7 @@ type News struct {
 
 	ID    string `gorm:"column:id;primaryKey" json:"id"`
 	Title string `gorm:"column:title" json:"title"`
+	TitleAi string `gorm:"column:title_ai" json:"title_ai"`
 	Text  string `gorm:"column:text" json:"text"`
 	Link  string `gorm:"column:link" json:"link"`
 	Image string `gorm:"column:image" json:"image"`
@@ -26,13 +27,23 @@ type News struct {
 }
 
 func NewNews(news News) *News {
+	
+	var slug string
+	
+	if news.TitleAi != "" {
+		slug = SlugTitle(news.TitleAi)
+	} else {
+		slug = SlugTitle(news.Title)
+	}
+
 	return &News{
 		ID:    uuid.NewString(),
 		Title: strings.TrimSpace(news.Title),
+		TitleAi: strings.TrimSpace(news.TitleAi),
 		Text:  strings.TrimSpace(news.Text),
 		Link:  strings.TrimSpace(news.Link),
 		Image: strings.TrimSpace(news.Image),
-		Slug: SlugTitle(news.Title),
+		Slug: slug,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),	
 		Visible: news.Visible,
