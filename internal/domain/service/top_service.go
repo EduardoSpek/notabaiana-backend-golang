@@ -5,30 +5,36 @@ import (
 	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 )
 
-type TopRepository interface {
-	Create(tops []entity.Top) error
-	TopTruncateTable() error
-	FindAll() ([]entity.Top, error)
-}
-
 type TopService struct {
-	TopRepository TopRepository
-	NewsService NewsService
+	HitsRepository port.HitsRepository
+	TopRepository port.TopRepository
+	NewsRepository port.NewsRepository
 }
 
-func NewTopService(toprepo TopRepository, newsservice NewsService) *TopService {
-	return &TopService{  TopRepository: toprepo, NewsService: newsservice }
+func NewTopService(toprepo port.TopRepository, newsrepo port.NewsRepository, hitsrepo port.HitsRepository) *TopService {
+	return &TopService{  TopRepository: toprepo, NewsRepository: newsrepo, HitsRepository: hitsrepo }
 }
 
 func (t *TopService) TopCreate() {
 
-	news, err := t.NewsService.FindAllViews()
+	var news []entity.News
+	hits, _ := t.HitsRepository.TopHits()
 
-	if err != nil {
-		fmt.Println(err)
-	}	
+	for _, hit := range hits {
+		
+		new, err := t.NewsRepository.GetBySlug(hit.Session)
+
+		if err != nil {
+			return 
+		}
+
+		news = append(news, new)
+	}
+
+	//news, err := t.NewsService.FindAllViews()
 
 	var tops []entity.Top
 	var newtop entity.Top
@@ -50,7 +56,7 @@ func (t *TopService) TopCreate() {
 		tops = append(tops, ntop)
 	}	
 
-	err = t.TopRepository.TopTruncateTable()
+	err := t.TopRepository.TopTruncateTable()
 
 	if err != nil {
 		fmt.Println(err)
@@ -62,11 +68,11 @@ func (t *TopService) TopCreate() {
 		fmt.Println(err)
 	}
 
-	err = t.NewsService.ClearViews()
+	// err = t.NewsService.ClearViews()
 
-	if err != nil {
-		fmt.Println(err)
-	}
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 }
 
 func (t *TopService) FindAll() ([]entity.Top, error) {

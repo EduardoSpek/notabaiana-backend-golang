@@ -1,7 +1,10 @@
 package postgres
 
 import (
+	"errors"
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
@@ -29,6 +32,7 @@ func (repo *HitsPostgresRepository) Save(hit entity.Hits) error {
     
     if result.Error != nil {
         tx.Rollback() 
+        fmt.Println(result.Error)
         return result.Error
     }
 
@@ -42,12 +46,13 @@ func (repo *HitsPostgresRepository) Update(hit entity.Hits) error {
     defer repo.mutex.Unlock()
     
     tx := repo.db.Begin()
-    defer tx.Rollback()    
+    defer tx.Rollback()
 
-    result := repo.db.Updates(&hit)
+    result := repo.db.Model(&hit).Update("views", hit.Views)
     
     if result.Error != nil {
         tx.Rollback() 
+        fmt.Println(result.Error)
         return result.Error
     }
 
@@ -66,11 +71,27 @@ func (repo *HitsPostgresRepository) Get(ip string, session string) (entity.Hits,
     var hit entity.Hits
     repo.db.Model(&entity.Hits{}).Where("ip = ? AND session = ?", ip, session).First(&hit)
 
-    if repo.db.Error != nil {
-        return entity.Hits{}, repo.db.Error
+    if hit.IP == "" {
+        fmt.Println("=== Nenhum hit encontrado ===")
+        return entity.Hits{}, errors.New("=== Nenhum hit encontrado ===")
     }
 
     tx.Commit()
 
     return hit, nil
+}
+
+func (repo *HitsPostgresRepository) TopHits() ([]entity.Hits, error) {
+	repo.mutex.RLock() 
+    defer repo.mutex.RUnlock()
+
+    tx := repo.db.Begin()
+    defer tx.Rollback()    
+
+    var hits []entity.Hits
+    repo.db.Model(&entity.Hits{}).Select("session, sum(views) as total").Where("created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("total DESC").Group("session").Limit(10).Find(&hits)
+
+    tx.Commit()
+
+    return hits, nil
 }

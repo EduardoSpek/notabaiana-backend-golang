@@ -23,3 +23,7 @@ func (h *HitsMemoryRepository) Update(hit entity.Hits) error {
 func (h *HitsMemoryRepository) Get(ip string, session string) (entity.Hits, error) {
 	return entity.Hits{}, nil
 }
+
+func (h *HitsMemoryRepository) TopHits() ([]entity.Hits, error) {
+	return []entity.Hits{}, nil
+}
