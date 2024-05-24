@@ -33,7 +33,8 @@ func main() {
 	postgres := adapter.NewPostgresAdapter()	
 	newsrepo := database.NewNewsPostgresRepository(postgres)
 	imagedownloader := utils.NewImgDownloader()	
-	news_service := service.NewNewsService(newsrepo, imagedownloader)	
+	hitrepo := database.NewHitsPostgresRepository(postgres)
+	news_service := service.NewNewsService(newsrepo, imagedownloader, hitrepo)	
 
 	crawler_service := service.NewCrawler()
 	copier_service := service.NewCopier(*news_service, *crawler_service)

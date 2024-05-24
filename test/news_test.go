@@ -82,7 +82,8 @@ func TestNewsService(t *testing.T) {
 
 	news_repo := database.NewNewsMemoryRepository()
 	imagedownloader := utils.NewImgDownloader()
-	news_service := service.NewNewsService(news_repo, imagedownloader)
+	hits := database.NewHitsMemoryRepository()
+	news_service := service.NewNewsService(news_repo, imagedownloader, hits)
 
 	t.Run("Deve criar uma nova noticia no banco", func (t *testing.T)  {
 		news := entity.News{		
@@ -199,7 +200,8 @@ func TestNewsController(t *testing.T) {
 
 		repo := database.NewNewsMemoryRepository()
 		imagedownloader := utils.NewImgDownloader()
-		news_service := service.NewNewsService(repo, imagedownloader)		
+		hits := database.NewHitsMemoryRepository()
+		news_service := service.NewNewsService(repo, imagedownloader, hits)		
 		controller := controllers.NewNewsController(*news_service)
 
 		news := entity.News{		

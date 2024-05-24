@@ -56,7 +56,8 @@ func TestCrawlerController(t *testing.T) {
 
 		repo := database.NewNewsMemoryRepository()
 		imagedownloader := utils.NewImgDownloader()
-		news := service.NewNewsService(repo, imagedownloader)
+		hits := database.NewHitsMemoryRepository()
+		news := service.NewNewsService(repo, imagedownloader, hits)
 		crawler := service.NewCrawler()
 		copier := service.NewCopier(*news, *crawler)
 		controller := controllers.NewCrawlerController(*copier)

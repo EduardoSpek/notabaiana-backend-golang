@@ -22,7 +22,7 @@ func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	slug := vars["slug"]
 
-	new, err := c.news_service.GetNewsBySlug(slug)
+	new, err := c.news_service.GetNewsBySlug(r, slug)
 
 	if err != nil {
 		msg := map[string]any{

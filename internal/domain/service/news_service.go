@@ -45,12 +45,13 @@ type Part struct {
 }
 		
 type NewsService struct {
+	hitsrepository port.HitsRepository
 	newsrepository port.NewsRepository
 	imagedownloader port.ImageDownloader
 }
 
-func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloader) *NewsService {
-	return &NewsService{ newsrepository: repository, imagedownloader: downloader }
+func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloader, hits port.HitsRepository) *NewsService {
+	return &NewsService{ newsrepository: repository, imagedownloader: downloader, hitsrepository: hits }
 }
 
 func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {	
@@ -104,7 +105,13 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	return new, nil
 }
 
-func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
+func (s *NewsService) GetNewsBySlug(req *http.Request, slug string) (entity.News, error) {
+
+	err := s.Hit(req, slug)
+
+	if err != nil {
+		return entity.News{}, err
+	}
 	
 	new, err := s.newsrepository.GetBySlug(slug)
 
@@ -114,6 +121,42 @@ func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
 	
 	return new, nil
 
+}
+
+func (s *NewsService) Hit(req *http.Request, session string) error {
+	hit, err := s.hitsrepository.Get(req.RemoteAddr, session)
+
+	if err != nil {		
+
+		newhit := entity.Hits{
+			IP: req.RemoteAddr,
+			Session: session,
+			Views: 1,
+		}
+
+		err := s.hitsrepository.Save(newhit)
+		
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	hit.Views++
+	newhit := entity.Hits{
+		IP: req.RemoteAddr,
+		Session: session,
+		Views: hit.Views,
+	}
+
+	err = s.hitsrepository.Update(newhit)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *NewsService) SearchNews(page int, str_search string) interface{} {
