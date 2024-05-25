@@ -107,11 +107,11 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 
 func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
 
-	err := s.Hit(slug)
+	// err := s.Hit(slug)
 
-	if err != nil {
-		return entity.News{}, err
-	}
+	// if err != nil {
+	// 	return entity.News{}, err
+	// }
 	
 	new, err := s.newsrepository.GetBySlug(slug)
 
