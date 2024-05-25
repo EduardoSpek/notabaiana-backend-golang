@@ -601,8 +601,16 @@ func (s *NewsService) GetImageLink(link string) (string, error) {
 		tag = "BAHIA"
 	} else if path == "esportes_vitorias" {
 		tag = "VITORIA"
-	} else if path == "justica_colunas" || path == "hall_colunas" {
+	} else if path == "justica_colunas" || path == "hall_colunas" || path == "holofote_colunas" {
 		tag = "COLUNA"
+	} else if path == "principal_podcasts" {
+		tag = "PODCAST"
+	} else if path == "hall_enjoy" {
+		tag = "ENJOY"
+	} else if path == "hall_travellings" {
+		tag = "TRAVELLING"
+	} else if path == "hall_business" {
+		tag = "BUSINESS"
 	} 
 
 	newlink := fmt.Sprintf("https://www.bahianoticias.com.br/fotos/%s/%d/IMAGEM_%s_5.jpg", path, id, tag)
