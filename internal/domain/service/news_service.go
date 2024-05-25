@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -126,12 +125,9 @@ func (s *NewsService) GetNewsBySlug(req *http.Request, slug string) (entity.News
 
 func (s *NewsService) Hit(req *http.Request, session string) error {
 
-	ip, _, err := net.SplitHostPort(req.RemoteAddr)
-	if err != nil {
-		return err
-	}
+	ip := utils.GetIP(req)
 
-	_, err = s.hitsrepository.Get(ip, session)	
+	_, err := s.hitsrepository.Get(ip, session)	
 
 	if err != nil {		
 
