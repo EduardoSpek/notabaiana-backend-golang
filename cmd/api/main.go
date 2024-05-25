@@ -43,7 +43,7 @@ func main() {
 	news_controller := controllers.NewNewsController(*news_service)
 
 	toprepo := database.NewTopPostgresRepository(postgres)
-	top_service := service.NewTopService(toprepo, newsrepo, hitrepo)
+	top_service := service.NewTopService(toprepo, newsrepo, hitrepo, *news_service)
 	top_controller := controllers.NewTopController(*top_service)
 
 	server := web.NewServerWeb()

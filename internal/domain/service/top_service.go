@@ -12,29 +12,34 @@ type TopService struct {
 	HitsRepository port.HitsRepository
 	TopRepository port.TopRepository
 	NewsRepository port.NewsRepository
+	NewsService NewsService
 }
 
-func NewTopService(toprepo port.TopRepository, newsrepo port.NewsRepository, hitsrepo port.HitsRepository) *TopService {
-	return &TopService{  TopRepository: toprepo, NewsRepository: newsrepo, HitsRepository: hitsrepo }
+func NewTopService(toprepo port.TopRepository, newsrepo port.NewsRepository, hitsrepo port.HitsRepository, newsservice NewsService) *TopService {
+	return &TopService{  TopRepository: toprepo, NewsRepository: newsrepo, HitsRepository: hitsrepo,NewsService: newsservice }
 }
 
 func (t *TopService) TopCreate() {
 
-	var news []entity.News
-	hits, _ := t.HitsRepository.TopHits()
+	// var news []entity.News
+	// hits, _ := t.HitsRepository.TopHits()
 
-	for _, hit := range hits {
+	// for _, hit := range hits {
 		
-		new, err := t.NewsRepository.GetBySlug(hit.Session)
+	// 	new, err := t.NewsRepository.GetBySlug(hit.Session)
 
-		if err != nil {
-			return 
-		}
+	// 	if err != nil {
+	// 		return 
+	// 	}
 
-		news = append(news, new)
+	// 	news = append(news, new)
+	// }
+
+	news, err := t.NewsService.FindAllViews()
+
+	if err != nil {
+		fmt.Println(err)
 	}
-
-	//news, err := t.NewsService.FindAllViews()
 
 	var tops []entity.Top
 	var newtop entity.Top
@@ -56,7 +61,7 @@ func (t *TopService) TopCreate() {
 		tops = append(tops, ntop)
 	}	
 
-	err := t.TopRepository.TopTruncateTable()
+	err = t.TopRepository.TopTruncateTable()
 
 	if err != nil {
 		fmt.Println(err)
@@ -68,11 +73,11 @@ func (t *TopService) TopCreate() {
 		fmt.Println(err)
 	}
 
-	// err = t.NewsService.ClearViews()
+	err = t.NewsService.ClearViews()
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func (t *TopService) FindAll() ([]entity.Top, error) {
