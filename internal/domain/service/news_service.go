@@ -105,9 +105,9 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	return new, nil
 }
 
-func (s *NewsService) GetNewsBySlug(req *http.Request, slug string) (entity.News, error) {
+func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
 
-	err := s.Hit(req, slug)
+	err := s.Hit(slug)
 
 	if err != nil {
 		return entity.News{}, err
@@ -123,9 +123,9 @@ func (s *NewsService) GetNewsBySlug(req *http.Request, slug string) (entity.News
 
 }
 
-func (s *NewsService) Hit(req *http.Request, session string) error {
+func (s *NewsService) Hit(session string) error {
 
-	ip := utils.GetIP(req)
+	ip := utils.GetIP()
 
 	_, err := s.hitsrepository.Get(ip, session)	
 
