@@ -113,15 +113,13 @@ func (s *NewsService) GetFormNewsData(r *http.Request) (entity.News, error) {
 func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 	// Parse the multipart form data
 	err := r.ParseMultipartForm(10 << 20) // 10 MB maximum
-	if err != nil {	
-		fmt.Println("erro em ParseMultipartForm")	
+	if err != nil {			
 		return ErrParseForm
 	}
 
 	// Get the file from the form
-	file, _, err := r.FormFile("Image")
-	if err != nil {
-		fmt.Println("erro em FormFile")
+	file, _, err := r.FormFile("image")
+	if err != nil {		
 		return ErrParseForm
 	}
 	defer file.Close()
@@ -136,8 +134,7 @@ func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 	pathImage := diretorio + news.Image
 	
 	f, err := os.Create(pathImage)
-	if err != nil {
-		fmt.Println("erro em os.Create(pathImage)")
+	if err != nil {		
 		return ErrParseForm
 	}
 	defer f.Close()
@@ -145,31 +142,27 @@ func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 
 	f, err = os.Open(pathImage)
 
-	if err != nil {
-		fmt.Println("erro em os.Open(pathImage)")
+	if err != nil {		
 		return ErrParseForm
 	}
 
 	// Resize the image
 	img, _, err := image.Decode(f)
-	if err != nil {
-		fmt.Println("erro em image.Decode(f)")
+	if err != nil {		
 		return ErrDecodeImage
 	}
 	resizedImg := resize.Resize(400, 254, img, resize.Lanczos3)
 
 	// Save the resized image	
 	out, err := os.Create(pathImage)
-	if err != nil {
-		fmt.Println("erro em os.Create(pathImage) 2")
+	if err != nil {		
 		return ErrDecodeImage
 	}
 	defer out.Close()
 
 	err = jpeg.Encode(out, resizedImg, nil)
 
-	if err != nil {
-		fmt.Println("erro em jpeg.Encode(out, resizedImg, nil)")
+	if err != nil {		
 		return ErrDecodeImage
 	}
 
