@@ -131,6 +131,7 @@ func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 	}
 
 	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"
+	fmt.Println(diretorio)
 	pathImage := diretorio + news.Image
 	
 	f, err := os.Create(pathImage)
