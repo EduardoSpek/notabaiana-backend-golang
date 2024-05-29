@@ -29,6 +29,7 @@ func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request
 		msg := map[string]any{
 			"ok": false,
 			"message": "A notícia não pode ser criada",
+			"erro": err,
 		}
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
