@@ -19,6 +19,22 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 
 func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
 
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	new, err := c.news_service.GetNewsBySlug(slug)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok": false,
+			"message": "não há notícia com este slug",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+	
+	ResponseJson(w, new, http.StatusOK)
+
 }
 
 func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request) {

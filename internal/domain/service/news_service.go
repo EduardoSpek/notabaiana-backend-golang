@@ -66,6 +66,7 @@ func (s *NewsService) NewsCreateByForm(r *http.Request) (entity.News, error) {
 	news, err := s.GetFormNewsData(r)
 
 	if err != nil {
+		fmt.Println("erro em s.GetFormNewsData(r) ")
 		return entity.News{}, ErrCreateNews
 	}
 
@@ -81,6 +82,7 @@ func (s *NewsService) GetFormNewsData(r *http.Request) (entity.News, error) {
 	key := r.FormValue("key")
 
 	if key != os.Getenv("key") {
+		fmt.Println("erro em os.Getenv(key) ")
 		return entity.News{}, ErrNotAuthorized
 	}
 
@@ -96,6 +98,7 @@ func (s *NewsService) GetFormNewsData(r *http.Request) (entity.News, error) {
 	new, err := s.CreateNews(*newNews)
 
 	if err != nil {
+		fmt.Println("erro em s.CreateNews(*newNews) ")
 		return entity.News{}, ErrCreateNews
 	}
 
@@ -119,7 +122,8 @@ func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 
 	// Get the file from the form
 	file, _, err := r.FormFile("image")
-	if err != nil {		
+	if err != nil {	
+		fmt.Println("erro em r.FormFile(image) ")	
 		return ErrParseForm
 	}
 	defer file.Close()
@@ -136,6 +140,7 @@ func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 	
 	f, err := os.Create(pathImage)
 	if err != nil {		
+		fmt.Println("erro em os.Create(pathImage) ")
 		return ErrParseForm
 	}
 	defer f.Close()
@@ -144,12 +149,14 @@ func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 	f, err = os.Open(pathImage)
 
 	if err != nil {		
+		fmt.Println("erro em os.Open(pathImage) ")
 		return ErrParseForm
 	}
 
 	// Resize the image
 	img, _, err := image.Decode(f)
 	if err != nil {		
+		fmt.Println("erro em image.Decode(f) ")
 		return ErrDecodeImage
 	}
 	resizedImg := resize.Resize(400, 254, img, resize.Lanczos3)
@@ -157,13 +164,15 @@ func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 	// Save the resized image	
 	out, err := os.Create(pathImage)
 	if err != nil {		
+		fmt.Println("erro em os.Create(pathImage) 2 ")
 		return ErrDecodeImage
 	}
 	defer out.Close()
 
 	err = jpeg.Encode(out, resizedImg, nil)
 
-	if err != nil {		
+	if err != nil {	
+		fmt.Println("erro em jpeg.Encode(out, resizedImg, nil)")	
 		return ErrDecodeImage
 	}
 
