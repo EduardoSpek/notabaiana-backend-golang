@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"math"
 	"net/http"
@@ -17,9 +19,13 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gocolly/colly"
+	"github.com/nfnt/resize"
 )
 
 var (
+		ErrDecodeImage = errors.New("não foi possível decodificar a imagem")
+		ErrCreateNews = errors.New("não foi possível criar a notícia")
+		ErrParseForm = errors.New("Erro ao obter a imagem")
 		ErrWordsBlackList = errors.New("o título contém palavras bloqueadas")
 		ErrNoCategory = errors.New("nenhuma categoria no rss")
 		ErrSimilarTitle = errors.New("título similar ao recente adicionado detectado")
@@ -54,9 +60,105 @@ func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloa
 	return &NewsService{ newsrepository: repository, imagedownloader: downloader, hitsrepository: hits }
 }
 
-func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {	
+func (s *NewsService) NewsCreateByForm(r *http.Request) (entity.News, error) {
 
+	news, err := s.GetFormNewsData(r)
+
+	if err != nil {
+		return entity.News{}, ErrCreateNews
+	}
+
+	return news, nil
+
+}
+
+func (s *NewsService) GetFormNewsData(r *http.Request) (entity.News, error) {
+
+	title := r.FormValue("Title")
+	text := r.FormValue("Text")
+	category := r.FormValue("Category")
+
+	news := &entity.News{
+		Title: title,
+		Text: text,				
+		Visible: true,
+		Category: category,
+	}
+
+	newNews := entity.NewNews(*news)
+
+	new, err := s.CreateNews(*newNews)
+
+	if err != nil {
+		return entity.News{}, ErrCreateNews
+	}
+
+	err = s.SaveImageForm(r, new)
+
+	if err != nil {
+		newNews.Image = ""
+		fmt.Println("Não foi possível salvar a imagem")
+	}
+
+	return new, nil
+
+}
+
+func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
+	// Parse the multipart form data
+	err := r.ParseMultipartForm(10 << 20) // 10 MB maximum
+	if err != nil {		
+		return ErrParseForm
+	}
+
+	// Get the file from the form
+	file, _, err := r.FormFile("Image")
+	if err != nil {
+		return ErrParseForm
+	}
+	defer file.Close()
 	
+	cwd, err := os.Getwd()
+	
+	if err != nil {
+		fmt.Println("Erro ao obter o caminho do executável:", err)
+	}
+
+	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"
+	pathImage := diretorio + news.Image
+	
+	f, err := os.Create(pathImage)
+	if err != nil {
+		return ErrParseForm
+	}
+	defer f.Close()
+	io.Copy(f, file)
+
+	// Resize the image
+	img, _, err := image.Decode(f)
+	if err != nil {
+		return ErrDecodeImage
+	}
+	resizedImg := resize.Resize(400, 254, img, resize.Lanczos3)
+
+	// Save the resized image	
+	out, err := os.Create(pathImage)
+	if err != nil {
+		return ErrDecodeImage
+	}
+	defer out.Close()
+
+	err = jpeg.Encode(out, resizedImg, nil)
+
+	if err != nil {
+		return ErrDecodeImage
+	}
+
+	return nil
+
+}
+
+func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {	
 	
 	new := *entity.NewNews(news)
 

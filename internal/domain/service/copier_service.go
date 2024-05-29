@@ -39,11 +39,14 @@ func (c *CopierService) Run(list_pages []string) {
 	}
 
 	cwd, err := os.Getwd()
-	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"
-
+	
 	if err != nil {
 		fmt.Println("Erro ao obter o caminho do executável:", err)
 	}
+
+	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"
+
+	
 
 	// rss := c.crawler_service.GetRSS(rss_url)
 	// category, _ := c.news_service.GetCategory(rss_url)
