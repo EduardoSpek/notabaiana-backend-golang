@@ -23,6 +23,7 @@ import (
 )
 
 var (
+		ErrNotAuthorized = errors.New("você não tem autorização para criar notícias")
 		ErrDecodeImage = errors.New("não foi possível decodificar a imagem")
 		ErrCreateNews = errors.New("não foi possível criar a notícia")
 		ErrParseForm = errors.New("erro ao obter a imagem")
@@ -74,9 +75,14 @@ func (s *NewsService) NewsCreateByForm(r *http.Request) (entity.News, error) {
 
 func (s *NewsService) GetFormNewsData(r *http.Request) (entity.News, error) {
 
-	title := r.FormValue("Title")
-	text := r.FormValue("Text")
-	category := r.FormValue("Category")
+	title := r.FormValue("title")
+	text := r.FormValue("text")
+	category := r.FormValue("category")
+	key := r.FormValue("key")
+
+	if key != os.Getenv("key") {
+		return entity.News{}, ErrNotAuthorized
+	}
 
 	news := &entity.News{
 		Title: title,
