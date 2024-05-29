@@ -25,7 +25,7 @@ import (
 var (
 		ErrDecodeImage = errors.New("não foi possível decodificar a imagem")
 		ErrCreateNews = errors.New("não foi possível criar a notícia")
-		ErrParseForm = errors.New("Erro ao obter a imagem")
+		ErrParseForm = errors.New("erro ao obter a imagem")
 		ErrWordsBlackList = errors.New("o título contém palavras bloqueadas")
 		ErrNoCategory = errors.New("nenhuma categoria no rss")
 		ErrSimilarTitle = errors.New("título similar ao recente adicionado detectado")
