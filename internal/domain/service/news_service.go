@@ -81,7 +81,7 @@ func (s *NewsService) GetFormNewsData(r *http.Request) (entity.News, error) {
 	category := r.FormValue("category")
 	key := r.FormValue("key")
 
-	if key != os.Getenv("key") {
+	if key != os.Getenv("KEY") {
 		fmt.Println("erro em os.Getenv(key) ")
 		return entity.News{}, ErrNotAuthorized
 	}
