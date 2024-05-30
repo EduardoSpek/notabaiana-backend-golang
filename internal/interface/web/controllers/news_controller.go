@@ -29,7 +29,7 @@ func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request
 	// Faça uma solicitação POST para a API de verificação do reCAPTCHA v3 do Google
 	response, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", 
 		map[string][]string{
-			"secret":   {"6LdrROwpAAAAAPNbLdsY6XI6kI5R_xhV_2831cKJ"},
+			"secret":   {os.Getenv("KEY_GOOGLE_RECAPTCHA")},
 			"response": {token},
 		})
 	
