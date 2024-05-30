@@ -21,8 +21,7 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 }
 
 func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request) {
-
-	//gcaptcha := r.FormValue("g-recaptcha-response")
+	
 
 	// Captura o token enviado pelo cliente
 	token := r.FormValue("g-recaptcha-response")
@@ -57,27 +56,30 @@ func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request
 	// Verifica se a resposta foi bem-sucedida
 	success := result["success"].(bool)
 	if success {
-		fmt.Println("Token validado com sucesso!")
-		// Faça o que você quiser aqui
+		
+		new, err := c.news_service.NewsCreateByForm(r)
+
+		if err != nil {
+			msg := map[string]any{
+				"ok": false,
+				"message": "A notícia não pode ser criada",
+				"erro": err,
+			}
+			ResponseJson(w, msg, http.StatusNotFound)
+			return
+		}
+		
+		ResponseJson(w, new, http.StatusOK)
+
 	} else {
-		fmt.Println("Falha na validação do token.")
+		msg := map[string]any{
+				"ok": false,
+				"message": "Token do captcha inválido",
+				"erro": err,
+			}
+			ResponseJson(w, msg, http.StatusNotFound)
 	}
- 	
 
-	// new, err := c.news_service.NewsCreateByForm(r)
-
-	// if err != nil {
-	// 	msg := map[string]any{
-	// 		"ok": false,
-	// 		"message": "A notícia não pode ser criada",
-	// 		"erro": err,
-	// 	}
-	// 	ResponseJson(w, msg, http.StatusNotFound)
-	// 	return
-	// }
-	
-	// ResponseJson(w, new, http.StatusOK)
-	
 }
 
 func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
