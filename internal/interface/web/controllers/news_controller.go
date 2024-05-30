@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -20,9 +22,46 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 
 func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request) {
 
-	gcaptcha := r.FormValue("g-recaptcha-response")
+	//gcaptcha := r.FormValue("g-recaptcha-response")
 
-	fmt.Println(gcaptcha)
+	// Captura o token enviado pelo cliente
+	token := r.FormValue("token")
+        
+	// Faça uma solicitação POST para a API de verificação do reCAPTCHA v3 do Google
+	response, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", 
+		map[string][]string{
+			"secret":   {"6LdrROwpAAAAAPNbLdsY6XI6kI5R_xhV_2831cKJ"},
+			"response": {token},
+		})
+	
+	if err != nil {
+		fmt.Println("Erro ao fazer a solicitação:", err)
+		return
+	}
+	defer response.Body.Close()
+
+	// Lê a resposta da API
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println("Erro ao ler a resposta:", err)
+		return
+	}
+
+	// Decodifica a resposta JSON
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		fmt.Println("Erro ao decodificar a resposta:", err)
+		return
+	}
+
+	// Verifica se a resposta foi bem-sucedida
+	success := result["success"].(bool)
+	if success {
+		fmt.Println("Token validado com sucesso!")
+		// Faça o que você quiser aqui
+	} else {
+		fmt.Println("Falha na validação do token.")
+	}
  	
 
 	// new, err := c.news_service.NewsCreateByForm(r)
