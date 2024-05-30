@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -15,6 +16,29 @@ type NewsController struct {
 
 func NewNewsController(newsservice service.NewsService) *NewsController {
 	return &NewsController{ news_service: newsservice }
+}
+
+func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request) {
+
+	gcaptcha := r.FormValue("g-recaptcha-response")
+
+	fmt.Println(gcaptcha)
+ 	
+
+	// new, err := c.news_service.NewsCreateByForm(r)
+
+	// if err != nil {
+	// 	msg := map[string]any{
+	// 		"ok": false,
+	// 		"message": "A notícia não pode ser criada",
+	// 		"erro": err,
+	// 	}
+	// 	ResponseJson(w, msg, http.StatusNotFound)
+	// 	return
+	// }
+	
+	// ResponseJson(w, new, http.StatusOK)
+	
 }
 
 func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
@@ -35,24 +59,6 @@ func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
 	
 	ResponseJson(w, new, http.StatusOK)
 
-}
-
-func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request) {
-
-	new, err := c.news_service.NewsCreateByForm(r)
-
-	if err != nil {
-		msg := map[string]any{
-			"ok": false,
-			"message": "A notícia não pode ser criada",
-			"erro": err,
-		}
-		ResponseJson(w, msg, http.StatusNotFound)
-		return
-	}
-	
-	ResponseJson(w, new, http.StatusOK)
-	
 }
 
 func (c *NewsController) News(w http.ResponseWriter, r *http.Request) {
