@@ -25,7 +25,7 @@ func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request
 	//gcaptcha := r.FormValue("g-recaptcha-response")
 
 	// Captura o token enviado pelo cliente
-	token := r.FormValue("token")
+	token := r.FormValue("g-recaptcha-response")
         
 	// Faça uma solicitação POST para a API de verificação do reCAPTCHA v3 do Google
 	response, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", 
