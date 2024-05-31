@@ -95,10 +95,6 @@ func (s *NewsService) UpdateNewsUsingTheForm(r *http.Request) (entity.News, erro
 		fmt.Println("Não foi possível salvar a imagem")
 	}
 
-	if err != nil {		
-		return entity.News{}, ErrUpdateNews
-	}
-
 	return new, nil
 
 }
