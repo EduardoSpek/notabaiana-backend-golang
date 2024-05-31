@@ -22,8 +22,8 @@ type News struct {
 	CreatedAt  time.Time `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt  time.Time `gorm:"column:updated_at" json:"updated_at"`
 	Visible bool `gorm:"column:visible;default:true" json:"-"`
-	Views int `gorm:"column:views;default:0"`
-	Category string `gorm:"column:category"`
+	Views int `gorm:"column:views;default:0" json:"views"`
+	Category string `gorm:"column:category" json:"category"`
 }
 
 func NewNews(news News) *News {
@@ -45,6 +45,30 @@ func NewNews(news News) *News {
 		Image: strings.TrimSpace(news.Image),
 		Slug: slug,
 		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),	
+		Visible: news.Visible,
+		Category: news.Category,
+	}
+}
+
+func UpdateNews(news News) *News {
+	
+	var slug string
+	
+	if news.TitleAi != "" {
+		slug = SlugTitle(news.TitleAi)
+	} else {
+		slug = SlugTitle(news.Title)
+	}
+
+	return &News{
+		ID:    strings.TrimSpace(news.ID),
+		Title: strings.TrimSpace(news.Title),
+		TitleAi: strings.TrimSpace(news.TitleAi),
+		Text:  strings.TrimSpace(news.Text),
+		Link:  strings.TrimSpace(news.Link),
+		Image: strings.TrimSpace(news.Image),
+		Slug: slug,		
 		UpdatedAt: time.Now(),	
 		Visible: news.Visible,
 		Category: news.Category,

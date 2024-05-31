@@ -18,6 +18,34 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 	return &NewsController{ news_service: newsservice }
 }
 
+func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.Request) {
+	success := utils.GoogleRecaptchaVerify(r)
+
+	if success {
+		
+		new, err := c.news_service.UpdateNewsUsingTheForm(r)
+
+		if err != nil {
+			msg := map[string]any{
+				"ok": false,
+				"message": "A notícia não pode ser atualizada",
+				"erro": err,
+			}
+			ResponseJson(w, msg, http.StatusNotFound)
+			return
+		}
+		
+		ResponseJson(w, new, http.StatusOK)
+
+	} else {
+		msg := map[string]any{
+				"ok": false,
+				"message": "Token do captcha inválido",				
+			}
+			ResponseJson(w, msg, http.StatusNotFound)
+	}
+}
+
 func (c *NewsController) CreateNewsUsingTheForm(w http.ResponseWriter, r *http.Request) {
 	
 

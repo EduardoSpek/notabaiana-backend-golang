@@ -21,6 +21,11 @@ func NewNewsMemoryRepository() *NewsMemoryRepository {
 	return &NewsMemoryRepository{ Newsdb: make(map[string]entity.News) }
 }
 
+func (r *NewsMemoryRepository) Update(news entity.News) (entity.News, error) {
+	r.Newsdb[news.ID] = news
+	return news, nil
+}
+
 func (r *NewsMemoryRepository) Create(news entity.News) (entity.News, error) {
 	r.Newsdb[news.ID] = news
 	return news, nil

@@ -26,6 +26,7 @@ var (
 		ErrNotAuthorized = errors.New("você não tem autorização para criar notícias")
 		ErrDecodeImage = errors.New("não foi possível decodificar a imagem")
 		ErrCreateNews = errors.New("não foi possível criar a notícia")
+		ErrUpdateNews = errors.New("não foi possível atualizar a notícia")
 		ErrParseForm = errors.New("erro ao obter a imagem")
 		ErrWordsBlackList = errors.New("o título contém palavras bloqueadas")
 		ErrNoCategory = errors.New("nenhuma categoria no rss")
@@ -59,6 +60,45 @@ type NewsService struct {
 
 func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloader, hits port.HitsRepository) *NewsService {
 	return &NewsService{ newsrepository: repository, imagedownloader: downloader, hitsrepository: hits }
+}
+
+func (s *NewsService) UpdateNewsUsingTheForm(r *http.Request) (entity.News, error) {
+
+	data, err := s.GetNewsDataFromTheForm(r)
+
+	if err != nil {		
+		return entity.News{}, err
+	}
+
+	news, err := s.newsrepository.GetBySlug(data.Slug)
+	
+	data.ID = news.ID
+
+	newNews := entity.UpdateNews(data)
+	
+	if err != nil {		
+		return entity.News{}, err
+	}	
+
+	new, err := s.newsrepository.Update(*newNews)
+
+	if err != nil {		
+		return entity.News{}, err
+	}
+
+	err = s.SaveImageForm(r, new)
+
+	if err != nil {
+		new.Image = ""
+		fmt.Println("Não foi possível salvar a imagem")
+	}
+
+	if err != nil {		
+		return entity.News{}, ErrUpdateNews
+	}
+
+	return new, nil
+
 }
 
 func (s *NewsService) CreateNewsUsingTheForm(r *http.Request) (entity.News, error) {
@@ -103,12 +143,14 @@ func (s *NewsService) GetNewsDataFromTheForm(r *http.Request) (entity.News, erro
 	title := r.FormValue("title")
 	text := r.FormValue("text")
 	category := r.FormValue("category")
+	slug := r.FormValue("slug")
 
 	new := &entity.News{
 		Title: title,
 		Text: text,				
 		Visible: true,
 		Category: category,
+		Slug: slug,
 	}
 
 	return *new, nil
