@@ -36,6 +36,7 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 		}
 		
 		ResponseJson(w, new, http.StatusOK)
+		return
 
 	} else {
 		msg := map[string]any{
@@ -43,6 +44,7 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 				"message": "Token do captcha inválido",				
 			}
 			ResponseJson(w, msg, http.StatusNotFound)
+			return
 	}
 }
 
