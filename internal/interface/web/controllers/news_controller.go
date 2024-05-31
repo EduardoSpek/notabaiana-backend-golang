@@ -1,14 +1,12 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -20,44 +18,14 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 	return &NewsController{ news_service: newsservice }
 }
 
-func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request) {
+func (c *NewsController) CreateNewsUsingTheForm(w http.ResponseWriter, r *http.Request) {
 	
 
-	// Captura o token enviado pelo cliente
-	token := r.FormValue("g-recaptcha-response")
-        
-	// Faça uma solicitação POST para a API de verificação do reCAPTCHA v3 do Google
-	response, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", 
-		map[string][]string{
-			"secret":   {os.Getenv("KEY_GOOGLE_RECAPTCHA")},
-			"response": {token},
-		})
-	
-	if err != nil {
-		fmt.Println("Erro ao fazer a solicitação:", err)
-		return
-	}
-	defer response.Body.Close()
+	success := utils.GoogleRecaptchaVerify(r)
 
-	// Lê a resposta da API
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println("Erro ao ler a resposta:", err)
-		return
-	}
-
-	// Decodifica a resposta JSON
-	var result map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		fmt.Println("Erro ao decodificar a resposta:", err)
-		return
-	}
-
-	// Verifica se a resposta foi bem-sucedida
-	success := result["success"].(bool)
 	if success {
 		
-		new, err := c.news_service.NewsCreateByForm(r)
+		new, err := c.news_service.CreateNewsUsingTheForm(r)
 
 		if err != nil {
 			msg := map[string]any{
@@ -74,8 +42,7 @@ func (c *NewsController) NewsCreateByForm(w http.ResponseWriter, r *http.Request
 	} else {
 		msg := map[string]any{
 				"ok": false,
-				"message": "Token do captcha inválido",
-				"erro": err,
+				"message": "Token do captcha inválido",				
 			}
 			ResponseJson(w, msg, http.StatusNotFound)
 	}

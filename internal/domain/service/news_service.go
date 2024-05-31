@@ -61,42 +61,20 @@ func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloa
 	return &NewsService{ newsrepository: repository, imagedownloader: downloader, hitsrepository: hits }
 }
 
-func (s *NewsService) NewsCreateByForm(r *http.Request) (entity.News, error) {
+func (s *NewsService) CreateNewsUsingTheForm(r *http.Request) (entity.News, error) {
 
-	news, err := s.GetFormNewsData(r)
+	news, err := s.GetNewsDataFromTheForm(r)
 
 	if err != nil {		
-		return entity.News{}, ErrCreateNews
+		return entity.News{}, err
 	}
 
-	return news, nil
-
-}
-
-func (s *NewsService) GetFormNewsData(r *http.Request) (entity.News, error) {
-
-	title := r.FormValue("title")
-	text := r.FormValue("text")
-	category := r.FormValue("category")
-	key := r.FormValue("key")
-
-	if key != os.Getenv("KEY") {		
-		return entity.News{}, ErrNotAuthorized
-	}
-
-	news := &entity.News{
-		Title: title,
-		Text: text,				
-		Visible: true,
-		Category: category,
-	}
-
-	newNews := entity.NewNews(*news)
+	newNews := entity.NewNews(news)
 
 	new, err := s.CreateNews(*newNews)
 
 	if err != nil {		
-		return entity.News{}, ErrCreateNews
+		return entity.News{}, err
 	}
 
 	err = s.SaveImageForm(r, new)
@@ -106,7 +84,34 @@ func (s *NewsService) GetFormNewsData(r *http.Request) (entity.News, error) {
 		fmt.Println("Não foi possível salvar a imagem")
 	}
 
-	return new, nil
+	if err != nil {		
+		return entity.News{}, ErrCreateNews
+	}
+
+	return news, nil
+
+}
+
+func (s *NewsService) GetNewsDataFromTheForm(r *http.Request) (entity.News, error) {
+
+	key := r.FormValue("key")
+
+	if key != os.Getenv("KEY") {		
+		return entity.News{}, ErrNotAuthorized
+	}
+
+	title := r.FormValue("title")
+	text := r.FormValue("text")
+	category := r.FormValue("category")
+
+	new := &entity.News{
+		Title: title,
+		Text: text,				
+		Visible: true,
+		Category: category,
+	}
+
+	return *new, nil
 
 }
 

@@ -9,6 +9,6 @@ func (s *ServerWeb) NewsController(newscontroller controllers.NewsController) {
 	s.router.HandleFunc("/news/busca/{page}", newscontroller.SearchNews).Methods("GET")
 	s.router.HandleFunc("/news/{slug}", newscontroller.GetNewsBySlug).Methods("GET")
 	s.router.HandleFunc("/news/{page}/{qtd}", newscontroller.News).Methods("GET")
-	s.router.HandleFunc("/news/create", newscontroller.NewsCreateByForm).Methods("POST")
+	s.router.HandleFunc("/news/create", newscontroller.CreateNewsUsingTheForm).Methods("POST")
 	
 }
