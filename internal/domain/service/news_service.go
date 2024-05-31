@@ -75,12 +75,14 @@ func (s *NewsService) UpdateNewsUsingTheForm(r *http.Request) (entity.News, erro
 	data.ID = news.ID
 
 	newNews := entity.UpdateNews(data)
+
+	news2 := ChangeLink(*newNews)
 	
 	if err != nil {		
 		return entity.News{}, err
 	}	
 
-	new, err := s.newsrepository.Update(*newNews)
+	new, err := s.newsrepository.Update(news2)
 
 	if err != nil {		
 		return entity.News{}, err
