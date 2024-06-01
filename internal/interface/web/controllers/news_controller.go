@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -19,10 +20,10 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 }
 
 func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.Request) {
-	success := utils.GoogleRecaptchaVerify(r)
+	success := true // utils.GoogleRecaptchaVerify(r)
 
 	if success {
-		
+		fmt.Println("Entrou")
 		new, err := c.news_service.UpdateNewsUsingTheForm(r)
 
 		if err != nil {

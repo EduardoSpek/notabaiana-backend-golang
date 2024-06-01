@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -54,9 +53,9 @@ func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error
     defer repo.mutex.Unlock() 
 	
     tx := repo.db.Begin()
-    defer tx.Rollback()    
+    defer tx.Rollback()
 
-    result := repo.db.Updates(&news)
+    result := repo.db.Model(&news).Updates(news)
     
     if result.Error != nil {
         tx.Rollback() 
@@ -65,14 +64,7 @@ func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error
 
     tx.Commit()
 
-    updatenews, err := repo.GetById(news.ID)
-
-    if err != nil {
-        fmt.Println(err)
-		return entity.News{}, err
-	}
-
-    return updatenews, err
+    return news, nil
 }
 
 func (repo *NewsPostgresRepository) GetById(id string) (entity.News, error) {
@@ -80,7 +72,7 @@ func (repo *NewsPostgresRepository) GetById(id string) (entity.News, error) {
     defer repo.mutex.RUnlock()
 
     tx := repo.db.Begin()
-    defer tx.Rollback()    
+    defer tx.Rollback()        
 
     var news entity.News
     repo.db.Model(&entity.News{}).Where("id = ?", id).First(&news)
@@ -89,7 +81,7 @@ func (repo *NewsPostgresRepository) GetById(id string) (entity.News, error) {
         return entity.News{}, repo.db.Error
     }
 
-    tx.Commit()
+    tx.Commit()    
 
     return news, nil
 }

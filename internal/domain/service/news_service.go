@@ -19,6 +19,7 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gocolly/colly"
+	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
 )
 
@@ -68,32 +69,23 @@ func (s *NewsService) UpdateNewsUsingTheForm(r *http.Request) (entity.News, erro
 
 	if err != nil {		
 		return entity.News{}, err
-	}
+	}		
 
-	news, err := s.newsrepository.GetBySlug(data.Slug)
+	newNews := entity.UpdateNews(data)	
 
-	if err != nil {		
-		return entity.News{}, err
-	}	
-	
-	data.ID = news.ID
-
-	newNews := entity.UpdateNews(data)
-
-	news2 := ChangeLink(*newNews)
+	news2 := ChangeLink(*newNews)	
 
 	new, err := s.newsrepository.Update(news2)
 
 	if err != nil {		
 		return entity.News{}, err
-	}
+	}	
 
 	err = s.SaveImageForm(r, new)
 
 	if err != nil {
-		new.Image = ""
-		fmt.Println("Não foi possível salvar a imagem")
-	}
+		new.Image = ""		
+	}	
 
 	return new, nil
 
@@ -118,12 +110,7 @@ func (s *NewsService) CreateNewsUsingTheForm(r *http.Request) (entity.News, erro
 	err = s.SaveImageForm(r, new)
 
 	if err != nil {
-		newNews.Image = ""
-		fmt.Println("Não foi possível salvar a imagem")
-	}
-
-	if err != nil {		
-		return entity.News{}, ErrCreateNews
+		newNews.Image = ""		
 	}
 
 	return news, nil
@@ -138,15 +125,24 @@ func (s *NewsService) GetNewsDataFromTheForm(r *http.Request) (entity.News, erro
 		return entity.News{}, ErrNotAuthorized
 	}
 
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
 	title := r.FormValue("title")
 	text := r.FormValue("text")
 	category := r.FormValue("category")
-	slug := r.FormValue("slug")
+	id := r.FormValue("id")
+	visible, err := strconv.ParseBool(r.FormValue("visible"))
+
+	if err != nil {
+		visible = true
+	}	
 
 	new := &entity.News{
+		ID: id,
 		Title: title,
 		Text: text,				
-		Visible: true,
+		Visible: visible,
 		Category: category,
 		Slug: slug,
 	}

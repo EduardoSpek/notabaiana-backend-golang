@@ -21,7 +21,7 @@ type News struct {
 	Slug string `gorm:"column:slug" json:"slug"`
 	CreatedAt  time.Time `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt  time.Time `gorm:"column:updated_at" json:"updated_at"`
-	Visible bool `gorm:"column:visible;default:true" json:"-"`
+	Visible bool `gorm:"column:visible;default:true" json:"visible"`
 	Views int `gorm:"column:views;default:0" json:"views"`
 	Category string `gorm:"column:category" json:"category"`
 }
