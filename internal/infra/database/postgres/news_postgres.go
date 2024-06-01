@@ -61,6 +61,7 @@ func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error
         "visible": news.Visible,
         "category": news.Category,
         "slug": news.Slug,
+        "link": news.Link,
         "image": news.Image,
         "updated_at": news.UpdatedAt,
     })
