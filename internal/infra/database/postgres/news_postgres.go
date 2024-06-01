@@ -53,16 +53,24 @@ func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error
     defer repo.mutex.Unlock() 
 	
     tx := repo.db.Begin()
-    defer tx.Rollback()
+    defer tx.Rollback()    
 
-    result := repo.db.Model(&news).Updates(news)
+    result := repo.db.Model(&news).Updates(map[string]interface{}{
+        "title": news.Title,
+        "text": news.Text,
+        "visible": news.Visible,
+        "category": news.Category,
+        "slug": news.Slug,
+        "image": news.Image,
+        "updated_at": news.UpdatedAt,
+    })
     
     if result.Error != nil {
         tx.Rollback() 
         return entity.News{}, result.Error
     }
 
-    tx.Commit()
+    tx.Commit()    
 
     return news, nil
 }

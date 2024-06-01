@@ -69,23 +69,31 @@ func (s *NewsService) UpdateNewsUsingTheForm(r *http.Request) (entity.News, erro
 
 	if err != nil {		
 		return entity.News{}, err
-	}		
+	}
+	
+	oldnew, err := s.newsrepository.GetBySlug(data.Slug)
 
-	newNews := entity.UpdateNews(data)	
+	if err != nil {		
+		return entity.News{}, err
+	}
 
-	news2 := ChangeLink(*newNews)	
+	oldnew.Title = data.Title
+	oldnew.Text = data.Text
+	oldnew.Visible = data.Visible
+	oldnew.Category = data.Category
+	
 
-	new, err := s.newsrepository.Update(news2)
+	newNews := entity.UpdateNews(oldnew)	
+
+	news := ChangeLink(*newNews)
+
+	new, err := s.newsrepository.Update(news)
 
 	if err != nil {		
 		return entity.News{}, err
 	}	
 
-	err = s.SaveImageForm(r, new)
-
-	if err != nil {
-		new.Image = ""		
-	}	
+	s.SaveImageForm(r, new)
 
 	return new, nil
 
@@ -132,11 +140,7 @@ func (s *NewsService) GetNewsDataFromTheForm(r *http.Request) (entity.News, erro
 	text := r.FormValue("text")
 	category := r.FormValue("category")
 	id := r.FormValue("id")
-	visible, err := strconv.ParseBool(r.FormValue("visible"))
-
-	if err != nil {
-		visible = true
-	}	
+	visible, _ := strconv.ParseBool(r.FormValue("visible"))
 
 	new := &entity.News{
 		ID: id,
