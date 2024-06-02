@@ -848,7 +848,7 @@ func (s *NewsService)  ChangeTitleWithGemini(title string) (string, error) {
 func (s *NewsService) Pagination(currentPage, totalNews int) map[string][]int {
 	
 	// Calcula o total de páginas
-	totalPages := int(math.Ceil(float64(totalNews) / 10)) 
+	totalPages := int(math.Ceil(float64(totalNews) / 16)) 
 
 	// Garante que a página atual esteja dentro dos limites
 	if currentPage < 1 {

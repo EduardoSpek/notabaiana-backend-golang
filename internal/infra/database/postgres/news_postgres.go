@@ -126,7 +126,7 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) []en
     repo.mutex.RLock() 
     defer repo.mutex.RUnlock()
 
-    limit := 10
+    limit := 16
     offset := (page - 1) * limit    
 
 	var news []entity.News
