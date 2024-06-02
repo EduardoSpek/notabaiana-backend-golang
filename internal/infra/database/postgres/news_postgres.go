@@ -215,7 +215,7 @@ func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]e
     repo.mutex.RLock() 
     defer repo.mutex.RUnlock()
 	
-    limit := 10
+    limit := 16
     offset := (page - 1) * limit
 
     tx := repo.db.Begin()
