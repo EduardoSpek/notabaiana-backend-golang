@@ -46,11 +46,8 @@ func (c *CopierService) Run(list_pages []string) {
 
 	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"
 
-	
-
 	// rss := c.crawler_service.GetRSS(rss_url)
 	// category, _ := c.news_service.GetCategory(rss_url)
-
 	
 	//var page string
 
@@ -91,14 +88,7 @@ func (c *CopierService) Run(list_pages []string) {
 
 			if err != nil {
 				fmt.Println("Erro ao Salvar Image: ", err)
-			}
-
-			// if strings.Contains(new.Title, "hackeada") {
-			// 	err = os.Remove(outputPath)
-			// 	if err != nil {
-			// 		fmt.Println("não foi possível remover o rquivo")
-			// 	}
-			// }	
+			}	
 			
 			fileExists := utils.FileExsists(outputPath)
 
@@ -108,13 +98,7 @@ func (c *CopierService) Run(list_pages []string) {
 				if err != nil {
 					fmt.Println("não foi possível atualizar o caminho da imagem")
 				}
-			}
-			
-
+			}		
 		}
-
 	}
-
-
-
 }
