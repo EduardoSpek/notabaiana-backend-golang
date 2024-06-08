@@ -26,7 +26,7 @@ func (repo *PostgresAdapter) Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&entity.News{}, &entity.Top{}, &entity.Hits{})
+	db.AutoMigrate(&entity.News{}, &entity.Top{}, &entity.Hits{}, &entity.User{})
 
 	return db, nil
 }
