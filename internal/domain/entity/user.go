@@ -43,6 +43,17 @@ func NewUser(user UserInput) *User {
 	}
 }
 
+func NewUpdateUser(id string, user UserInput) *User {	
+
+	return &User{
+		ID: id,
+		Email: user.Email,
+		Password: user.Password,
+		Admin: false,
+		UpdatedAt: time.Now(),
+	}
+}
+
 func (u *User) Validations() (bool, error) {	
 
 	if u.Email == "" || len(u.Email) < 7 || len(u.Email) > 80 { 

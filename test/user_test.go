@@ -62,6 +62,13 @@ func TestUserService(t *testing.T) {
 		log.Fatalf("Erro ao carregar arquivo .env: %v", err)
 	}
 
+	repo := database.NewUserMemoryRepository()
+	user_service := service.NewUserService(repo)		
+	controller := controllers.NewUserController(*user_service)
+
+	var responseUser entity.User
+	var responseUserUpdated entity.User
+
 	t.Run("Deve Criar um novo usuário", func(t *testing.T) {
 
 		user := &entity.UserInput{
@@ -80,12 +87,8 @@ func TestUserService(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+
 		req.Header.Set("Content-Type", "application/json")
-
-
-		repo := database.NewUserMemoryRepository()
-		user_service := service.NewUserService(repo)		
-		controller := controllers.NewUserController(*user_service)
 
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
@@ -94,11 +97,61 @@ func TestUserService(t *testing.T) {
 		router.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
-			t.Errorf("handler returned wrong status code: got %v want %v",
-				status, http.StatusOK)
+			t.Errorf("Esperado: %v - Recebido: %v",
+			http.StatusOK, status)
 		}
 
-		fmt.Println(rr.Body.String())
+		err = json.NewDecoder(rr.Body).Decode(&responseUser)
+		
+		if err != nil {
+			t.Fatalf("Erro ao decodificar resposta JSON: %v", err)
+		}
+
+		fmt.Println(responseUser)
+		fmt.Println("==================")
+		
+	})
+
+	t.Run("Deve atualizar um usuário", func(t *testing.T) {
+
+		user := &entity.UserInput{
+			Email: "spektogran@gmail.com",
+			Password: "p0o9i8u7",
+		}
+
+		userJson, err := json.Marshal(user)
+
+		if err != nil {
+			t.Fatalf("Erro ao converter usuário para JSON: %v", err)
+		}		
+
+		req, err := http.NewRequest("PUT", "/user/"+responseUser.ID, bytes.NewBuffer(userJson))
+		
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+
+		rr := httptest.NewRecorder()
+		router := mux.NewRouter()
+		router.HandleFunc("/user/{id}", controller.UpdateUser).Methods("PUT")
+
+		router.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("Esperado: %v - Recebido: %v",
+			http.StatusOK, status)
+		}
+
+		err = json.NewDecoder(rr.Body).Decode(&responseUserUpdated)
+		
+		if err != nil {
+			t.Fatalf("Erro ao decodificar resposta JSON: %v", err)
+		}
+
+		fmt.Println(responseUserUpdated)
+		fmt.Println("==================")
 		t.Fail()
 	})
 }
