@@ -125,7 +125,7 @@ func TestNewsService(t *testing.T) {
 		
 		newsList := lista.(struct{
 			List_news []entity.News `json:"news"`
-			Pagination map[string][]int `json:"pagination"`
+       		Pagination map[string][]int `json:"pagination"`
 		})		
 
 		if string(newsList.List_news[0].Title) != "Titulo" {
