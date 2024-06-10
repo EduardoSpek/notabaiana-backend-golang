@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
@@ -18,14 +17,32 @@ func NewUserController(userservice service.UserService) *UserController {
 	return &UserController{user_service: userservice}
 }
 
+func (u *UserController) Login(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+    var userInput entity.UserInput	
+    
+    err := json.NewDecoder(r.Body).Decode(&userInput)
+    if err!= nil {
+        ResponseJson(w, err.Error(), http.StatusNotFound)
+        return
+    }
+
+    userToken, err := u.user_service.Login(userInput)
+
+	if err != nil {
+		ResponseJson(w, err.Error(), http.StatusNotFound)
+        return
+	}
+
+	ResponseJson(w, userToken, http.StatusOK)
+}
+
 func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
     var userInput entity.UserInput
 
 	vars := mux.Vars(r)
-	id := vars["id"]
-
-	fmt.Println("ID Controller", id)
+	id := vars["id"]	
     
     err := json.NewDecoder(r.Body).Decode(&userInput)
     if err!= nil {

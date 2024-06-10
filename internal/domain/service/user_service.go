@@ -1,11 +1,16 @@
 package service
 
 import (
+	"errors"
 	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
+)
+
+var (
+	ErrInvalidPassword = errors.New("senha inválida")
 )
 
 type UserService struct {
@@ -14,6 +19,36 @@ type UserService struct {
 
 func NewUserService(user_repository port.UserRepository) *UserService {
 	return &UserService{ UserRepository: user_repository }
+}
+
+func (uc *UserService) Login(user entity.UserInput) (interface{}, error) {
+
+	userSelected, err := uc.UserRepository.GetByEmail(user.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	check_password := utils.CheckPasswordHash(user.Password, userSelected.Password)
+
+	if !check_password {
+		return nil, ErrInvalidPassword
+	}
+
+	token, err := utils.GenerateJWT(userSelected.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	userOutput := struct{
+		Token string `json:"token"`				
+	}{
+		Token: token,
+	}
+
+	return userOutput, nil
+
 }
 
 func (uc *UserService) UpdateUser(id string, user entity.UserInput) (interface{}, error) {
