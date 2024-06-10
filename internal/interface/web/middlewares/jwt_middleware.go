@@ -10,7 +10,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenStr := r.Header.Get("Authorization")
 		if tokenStr == "" {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+			http.Error(w, "Acesso não autorizado", http.StatusForbidden)
 			return
 		}
 
@@ -18,7 +18,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 
 		_, err := utils.ValidateJWT(tokenStr)
 		if err != nil {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+			http.Error(w, "Acesso não autorizado: Token inválido!", http.StatusForbidden)
 			return
 		}
 		

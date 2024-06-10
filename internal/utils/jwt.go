@@ -16,7 +16,7 @@ type Claims struct {
 }
 
 func GenerateJWT(email string) (string, error) {
-    expirationTime := time.Now().Add(15 * time.Minute)
+    expirationTime := time.Now().Add(15 * time.Second)
     claims := &Claims{
         Email: email,
         StandardClaims: jwt.StandardClaims{

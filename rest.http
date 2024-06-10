@@ -1,0 +1,28 @@
+POST http://localhost:8080/user
+Content-Type: application/json
+
+{
+    "email": "eu@vc.com",
+    "password": "q1w2e3"
+}
+
+###
+
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+    "email": "eu@vc.com",
+    "password": "q1w2e3"
+}
+
+###
+
+PUT http://localhost:8080/user/cc2126cb-b27a-4983-9e28-0ff3562a909f
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImV1QHZjLmNvbSIsImV4cCI6MTcxODA0ODM2MX0.RgQFQzDyGDAsMvO6nklZSTYzPjFz1hHNwCjzbKstAzA
+
+{
+    "email": "vc@laele.com",
+    "password": "qwe123"
+}
