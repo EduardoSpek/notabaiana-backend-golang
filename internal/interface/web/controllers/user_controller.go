@@ -3,9 +3,11 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -42,11 +44,31 @@ func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
     var userInput entity.UserInput
 
 	vars := mux.Vars(r)
-	id := vars["id"]	
+	id := vars["id"]
     
     err := json.NewDecoder(r.Body).Decode(&userInput)
     if err!= nil {
         ResponseJson(w, err.Error(), http.StatusNotFound)
+        return
+    }
+    
+    tokenStr := r.Header.Get("Authorization")
+    if tokenStr == "" {
+        ResponseJson(w, "acesso não autorizado", http.StatusForbidden)
+        return
+    }
+
+    tokenStr = tokenStr[len("Bearer "):]
+
+    claims, err := utils.ValidateJWT(tokenStr)
+
+    if err != nil {
+        ResponseJson(w, "acesso não autorizado: token inválido", http.StatusForbidden)
+        return
+    }
+
+    if strings.TrimSpace(id) != strings.TrimSpace(claims.ID) {
+        ResponseJson(w, "acesso não autorizado: usuário não identificado", http.StatusNotFound)
         return
     }
 

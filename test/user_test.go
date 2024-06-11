@@ -200,6 +200,5 @@ func TestUserService(t *testing.T) {
 
 		fmt.Println(responseRoute)
 		fmt.Println("==================")	
-		t.Fail()	
 	})
 }

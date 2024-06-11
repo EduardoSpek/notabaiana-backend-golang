@@ -35,15 +35,17 @@ func (uc *UserService) Login(user entity.UserInput) (interface{}, error) {
 		return nil, ErrInvalidPassword
 	}
 
-	token, err := utils.GenerateJWT(userSelected.Email)
+	token, err := utils.GenerateJWT(userSelected.ID, userSelected.Email, userSelected.Admin)
 
 	if err != nil {
 		return nil, err
 	}
 
 	userOutput := struct{
-		Token string `json:"token"`				
+		ID string `json:"id"` 
+		Token string `json:"token"`
 	}{
+		ID: userSelected.ID,
 		Token: token,
 	}
 
@@ -52,8 +54,15 @@ func (uc *UserService) Login(user entity.UserInput) (interface{}, error) {
 }
 
 func (uc *UserService) UpdateUser(id string, user entity.UserInput) (interface{}, error) {
+
+	_, err := uc.UserRepository.GetByID(id)
+
+	if err != nil {
+		return &entity.User{}, err
+	}
+
 	newuser := entity.NewUpdateUser(id, user)
-	_, err := newuser.Validations()
+	_, err = newuser.Validations()
 
 	if err != nil {
 		return &entity.User{}, err

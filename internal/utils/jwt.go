@@ -11,14 +11,18 @@ import (
 var jwtKey = []byte(os.Getenv("KEY_JWT"))
 
 type Claims struct {
-    Email string `json:"email"`
+    ID string
+    Email string
+    Admin bool
     jwt.StandardClaims
 }
 
-func GenerateJWT(email string) (string, error) {
+func GenerateJWT(id string, email string, admin bool) (string, error) {
     expirationTime := time.Now().Add(15 * time.Second)
     claims := &Claims{
+        ID: id,
         Email: email,
+        Admin: admin,
         StandardClaims: jwt.StandardClaims{
             ExpiresAt: expirationTime.Unix(),
         },

@@ -18,6 +18,17 @@ func NewUserMemoryRepository() *UserMemoryRepository {
 	return &UserMemoryRepository{ Userdb: make(map[string]entity.User) }
 }
 
+func (r *UserMemoryRepository) GetByID(id string) (entity.User, error) {
+
+	for _, u := range r.Userdb {
+		if u.ID == id {
+			return u, nil
+		}
+	}
+
+	return entity.User{}, ErrUserNotFound
+}
+
 func (r *UserMemoryRepository) GetByEmail(email string) (entity.User, error) {
 
 	for _, u := range r.Userdb {
