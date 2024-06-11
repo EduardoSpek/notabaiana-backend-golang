@@ -18,9 +18,9 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:8080/user/cc2126cb-b27a-4983-9e28-0ff3562a909f
+PUT http://localhost:8080/user/4c80ee8f-1ec8-47b1-aacd-97ca2ba1d2dc
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImV1QHZjLmNvbSIsImV4cCI6MTcxODA0ODM2MX0.RgQFQzDyGDAsMvO6nklZSTYzPjFz1hHNwCjzbKstAzA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjRjODBlZThmLTFlYzgtNDdiMS1hYWNkLTk3Y2EyYmExZDJkYyIsIkVtYWlsIjoiZXVAdmMuY29tIiwiQWRtaW4iOmZhbHNlLCJleHAiOjE3MTgxNTg4MTV9.rvW71gU9-NE0cxJZb7JRbmi7VcfWXloCLyU3ZHrMwjo
 
 {
     "email": "vc@laele.com",

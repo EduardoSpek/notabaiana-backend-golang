@@ -78,6 +78,7 @@ func TestUserService(t *testing.T) {
 		user := &entity.UserInput{
 			Email: "eu@vc.com",
 			Password: "q1w2e3",
+			Admin: true,
 		}
 
 		userJson, err := json.Marshal(user)
@@ -120,7 +121,7 @@ func TestUserService(t *testing.T) {
 
 		user := &entity.UserInput{
 			Email: "eu@vc.com",
-			Password: "q1w2e3",
+			Password: "q1w2e3",			
 		}
 
 		userJson, err := json.Marshal(user)
@@ -163,7 +164,7 @@ func TestUserService(t *testing.T) {
 
 		user := &entity.UserInput{
 			Email: "vc@laele.com",
-			Password: "p0o9i8u7",
+			Password: "p0o9i8u7",			
 		}
 
 		userJson, err := json.Marshal(user)
@@ -200,5 +201,6 @@ func TestUserService(t *testing.T) {
 
 		fmt.Println(responseRoute)
 		fmt.Println("==================")	
+		t.Fail()
 	})
 }

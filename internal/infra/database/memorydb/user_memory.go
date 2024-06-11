@@ -42,7 +42,7 @@ func (r *UserMemoryRepository) GetByEmail(email string) (entity.User, error) {
 
 func (r *UserMemoryRepository) Update(user entity.User) (entity.User, error) {
 	updatedUser := r.Userdb[user.ID]
-	updatedUser.Email = user.Email
+	updatedUser.Email = user.Email	
 	updatedUser.Password = user.Password
 	updatedUser.UpdatedAt = user.UpdatedAt
 

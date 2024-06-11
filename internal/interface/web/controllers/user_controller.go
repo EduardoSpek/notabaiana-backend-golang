@@ -67,7 +67,7 @@ func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if strings.TrimSpace(id) != strings.TrimSpace(claims.ID) {
+    if strings.TrimSpace(id) != strings.TrimSpace(claims.ID) && !claims.Admin {
         ResponseJson(w, "acesso não autorizado: usuário não identificado", http.StatusNotFound)
         return
     }

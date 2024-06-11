@@ -29,6 +29,7 @@ type User struct {
 type UserInput struct {
 	Email		string
 	Password	string
+	Admin  		bool
 }
 
 func NewUser(user UserInput) *User {	
@@ -37,7 +38,7 @@ func NewUser(user UserInput) *User {
 		ID: uuid.NewString(),
 		Email: user.Email,
 		Password: user.Password,
-		Admin: false,
+		Admin: user.Admin,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -49,7 +50,7 @@ func NewUpdateUser(id string, user UserInput) *User {
 		ID: id,
 		Email: user.Email,
 		Password: user.Password,
-		Admin: false,
+		Admin: user.Admin,
 		UpdatedAt: time.Now(),
 	}
 }
