@@ -19,7 +19,7 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 }
 
 func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.Request) {
-	success := true // utils.GoogleRecaptchaVerify(r)
+	success := utils.GoogleRecaptchaVerify(r)
 
 	if success {
 		
