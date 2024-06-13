@@ -19,6 +19,54 @@ func NewUserController(userservice service.UserService) *UserController {
 	return &UserController{user_service: userservice}
 }
 
+func (u *UserController) CheckUser(w http.ResponseWriter, r *http.Request) {    
+    var msg map[string]any
+        
+    tokenStr := r.Header.Get("Authorization")
+    if tokenStr == "" {
+        msg = map[string]any{
+            "ok": false,
+            "message": "acesso não autorizado",
+            "erro": "token é necessário",
+        }
+        ResponseJson(w, msg, http.StatusForbidden)
+        return
+    }
+
+    tokenStr = tokenStr[len("Bearer "):]
+
+    claims, err := utils.ValidateJWT(tokenStr)
+
+    if err != nil {
+        msg = map[string]any{
+            "ok": false,
+            "message": "acesso não autorizado",
+            "erro": "token inválido",
+        }
+        ResponseJson(w, msg, http.StatusForbidden)
+        return
+    }
+
+    if !claims.Admin {
+        msg = map[string]any{
+            "ok": false,
+            "message": "acesso não autorizado",
+            "erro": "sem permissão de admin",
+        }
+        ResponseJson(w, msg, http.StatusNotFound)
+        return
+    }  
+    
+    msg = map[string]any{
+        "ok": true,
+        "message": "acesso autorizado",
+        "erro": nil,
+    }
+
+	ResponseJson(w, msg, http.StatusOK)
+    
+}
+
 func (u *UserController) Login(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
     var userInput entity.UserInput	
@@ -32,7 +80,12 @@ func (u *UserController) Login(w http.ResponseWriter, r *http.Request) {
     userToken, err := u.user_service.Login(userInput)
 
 	if err != nil {
-		ResponseJson(w, err.Error(), http.StatusNotFound)
+        msg := map[string]any{
+            "ok": false,
+            "message": "Não foi possível efetuar o login",
+            "erro": err.Error(),
+        }
+		ResponseJson(w, msg, http.StatusNotFound)
         return
 	}
 

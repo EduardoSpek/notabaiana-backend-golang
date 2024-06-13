@@ -200,7 +200,35 @@ func TestUserService(t *testing.T) {
 		}
 
 		fmt.Println(responseRoute)
-		fmt.Println("==================")	
-		t.Fail()
+		fmt.Println("==================")			
+	})
+
+	t.Run("Deve checar se o usuário autenticado é admin", func(t *testing.T) {
+
+		req, err := http.NewRequest("GET", "/checkuser", nil)
+		
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer " + token.Token)
+
+		rr := httptest.NewRecorder()
+		router := mux.NewRouter()
+		router.Handle("/checkuser", middlewares.JwtMiddleware(http.HandlerFunc(controller.CheckUser))).Methods("GET")
+
+		router.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("Esperado: %v - Recebido: %v",
+			http.StatusOK, status)
+		}
+
+		err = json.NewDecoder(rr.Body).Decode(&responseRoute)
+		
+		if err != nil {
+			t.Fatalf("Erro ao decodificar resposta JSON: %v", err)
+		}		
 	})
 }
