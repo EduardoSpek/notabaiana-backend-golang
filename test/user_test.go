@@ -205,7 +205,7 @@ func TestUserService(t *testing.T) {
 
 	t.Run("Deve checar se o usuário autenticado é admin", func(t *testing.T) {
 
-		req, err := http.NewRequest("GET", "/checkuser", nil)
+		req, err := http.NewRequest("GET", "/accesscheck", nil)
 		
 		if err != nil {
 			t.Fatal(err)
@@ -216,7 +216,7 @@ func TestUserService(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
-		router.Handle("/checkuser", middlewares.JwtMiddleware(http.HandlerFunc(controller.CheckUser))).Methods("GET")
+		router.Handle("/accesscheck", middlewares.JwtMiddleware(http.HandlerFunc(controller.AccessCheck))).Methods("GET")
 
 		router.ServeHTTP(rr, req)
 

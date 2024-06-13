@@ -19,7 +19,7 @@ func NewUserController(userservice service.UserService) *UserController {
 	return &UserController{user_service: userservice}
 }
 
-func (u *UserController) CheckUser(w http.ResponseWriter, r *http.Request) {    
+func (u *UserController) AccessCheck(w http.ResponseWriter, r *http.Request) {    
     var msg map[string]any
         
     tokenStr := r.Header.Get("Authorization")

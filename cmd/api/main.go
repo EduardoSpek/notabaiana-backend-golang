@@ -46,8 +46,13 @@ func main() {
 	top_service := service.NewTopService(toprepo, newsrepo, hitrepo, *news_service)
 	top_controller := controllers.NewTopController(*top_service)
 
+	user_repo := database.NewUserPostgresRepository(postgres)
+	user_service := service.NewUserService(user_repo)
+	user_controller := controllers.NewUserController(*user_service)
+
 	server := web.NewServerWeb()
 
+	server.UserController(*user_controller)
 	server.TopController(*top_controller)
 	server.CrawlerController(*crawler_controller)
 	server.NewsController(*news_controller)
