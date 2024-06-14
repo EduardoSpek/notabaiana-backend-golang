@@ -121,17 +121,11 @@ func (s *NewsService) CreateNewsUsingTheForm(r *http.Request) (entity.News, erro
 		newNews.Image = ""		
 	}
 
-	return news, nil
+	return new, nil
 
 }
 
 func (s *NewsService) GetNewsDataFromTheForm(r *http.Request) (entity.News, error) {
-
-	key := r.FormValue("key")
-
-	if key != os.Getenv("KEY") {		
-		return entity.News{}, ErrNotAuthorized
-	}
 
 	vars := mux.Vars(r)
 	slug := vars["slug"]
@@ -140,7 +134,7 @@ func (s *NewsService) GetNewsDataFromTheForm(r *http.Request) (entity.News, erro
 	text := r.FormValue("text")
 	category := r.FormValue("category")
 	id := r.FormValue("id")
-	visible, _ := strconv.ParseBool(r.FormValue("visible"))
+	visible, _ := strconv.ParseBool(r.FormValue("visible"))	
 
 	new := &entity.News{
 		ID: id,
@@ -259,7 +253,7 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	
 	if err != nil {
 		return entity.News{}, err
-	}
+	}	
 	
 	return new, nil
 }

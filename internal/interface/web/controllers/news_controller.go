@@ -22,6 +22,41 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 	success := utils.GoogleRecaptchaVerify(r)
 
 	if success {
+
+		var msg map[string]any
+		token := r.FormValue("token")
+
+		if token == "" {
+			msg = map[string]any{
+				"ok": false,
+				"message": "acesso não autorizado",
+				"erro": "token é necessário",
+			}
+			ResponseJson(w, msg, http.StatusForbidden)
+			return
+		}		
+	
+		claims, err := utils.ValidateJWT(token)
+	
+		if err != nil {
+			msg = map[string]any{
+				"ok": false,
+				"message": "acesso não autorizado",
+				"erro": "token inválido",
+			}
+			ResponseJson(w, msg, http.StatusForbidden)
+			return
+		}
+	
+		if !claims.Admin {
+			msg = map[string]any{
+				"ok": false,
+				"message": "acesso não autorizado",
+				"erro": "sem permissão de admin",
+			}
+			ResponseJson(w, msg, http.StatusNotFound)
+			return
+		}  
 		
 		new, err := c.news_service.UpdateNewsUsingTheForm(r)
 
@@ -54,6 +89,40 @@ func (c *NewsController) CreateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 	success := utils.GoogleRecaptchaVerify(r)
 
 	if success {
+		var msg map[string]any
+		token := r.FormValue("token")
+
+		if token == "" {
+			msg = map[string]any{
+				"ok": false,
+				"message": "acesso não autorizado",
+				"erro": "token é necessário",
+			}
+			ResponseJson(w, msg, http.StatusForbidden)
+			return
+		}		
+	
+		claims, err := utils.ValidateJWT(token)
+	
+		if err != nil {
+			msg = map[string]any{
+				"ok": false,
+				"message": "acesso não autorizado",
+				"erro": "token inválido",
+			}
+			ResponseJson(w, msg, http.StatusForbidden)
+			return
+		}
+	
+		if !claims.Admin {
+			msg = map[string]any{
+				"ok": false,
+				"message": "acesso não autorizado",
+				"erro": "sem permissão de admin",
+			}
+			ResponseJson(w, msg, http.StatusNotFound)
+			return
+		}  
 		
 		new, err := c.news_service.CreateNewsUsingTheForm(r)
 

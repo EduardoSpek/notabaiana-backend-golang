@@ -11,9 +11,8 @@ func (s *ServerWeb) NewsController(newscontroller controllers.NewsController) {
 	s.router.HandleFunc("/news/busca/{page}", newscontroller.SearchNews).Methods("GET")
 	s.router.HandleFunc("/news/{slug}", newscontroller.GetNewsBySlug).Methods("GET")
 	s.router.HandleFunc("/news/{page}/{qtd}", newscontroller.News).Methods("GET")
-	s.router.HandleFunc("/news/create", newscontroller.CreateNewsUsingTheForm).Methods("POST")
-	//s.router.Handle("/news/create", middlewares.JwtMiddleware(http.HandlerFunc(newscontroller.CreateNewsUsingTheForm))).Methods("POST")
+	s.router.HandleFunc("/news/create", newscontroller.CreateNewsUsingTheForm).Methods("POST")	
 	s.router.HandleFunc("/update/news/{slug}", newscontroller.UpdateNewsUsingTheForm).Methods("POST")
-	//s.router.Handle("/update/news/{slug}", middlewares.JwtMiddleware(http.HandlerFunc(newscontroller.UpdateNewsUsingTheForm))).Methods("POST")
+	
 	
 }
