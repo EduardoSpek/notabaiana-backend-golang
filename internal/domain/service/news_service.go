@@ -545,6 +545,9 @@ func ChangeLink(news entity.News) entity.News {
 func listOfBlockedWords(titulo string) bool {
 	palavras := []string {
 		"Bahia Notícias",
+		"Bahia Notícia",
+		"Bahia Noticias",
+		"Bahia Noticia",		
 		"BN",
 		"Curtas",
 		"Nota Baiana",
@@ -562,7 +565,13 @@ func listOfBlockedWords(titulo string) bool {
 func changeWords(text string) string {
 	text = strings.Replace(text, "Siga o @bnhall_ no Instagram e fique de olho nas principais notícias.", "", -1)
 
-	text = strings.Replace(text, "Bahia Notícias", "BN", -1)
+	text = strings.Replace(text, "Bahia Notícias", "NB", -1)
+
+	text = strings.Replace(text, "Bahia Notícia", "NB", -1)
+
+	text = strings.Replace(text, "Bahia Noticia", "NB", -1)
+
+	text = strings.Replace(text, "Bahia Noticias", "NB", -1)
 
 	text = strings.Replace(text, "@BahiaNoticias", "@", -1)
 
@@ -572,11 +581,13 @@ func changeWords(text string) string {
 
 	text = strings.Replace(text, "@bhall", "@", -1)
 
-	text = strings.Replace(text, "As informações são do Metrópoles, parceiro do BN", ".", -1)
+	text = strings.Replace(text, "As informações são do Metrópoles, parceiro do NB", ".", -1)
 
-	text = strings.Replace(text, " parceiro do BN,", "", -1)
+	text = strings.Replace(text, " parceiro do NB,", "", -1)
 
-	text = strings.Replace(text, "Assine a newsletter de Esportes do BN e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
+	text = strings.Replace(text, "Assine a newsletter de Esportes do NB e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
+
+	text = strings.Replace(text, "Siga o NB no Google News e veja os conteúdos de maneira ainda mais rápida e ágil pelo celular ou pelo computador!", "", -1)
 	
     return text
 }
