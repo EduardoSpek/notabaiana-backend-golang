@@ -3,7 +3,6 @@ package test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -22,13 +21,13 @@ func TestUserEntity(t *testing.T) {
 	t.Parallel()
 
 	userInput := entity.UserInput{
-		Email: "eu@vc.com",
+		Email:    "eu@vc.com",
 		Password: "q1w2e3",
 	}
-	
+
 	user := entity.NewUser(userInput)
 
-	_, err := user.Validations() 
+	_, err := user.Validations()
 
 	if err != nil {
 		t.Error(err)
@@ -36,16 +35,15 @@ func TestUserEntity(t *testing.T) {
 
 	testcases := []TestCase{
 		{
-			Esperado: "eu@vc.com",
-			Recebido: user.Email,
+			Esperado:  "eu@vc.com",
+			Recebido:  user.Email,
 			Descricao: "Validação do Email",
 		},
 		{
-			Esperado: false,
-			Recebido: user.Admin,
+			Esperado:  false,
+			Recebido:  user.Admin,
 			Descricao: "Validação do Administrador",
 		},
-		
 	}
 
 	for _, teste := range testcases {
@@ -53,7 +51,6 @@ func TestUserEntity(t *testing.T) {
 	}
 
 }
-
 
 func TestUserService(t *testing.T) {
 	t.Parallel()
@@ -64,21 +61,21 @@ func TestUserService(t *testing.T) {
 	}
 
 	repo := database.NewUserMemoryRepository()
-	user_service := service.NewUserService(repo)		
+	user_service := service.NewUserService(repo)
 	controller := controllers.NewUserController(*user_service)
 
 	var responseRoute entity.User
 
-	var token struct{
+	var token struct {
 		Token string
 	}
 
 	t.Run("Deve Criar um novo usuário", func(t *testing.T) {
 
 		user := &entity.UserInput{
-			Email: "eu@vc.com",
+			Email:    "eu@vc.com",
 			Password: "q1w2e3",
-			Admin: true,
+			Admin:    true,
 		}
 
 		userJson, err := json.Marshal(user)
@@ -88,7 +85,7 @@ func TestUserService(t *testing.T) {
 		}
 
 		req, err := http.NewRequest("POST", "/user", bytes.NewBuffer(userJson))
-		
+
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -103,35 +100,32 @@ func TestUserService(t *testing.T) {
 
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("Esperado: %v - Recebido: %v",
-			http.StatusOK, status)
+				http.StatusOK, status)
 		}
 
 		err = json.NewDecoder(rr.Body).Decode(&responseRoute)
-		
+
 		if err != nil {
 			t.Fatalf("Erro ao decodificar resposta JSON: %v", err)
 		}
 
-		fmt.Println(responseRoute)
-		fmt.Println("==================")
-		
 	})
 
 	t.Run("Deve fazer o login", func(t *testing.T) {
 
 		user := &entity.UserInput{
-			Email: "eu@vc.com",
-			Password: "q1w2e3",			
+			Email:    "eu@vc.com",
+			Password: "q1w2e3",
 		}
 
 		userJson, err := json.Marshal(user)
 
 		if err != nil {
 			t.Fatalf("Erro ao converter usuário para JSON: %v", err)
-		}		
+		}
 
 		req, err := http.NewRequest("POST", "/login", bytes.NewBuffer(userJson))
-		
+
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -146,41 +140,37 @@ func TestUserService(t *testing.T) {
 
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("Esperado: %v - Recebido: %v",
-			http.StatusOK, status)
+				http.StatusOK, status)
 		}
 
 		err = json.NewDecoder(rr.Body).Decode(&token)
-		
+
 		if err != nil {
 			t.Fatalf("Erro ao decodificar resposta JSON: %v", err)
 		}
-
-		fmt.Println(token)
-		fmt.Println("==================")		
 	})
 
-	
 	t.Run("Deve atualizar um usuário", func(t *testing.T) {
 
 		user := &entity.UserInput{
-			Email: "vc@laele.com",
-			Password: "p0o9i8u7",			
+			Email:    "vc@laele.com",
+			Password: "p0o9i8u7",
 		}
 
 		userJson, err := json.Marshal(user)
 
 		if err != nil {
 			t.Fatalf("Erro ao converter usuário para JSON: %v", err)
-		}		
+		}
 
 		req, err := http.NewRequest("PUT", "/user/"+responseRoute.ID, bytes.NewBuffer(userJson))
-		
+
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer " + token.Token)
+		req.Header.Set("Authorization", "Bearer "+token.Token)
 
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
@@ -190,29 +180,26 @@ func TestUserService(t *testing.T) {
 
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("Esperado: %v - Recebido: %v",
-			http.StatusOK, status)
+				http.StatusOK, status)
 		}
 
 		err = json.NewDecoder(rr.Body).Decode(&responseRoute)
-		
+
 		if err != nil {
 			t.Fatalf("Erro ao decodificar resposta JSON: %v", err)
 		}
-
-		fmt.Println(responseRoute)
-		fmt.Println("==================")			
 	})
 
 	t.Run("Deve checar se o usuário autenticado é admin", func(t *testing.T) {
 
 		req, err := http.NewRequest("GET", "/accesscheck", nil)
-		
+
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer " + token.Token)
+		req.Header.Set("Authorization", "Bearer "+token.Token)
 
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
@@ -222,13 +209,13 @@ func TestUserService(t *testing.T) {
 
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("Esperado: %v - Recebido: %v",
-			http.StatusOK, status)
+				http.StatusOK, status)
 		}
 
 		err = json.NewDecoder(rr.Body).Decode(&responseRoute)
-		
+
 		if err != nil {
 			t.Fatalf("Erro ao decodificar resposta JSON: %v", err)
-		}		
+		}
 	})
 }
