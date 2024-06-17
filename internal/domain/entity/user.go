@@ -10,68 +10,67 @@ import (
 )
 
 var (
-	ErrEmail = errors.New("email não pode ser vazio e deve ter mínimo de 7 e máximo de 80 caracteres")
+	ErrEmail         = errors.New("email não pode ser vazio e deve ter mínimo de 7 e máximo de 80 caracteres")
 	ErrEmailNotValid = errors.New("o email informado não é válido")
-	ErrPassword = errors.New("password não pode ser vazio e deve ter mínimo de 6 e máximo de 80 caracteres")
+	ErrPassword      = errors.New("password não pode ser vazio e deve ter mínimo de 6 e máximo de 80 caracteres")
 )
 
 type User struct {
 	gorm.Model
 
-	ID			string    	`gorm:"column:id;primaryKey" json:"id"`
-	Email   	string    	`gorm:"column:email;unique;size:80;not null" json:"email"`	
-	Password    string    	`gorm:"column:password;size:80;not null" json:"password"`	
-	Admin  		bool      	`gorm:"column:admin;default:false" json:"admin"`
-	CreatedAt	time.Time 	`gorm:"column:created_at" json:"created_at"`
-	UpdatedAt	time.Time 	`gorm:"column:updated_at" json:"updated_at"`
+	ID        string    `gorm:"column:id;primaryKey" json:"id"`
+	Email     string    `gorm:"column:email;unique;size:80;not null" json:"email"`
+	Password  string    `gorm:"column:password;size:80;not null" json:"password"`
+	Admin     bool      `gorm:"column:admin;default:false" json:"admin"`
+	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
 }
 
 type UserInput struct {
-	Email		string
-	Password	string
-	Admin  		bool
+	Email    string
+	Password string
+	Admin    bool
 }
 
-func NewUser(user UserInput) *User {	
+func NewUser(user UserInput) *User {
 
 	return &User{
-		ID: uuid.NewString(),
-		Email: user.Email,
-		Password: user.Password,
-		Admin: user.Admin,
+		ID:        uuid.NewString(),
+		Email:     user.Email,
+		Password:  user.Password,
+		Admin:     user.Admin,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 }
 
-func NewUpdateUser(id string, user UserInput) *User {	
+func NewUpdateUser(id string, user UserInput) *User {
 
 	return &User{
-		ID: id,
-		Email: user.Email,
-		Password: user.Password,
-		Admin: user.Admin,
+		ID:        id,
+		Email:     user.Email,
+		Password:  user.Password,
+		Admin:     user.Admin,
 		UpdatedAt: time.Now(),
 	}
 }
 
-func (u *User) Validations() (bool, error) {	
+func (u *User) Validations() (bool, error) {
 
-	if u.Email == "" || len(u.Email) < 7 || len(u.Email) > 80 { 
+	if u.Email == "" || len(u.Email) < 7 || len(u.Email) > 80 {
 		return false, ErrEmail
 	}
 
-	validEmail := utils.IsValidEmail(u.Email)	
+	validEmail := utils.IsValidEmail(u.Email)
 
-	if !validEmail { 
+	if !validEmail {
 		return false, ErrEmailNotValid
-	 }	
+	}
 
-	if u.Password == "" || len(u.Password) < 6 || len(u.Password) > 80 { 		
+	if u.Password == "" || len(u.Password) < 6 || len(u.Password) > 80 {
 		return false, ErrPassword
 	}
 
 	return true, nil
-	
-}
 
+}
