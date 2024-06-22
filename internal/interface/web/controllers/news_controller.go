@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"image/jpeg"
-	"math"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -32,7 +31,7 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 	fotoURL := r.URL.Query().Get("foto")
 	title := r.URL.Query().Get("title")
-	var numberLines float64
+	var numberLines int
 
 	err := os.MkdirAll("files", os.ModePerm)
 	if err != nil {
@@ -50,7 +49,7 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 
 	totalWords := strings.Split(title, " ")
 	if len(totalWords) > 1 {
-		numberLines = math.Floor(float64(len(totalWords) / 5))
+		numberLines = len(totalWords) / 5
 	}
 
 	baseImgFile, err := os.Open(diretorio + "base_image.jpg")
@@ -101,16 +100,10 @@ func (s *NewsController) GetNewsDataFromTheForm(r *http.Request) (entity.News, m
 	visible, _ := strconv.ParseBool(r.FormValue("visible"))
 
 	// Parse the multipart form data
-	err := r.ParseMultipartForm(10 << 20) // 10 MB maximum
-	if err != nil {
-		return entity.News{}, nil, ErrParseForm
-	}
+	r.ParseMultipartForm(10 << 20) // 10 MB maximum
 
 	// Get the file from the form
-	file, _, err := r.FormFile("image")
-	if err != nil {
-		return entity.News{}, nil, ErrParseForm
-	}
+	file, _, _ := r.FormFile("image")
 
 	new := &entity.News{
 		ID:       id,
