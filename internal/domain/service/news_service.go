@@ -86,7 +86,12 @@ func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput enti
 		return entity.News{}, err
 	}
 
-	s.SaveImageForm(file, new)
+	err = s.SaveImageForm(file, new)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
 
 	return new, nil
 
