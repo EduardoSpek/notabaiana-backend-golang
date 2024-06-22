@@ -9,6 +9,7 @@ import (
 	"image/jpeg"
 	"io"
 	"math"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -19,23 +20,22 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gocolly/colly"
-	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
 )
 
 var (
-		ErrNotAuthorized = errors.New("você não tem autorização para criar notícias")
-		ErrDecodeImage = errors.New("não foi possível decodificar a imagem")
-		ErrCreateNews = errors.New("não foi possível criar a notícia")
-		ErrUpdateNews = errors.New("não foi possível atualizar a notícia")
-		ErrParseForm = errors.New("erro ao obter a imagem")
-		ErrWordsBlackList = errors.New("o título contém palavras bloqueadas")
-		ErrNoCategory = errors.New("nenhuma categoria no rss")
-		ErrSimilarTitle = errors.New("título similar ao recente adicionado detectado")
-		AllowedDomains = "www.bahianoticias.com.br"		
+	ErrNotAuthorized  = errors.New("você não tem autorização para criar notícias")
+	ErrDecodeImage    = errors.New("não foi possível decodificar a imagem")
+	ErrCreateNews     = errors.New("não foi possível criar a notícia")
+	ErrUpdateNews     = errors.New("não foi possível atualizar a notícia")
+	ErrParseForm      = errors.New("erro ao obter a imagem")
+	ErrWordsBlackList = errors.New("o título contém palavras bloqueadas")
+	ErrNoCategory     = errors.New("nenhuma categoria no rss")
+	ErrSimilarTitle   = errors.New("título similar ao recente adicionado detectado")
+	AllowedDomains    = "www.bahianoticias.com.br"
 
-		LimitPerPage = 100
-	)
+	LimitPerPage = 100
+)
 
 type Response struct {
 	Candidates []Candidate `json:"candidates"`
@@ -52,128 +52,85 @@ type Content struct {
 type Part struct {
 	Text string `json:"text"`
 }
-		
+
 type NewsService struct {
-	hitsrepository port.HitsRepository
-	newsrepository port.NewsRepository
+	hitsrepository  port.HitsRepository
+	newsrepository  port.NewsRepository
 	imagedownloader port.ImageDownloader
 }
 
 func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloader, hits port.HitsRepository) *NewsService {
-	return &NewsService{ newsrepository: repository, imagedownloader: downloader, hitsrepository: hits }
+	return &NewsService{newsrepository: repository, imagedownloader: downloader, hitsrepository: hits}
 }
 
-func (s *NewsService) UpdateNewsUsingTheForm(r *http.Request) (entity.News, error) {
+func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput entity.News) (entity.News, error) {
 
-	data, err := s.GetNewsDataFromTheForm(r)
+	oldnew, err := s.newsrepository.GetBySlug(newsInput.Slug)
 
-	if err != nil {		
-		return entity.News{}, err
-	}
-	
-	oldnew, err := s.newsrepository.GetBySlug(data.Slug)
-
-	if err != nil {		
+	if err != nil {
 		return entity.News{}, err
 	}
 
-	oldnew.Title = data.Title
-	oldnew.Text = data.Text
-	oldnew.Visible = data.Visible
-	oldnew.Category = data.Category
-	
+	oldnew.Title = newsInput.Title
+	oldnew.Text = newsInput.Text
+	oldnew.Visible = newsInput.Visible
+	oldnew.Category = newsInput.Category
 
-	newNews := entity.UpdateNews(oldnew)	
+	newNews := entity.UpdateNews(oldnew)
 
 	news := ChangeLink(*newNews)
 
 	new, err := s.newsrepository.Update(news)
 
-	if err != nil {		
+	if err != nil {
 		return entity.News{}, err
-	}	
+	}
 
-	s.SaveImageForm(r, new)
+	s.SaveImageForm(file, new)
 
 	return new, nil
 
 }
 
-func (s *NewsService) CreateNewsUsingTheForm(r *http.Request) (entity.News, error) {
-
-	news, err := s.GetNewsDataFromTheForm(r)
-
-	if err != nil {		
-		return entity.News{}, err
-	}
+func (s *NewsService) CreateNewsUsingTheForm(file multipart.File, news entity.News) (entity.News, error) {
 
 	newNews := entity.NewNews(news)
 
 	new, err := s.CreateNews(*newNews)
 
-	if err != nil {		
+	if err != nil {
 		return entity.News{}, err
 	}
 
-	err = s.SaveImageForm(r, new)
+	err = s.SaveImageForm(file, new)
 
 	if err != nil {
-		newNews.Image = ""		
+		newNews.Image = ""
 	}
 
 	return new, nil
 
 }
 
-func (s *NewsService) GetNewsDataFromTheForm(r *http.Request) (entity.News, error) {
+func (s *NewsService) SaveImageForm(file multipart.File, news entity.News) error {
 
-	vars := mux.Vars(r)
-	slug := vars["slug"]
-
-	title := r.FormValue("title")
-	text := r.FormValue("text")
-	category := r.FormValue("category")
-	id := r.FormValue("id")
-	visible, _ := strconv.ParseBool(r.FormValue("visible"))	
-
-	new := &entity.News{
-		ID: id,
-		Title: title,
-		Text: text,				
-		Visible: visible,
-		Category: category,
-		Slug: slug,
-	}
-
-	return *new, nil
-
-}
-
-func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
-	// Parse the multipart form data
-	err := r.ParseMultipartForm(10 << 20) // 10 MB maximum
-	if err != nil {			
+	if file == nil {
 		return ErrParseForm
 	}
 
-	// Get the file from the form
-	file, _, err := r.FormFile("image")
-	if err != nil {			
-		return ErrParseForm
-	}
 	defer file.Close()
-	
+
 	cwd, err := os.Getwd()
-	
+
 	if err != nil {
 		fmt.Println("Erro ao obter o caminho do executável:", err)
 	}
 
-	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"	
+	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"
 	pathImage := diretorio + news.Image
-	
+
 	f, err := os.Create(pathImage)
-	if err != nil {				
+	if err != nil {
 		return ErrParseForm
 	}
 	defer f.Close()
@@ -181,27 +138,27 @@ func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 
 	f, err = os.Open(pathImage)
 
-	if err != nil {				
+	if err != nil {
 		return ErrParseForm
 	}
 
 	// Resize the image
 	img, _, err := image.Decode(f)
-	if err != nil {			
+	if err != nil {
 		return ErrDecodeImage
 	}
 	resizedImg := resize.Resize(400, 254, img, resize.Lanczos3)
 
-	// Save the resized image	
+	// Save the resized image
 	out, err := os.Create(pathImage)
-	if err != nil {				
+	if err != nil {
 		return ErrDecodeImage
 	}
 	defer out.Close()
 
 	err = jpeg.Encode(out, resizedImg, nil)
 
-	if err != nil {			
+	if err != nil {
 		return ErrDecodeImage
 	}
 
@@ -209,15 +166,15 @@ func (s *NewsService) SaveImageForm(r *http.Request, news entity.News) error {
 
 }
 
-func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {	
-	
+func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
+
 	new := *entity.NewNews(news)
 
 	recent, err := s.newsrepository.FindRecent()
 
 	if err != nil {
 		return entity.News{}, err
-	}	
+	}
 
 	similarity := utils.Similarity(recent.Title, new.Title)
 
@@ -234,7 +191,7 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	if result {
 		return entity.News{}, ErrWordsBlackList
 	}
-	
+
 	new.Text = changeWords(new.Text)
 
 	err = s.newsrepository.NewsExists(new.Title)
@@ -246,15 +203,15 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	//newtitle, err := s.ChangeTitleWithGemini(new.Title)
 
 	//if err == nil && newtitle != "" {
-	 //	new.TitleAi = strings.TrimSpace(newtitle)
+	//	new.TitleAi = strings.TrimSpace(newtitle)
 	//}
-	
+
 	_, err = s.newsrepository.Create(new)
-	
+
 	if err != nil {
 		return entity.News{}, err
-	}	
-	
+	}
+
 	return new, nil
 }
 
@@ -265,13 +222,13 @@ func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
 	// if err != nil {
 	// 	return entity.News{}, err
 	// }
-	
+
 	new, err := s.newsrepository.GetBySlug(slug)
 
 	if err != nil {
 		return entity.News{}, err
 	}
-	
+
 	return new, nil
 
 }
@@ -280,18 +237,18 @@ func (s *NewsService) Hit(session string) error {
 
 	ip := utils.GetIP()
 
-	_, err := s.hitsrepository.Get(ip, session)	
+	_, err := s.hitsrepository.Get(ip, session)
 
-	if err != nil {		
+	if err != nil {
 
 		newhit := entity.Hits{
-			IP: ip,
+			IP:      ip,
 			Session: session,
-			Views: 1,
+			Views:   1,
 		}
 
 		err = s.hitsrepository.Save(newhit)
-		
+
 		if err != nil {
 			return err
 		}
@@ -305,23 +262,23 @@ func (s *NewsService) Hit(session string) error {
 func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 
 	str_search = strings.Replace(str_search, " ", "%", -1)
-	
+
 	news := s.newsrepository.SearchNews(page, str_search)
 
 	total := s.newsrepository.GetTotalNewsBySearch(str_search)
 
 	pagination := s.Pagination(page, total)
 
-    result := struct{
-        List_news []entity.News `json:"news"`
-        Pagination map[string][]int `json:"pagination"`
-        Search string `json:"search"`
-    }{
-        List_news: news,
-        Pagination: pagination,
-        Search: strings.Replace(str_search, "%", " ", -1),
-    }
-	
+	result := struct {
+		List_news  []entity.News    `json:"news"`
+		Pagination map[string][]int `json:"pagination"`
+		Search     string           `json:"search"`
+	}{
+		List_news:  news,
+		Pagination: pagination,
+		Search:     strings.Replace(str_search, "%", " ", -1),
+	}
+
 	return result
 
 }
@@ -329,28 +286,30 @@ func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 	//Limita o total de registros que deve ser retornado
-	if limit > LimitPerPage { limit = LimitPerPage }
-	
+	if limit > LimitPerPage {
+		limit = LimitPerPage
+	}
+
 	news, _ := s.newsrepository.FindAll(page, limit)
 
 	total := s.newsrepository.GetTotalNews()
 
 	pagination := s.Pagination(page, total)
 
-    result := struct{
-        List_news []entity.News `json:"news"`
-        Pagination map[string][]int `json:"pagination"`
-    }{
-        List_news: news,
-        Pagination: pagination,
-    }
-	
-	return result		
+	result := struct {
+		List_news  []entity.News    `json:"news"`
+		Pagination map[string][]int `json:"pagination"`
+	}{
+		List_news:  news,
+		Pagination: pagination,
+	}
+
+	return result
 
 }
 
 func (s *NewsService) FindRecent() (entity.News, error) {
-	
+
 	news, err := s.newsrepository.FindRecent()
 
 	if err != nil {
@@ -362,71 +321,70 @@ func (s *NewsService) FindRecent() (entity.News, error) {
 }
 
 func (s *NewsService) FindNewsCategory(category string, page int) interface{} {
-	
+
 	news, _ := s.newsrepository.FindCategory(category, page)
 
 	total := s.newsrepository.GetTotalNewsByCategory(category)
 
 	pagination := s.Pagination(page, total)
 
-    result := struct{
-        List_news []entity.News `json:"news"`
-        Pagination map[string][]int `json:"pagination"`
-		Category string `json:"category"`
-    }{
-        List_news: news,
-        Pagination: pagination,
-		Category: category,
-    }
-	
+	result := struct {
+		List_news  []entity.News    `json:"news"`
+		Pagination map[string][]int `json:"pagination"`
+		Category   string           `json:"category"`
+	}{
+		List_news:  news,
+		Pagination: pagination,
+		Category:   category,
+	}
+
 	return result
 }
 
-
 func (s *NewsService) FindAllViews() ([]entity.News, error) {
-	
+
 	news, err := s.newsrepository.FindAllViews()
 
 	if err != nil {
 		return []entity.News{}, err
 	}
-	
+
 	return news, nil
 
 }
 
 func (s *NewsService) ClearViews() error {
-	
+
 	err := s.newsrepository.ClearViews()
 
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 
 }
 
 func (s *NewsService) NewsTruncateTable() error {
-	
+
 	err := s.newsrepository.NewsTruncateTable()
 
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 
 }
 
 func (s *NewsService) ClearImagePath(id string) error {
-	
+
 	err := s.newsrepository.ClearImagePath(id)
 
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 
 }
@@ -434,28 +392,28 @@ func (s *NewsService) ClearImagePath(id string) error {
 func (s *NewsService) SaveImage(id, url, diretorio string) (string, error) {
 
 	url = strings.Replace(url, "_original.jpg", "_5.jpg", -1)
-	
+
 	img, err := s.imagedownloader.DownloadImage(url)
-	
+
 	if err != nil {
 		//fmt.Println("Erro ao baixar a imagem:", err)
 		return "", err
 	}
-	
+
 	outputPath := diretorio + id + ".jpg"
 
 	width := 400
-	height := int(float64(img.Bounds().Dy()) * (float64(width) / float64(img.Bounds().Dx()))) 
+	height := int(float64(img.Bounds().Dy()) * (float64(width) / float64(img.Bounds().Dx())))
 
 	err = s.imagedownloader.ResizeAndSaveImage(img, width, height, outputPath)
-	
+
 	if err != nil {
 		//fmt.Println("Erro ao redimensionar e salvar a imagem:", err)
-		return "",err
+		return "", err
 	}
 
 	//fmt.Println("Imagem redimensionada e salva com sucesso em", outputPath)
-	
+
 	return outputPath, nil
 
 }
@@ -470,11 +428,11 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 
 	//Obtém o texto da notícia
 	collector.OnHTML(".sc-16306eb7-3.lbjQbj", func(e *colly.HTMLElement) {
-		
-		str_text = e.DOM.Text()		
+
+		str_text = e.DOM.Text()
 
 		text += str_text + "<br><br>"
-	
+
 	})
 
 	//Obtém os embeds das redes sociais
@@ -483,12 +441,12 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 		conteudo = e.Attr("data-content")
 		conteudo_decoded, err := url.QueryUnescape(conteudo)
 
-		if err != nil {			
+		if err != nil {
 			return
-		}	
+		}
 
-		html +=  "<br><br>" + conteudo_decoded
-	
+		html += "<br><br>" + conteudo_decoded
+
 	})
 
 	//Obtém os scrits
@@ -498,17 +456,17 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 
 		script_decoded, err := url.QueryUnescape(script)
 
-		if err != nil {			
+		if err != nil {
 			return
 		}
 
 		if strings.Contains(script_decoded, "instagram") || strings.Contains(script_decoded, "twitter") || strings.Contains(script_decoded, "youtube") || strings.Contains(script_decoded, "flickr") {
-		
+
 			if !strings.Contains(html, script_decoded) {
 				html += script_decoded
 			}
 		}
-		
+
 	})
 
 	// Definindo o callback OnHTML
@@ -517,12 +475,12 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 		src := e.Attr("src")
 
 		src = strings.Replace(src, " ", "%20", -1)
-	
+
 		// Verificar se o valor "src" contém o endereço de destino
 		if strings.Contains(src, "bahianoticias.com.br/fotos/") {
-			
+
 			html += `<div class="imagem_anexada"><img src="` + src + `" width="100%"></div>`
-						
+
 		}
 	})
 
@@ -543,11 +501,11 @@ func ChangeLink(news entity.News) entity.News {
 	return news
 }
 func listOfBlockedWords(titulo string) bool {
-	palavras := []string {
+	palavras := []string{
 		"Bahia Notícias",
 		"Bahia Notícia",
 		"Bahia Noticias",
-		"Bahia Noticia",		
+		"Bahia Noticia",
 		"BN",
 		"Curtas",
 		"Nota Baiana",
@@ -555,12 +513,12 @@ func listOfBlockedWords(titulo string) bool {
 		"notabaiana",
 		"apple-touch-icon.png",
 	}
-    for _, palavra := range palavras {
-        if strings.Contains(titulo, palavra) {
-            return true
-        }
-    }
-    return false
+	for _, palavra := range palavras {
+		if strings.Contains(titulo, palavra) {
+			return true
+		}
+	}
+	return false
 }
 func changeWords(text string) string {
 	text = strings.Replace(text, "Siga o @bnhall_ no Instagram e fique de olho nas principais notícias.", "", -1)
@@ -588,21 +546,21 @@ func changeWords(text string) string {
 	text = strings.Replace(text, "Assine a newsletter de Esportes do NB e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
 
 	text = strings.Replace(text, "Siga o NB no Google News e veja os conteúdos de maneira ainda mais rápida e ágil pelo celular ou pelo computador!", "", -1)
-	
-    return text
+
+	return text
 }
 
 func (s *NewsService) GetCategory(rss string) (string, error) {
 
-	if  strings.Contains(rss, "holofote") {
+	if strings.Contains(rss, "holofote") {
 		return "famosos", nil
-	} else if  strings.Contains(rss, "esportes") {
+	} else if strings.Contains(rss, "esportes") {
 		return "esportes", nil
-	} else if  strings.Contains(rss, "justica") {
+	} else if strings.Contains(rss, "justica") {
 		return "justica", nil
-	} else if  strings.Contains(rss, "saude") {
+	} else if strings.Contains(rss, "saude") {
 		return "saude", nil
-	} else if  strings.Contains(rss, "municipios") {
+	} else if strings.Contains(rss, "municipios") {
 		return "municipios", nil
 	} else {
 		return "", ErrNoCategory
@@ -619,22 +577,22 @@ func (s *NewsService) GetNewsFromPage(link string) []entity.News {
 	)
 
 	var titulos []string
-	var texts []string	
+	var texts []string
 	var links []string
 	var images []string
 
 	//Obtém titulos
 	collector.OnHTML("h3.sc-b4c8ccf3-1.ireAxk", func(e *colly.HTMLElement) {
-		
-		conteudo = e.DOM.Text()		
+
+		conteudo = e.DOM.Text()
 
 		titulos = append(titulos, conteudo)
-	
+
 	})
 
 	//Obtém links
 	collector.OnHTML(".sc-b4c8ccf3-0.fsXNOt a", func(e *colly.HTMLElement) {
-		
+
 		conteudo = e.Attr("href")
 
 		conteudo = "https://www.bahianoticias.com.br" + conteudo
@@ -644,54 +602,52 @@ func (s *NewsService) GetNewsFromPage(link string) []entity.News {
 		if err != nil {
 			return
 		}
-		
+
 		images = append(images, image)
 
 		links = append(links, conteudo)
-	
+
 	})
 
 	//Obtém textos
 	collector.OnHTML(".sc-81cf810-3.gCNTHg", func(e *colly.HTMLElement) {
-		
-		conteudo = e.DOM.Text()		
+
+		conteudo = e.DOM.Text()
 
 		texts = append(texts, conteudo)
-	
+
 	})
 
-	//Obtém images 
+	//Obtém images
 	collector.OnHTML(".sc-81cf810-2.hiSMeg div span img", func(e *colly.HTMLElement) {
-		
+
 		conteudo = e.Attr("src")
 
-		conteudo_decoded, err := url.QueryUnescape(conteudo)		
+		conteudo_decoded, err := url.QueryUnescape(conteudo)
 
-		if err != nil {			
+		if err != nil {
 			return
-		}	
+		}
 
 		images = append(images, conteudo_decoded)
-	
+
 	})
-	
+
 	// Visitando a URL inicial
 	collector.Visit(link)
 
 	var lista []entity.News
 
-	
-
 	for i, item := range titulos {
-		
+
 		category, _ := s.GetCategory(links[i])
 
 		new := entity.NewNews(entity.News{
-			Title: item,
-			Text: texts[i],
-			Image: images[i],
-			Link: links[i],
-			Visible: true,
+			Title:    item,
+			Text:     texts[i],
+			Image:    images[i],
+			Link:     links[i],
+			Visible:  true,
 			Category: category,
 		})
 		lista = append(lista, *new)
@@ -701,7 +657,7 @@ func (s *NewsService) GetNewsFromPage(link string) []entity.News {
 }
 
 func (s *NewsService) GetIdFromLink(link string) (int, error) {
-	
+
 	partes := strings.Split(link, "/")
 
 	partes_total := len(partes)
@@ -713,7 +669,7 @@ func (s *NewsService) GetIdFromLink(link string) (int, error) {
 	} else if partes_total == 5 {
 		maispartes = strings.Split(partes[4], "-")
 	}
-		
+
 	id, err := strconv.Atoi(maispartes[0])
 
 	if err != nil {
@@ -743,7 +699,7 @@ func (s *NewsService) ReturnPathFromLink(link string) (string, error) {
 		return "esportes_noticias", nil
 	} else {
 		return "principal_noticias", nil
-	}	
+	}
 }
 
 func (s *NewsService) GetImageLink(link string) (string, error) {
@@ -775,7 +731,7 @@ func (s *NewsService) GetImageLink(link string) (string, error) {
 		tag = "TRAVELLING"
 	} else if path == "hall_business" {
 		tag = "BUSINESS"
-	} 
+	}
 
 	newlink := fmt.Sprintf("https://www.bahianoticias.com.br/fotos/%s/%d/IMAGEM_%s_5.jpg", path, id, tag)
 
@@ -784,7 +740,7 @@ func (s *NewsService) GetImageLink(link string) (string, error) {
 
 func (s *NewsService) CopierPage(list_pages []string) []entity.News {
 	var lista []entity.News
-	for _, page := range list_pages {		
+	for _, page := range list_pages {
 		lista_page := s.GetNewsFromPage(page)
 		lista = append(lista, lista_page...)
 	}
@@ -792,16 +748,14 @@ func (s *NewsService) CopierPage(list_pages []string) []entity.News {
 	return lista
 }
 
-func (s *NewsService)  ChangeTitleWithGemini(title string) (string, error) {
+func (s *NewsService) ChangeTitleWithGemini(title string) (string, error) {
 
 	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + os.Getenv("KEY_GEMINI")
 
 	title = strings.ReplaceAll(title, `"`, `\"`)
 	title = strings.ReplaceAll(title, `'`, `\'`)
 
-	jsonData := `{"contents":[{"parts":[{"text":"Matenha o contexto e refaça o título usando palavras-chaves para melhorar o SEO. Tente gerar curiosidade para o leitor querer ler a notícia completa. Retorne apenas o título com no máximo 120 caracteres. O título para ser refeito é: ` + title + `"}]}]}`
-
-	
+	jsonData := `{"contents":[{"parts":[{"text":"Matenha o contexto e refaça o título usando palavras-chaves para melhorar o SEO. Retorne apenas o título com no máximo 120 caracteres. O título para ser refeito é: ` + title + `"}]}]}`
 
 	reqBody := bytes.NewBuffer([]byte(jsonData))
 
@@ -826,22 +780,22 @@ func (s *NewsService)  ChangeTitleWithGemini(title string) (string, error) {
 		fmt.Println("Erro ao ler o corpo da resposta:", err)
 		return "", err
 	}
-	
+
 	// Deserializa o JSON na struct Response
 	var response Response
 	err = json.Unmarshal(respBody, &response)
 	if err != nil {
 		fmt.Println("Erro ao deserializar o JSON:", err)
 		return "", err
-	}	
+	}
 
 	var newtitle string
 	// Acessa o valor de "text"
 	for _, candidate := range response.Candidates {
 		for _, part := range candidate.Contents.Parts {
-						
+
 			newtitle = strings.Replace(part.Text, "**", "", -1)
-			
+
 		}
 	}
 
@@ -849,11 +803,11 @@ func (s *NewsService)  ChangeTitleWithGemini(title string) (string, error) {
 
 }
 
-//Pagination recebe a página atual e o total de noticias para retornar a páginação de resultado
+// Pagination recebe a página atual e o total de noticias para retornar a páginação de resultado
 func (s *NewsService) Pagination(currentPage, totalNews int) map[string][]int {
-	
+
 	// Calcula o total de páginas
-	totalPages := int(math.Ceil(float64(totalNews) / 16)) 
+	totalPages := int(math.Ceil(float64(totalNews) / 16))
 
 	// Garante que a página atual esteja dentro dos limites
 	if currentPage < 1 {

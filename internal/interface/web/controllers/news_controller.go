@@ -1,17 +1,24 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"image/jpeg"
 	"math"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
+)
+
+var (
+	ErrParseForm = errors.New("erro ao obter a imagem")
 )
 
 type NewsController struct {
@@ -82,6 +89,42 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 	jpeg.Encode(w, finalImg, nil)
 }
 
+func (s *NewsController) GetNewsDataFromTheForm(r *http.Request) (entity.News, multipart.File, error) {
+
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	title := r.FormValue("title")
+	text := r.FormValue("text")
+	category := r.FormValue("category")
+	id := r.FormValue("id")
+	visible, _ := strconv.ParseBool(r.FormValue("visible"))
+
+	// Parse the multipart form data
+	err := r.ParseMultipartForm(10 << 20) // 10 MB maximum
+	if err != nil {
+		return entity.News{}, nil, ErrParseForm
+	}
+
+	// Get the file from the form
+	file, _, err := r.FormFile("image")
+	if err != nil {
+		return entity.News{}, nil, ErrParseForm
+	}
+
+	new := &entity.News{
+		ID:       id,
+		Title:    title,
+		Text:     text,
+		Visible:  visible,
+		Category: category,
+		Slug:     slug,
+	}
+
+	return *new, file, nil
+
+}
+
 func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.Request) {
 	success := utils.GoogleRecaptchaVerify(r)
 
@@ -122,7 +165,19 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 			return
 		}
 
-		new, err := c.news_service.UpdateNewsUsingTheForm(r)
+		newsInput, file, err := c.GetNewsDataFromTheForm(r)
+
+		if err != nil {
+			msg = map[string]any{
+				"ok":      false,
+				"message": "problema com os dados do formulário",
+				"erro":    "não foi possível resgatar os dados corretamente",
+			}
+			ResponseJson(w, msg, http.StatusNotFound)
+			return
+		}
+
+		new, err := c.news_service.UpdateNewsUsingTheForm(file, newsInput)
 
 		if err != nil {
 			msg := map[string]any{
@@ -187,7 +242,19 @@ func (c *NewsController) CreateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 			return
 		}
 
-		new, err := c.news_service.CreateNewsUsingTheForm(r)
+		newsInput, file, err := c.GetNewsDataFromTheForm(r)
+
+		if err != nil {
+			msg = map[string]any{
+				"ok":      false,
+				"message": "problema com os dados do formulário",
+				"erro":    "não foi possível resgatar os dados corretamente",
+			}
+			ResponseJson(w, msg, http.StatusNotFound)
+			return
+		}
+
+		new, err := c.news_service.CreateNewsUsingTheForm(file, newsInput)
 
 		if err != nil {
 			msg := map[string]any{
