@@ -79,6 +79,7 @@ func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput enti
 	newNews := entity.UpdateNews(oldnew)
 
 	news := ChangeLink(*newNews)
+	news = RenamePathImage(news)
 
 	new, err := s.newsrepository.Update(news)
 
@@ -89,9 +90,8 @@ func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput enti
 	err = s.SaveImageForm(file, new)
 
 	if err != nil {
-		fmt.Println(err)
+		new.Image = ""
 	}
-
 
 	return new, nil
 
@@ -120,7 +120,7 @@ func (s *NewsService) CreateNewsUsingTheForm(file multipart.File, news entity.Ne
 func (s *NewsService) SaveImageForm(file multipart.File, news entity.News) error {
 
 	if file == nil {
-		return ErrParseForm
+		return nil
 	}
 
 	defer file.Close()
