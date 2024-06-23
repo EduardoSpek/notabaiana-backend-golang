@@ -74,12 +74,9 @@ func (u *UserController) Login(w http.ResponseWriter, r *http.Request) {
 	if success {
 
 		defer r.Body.Close()
-		var userInput entity.UserInput
-
-		err := json.NewDecoder(r.Body).Decode(&userInput)
-		if err != nil {
-			ResponseJson(w, err.Error(), http.StatusNotFound)
-			return
+		userInput := entity.UserInput{
+			Email:    r.FormValue("email"),
+			Password: r.FormValue("password"),
 		}
 
 		userToken, err := u.user_service.Login(userInput)
