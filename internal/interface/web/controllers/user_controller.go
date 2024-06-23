@@ -69,7 +69,7 @@ func (u *UserController) AccessCheck(w http.ResponseWriter, r *http.Request) {
 
 func (u *UserController) Login(w http.ResponseWriter, r *http.Request) {
 
-	success := true //utils.GoogleRecaptchaVerify(r)
+	success := utils.GoogleRecaptchaVerify(r)
 
 	if success {
 

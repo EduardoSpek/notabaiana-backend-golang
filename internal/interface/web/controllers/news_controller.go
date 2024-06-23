@@ -119,80 +119,68 @@ func (s *NewsController) GetNewsDataFromTheForm(r *http.Request) (entity.News, m
 }
 
 func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.Request) {
-	success := utils.GoogleRecaptchaVerify(r)
 
-	if success {
+	var msg map[string]any
+	token := r.FormValue("token")
 
-		var msg map[string]any
-		token := r.FormValue("token")
-
-		if token == "" {
-			msg = map[string]any{
-				"ok":      false,
-				"message": "acesso não autorizado",
-				"erro":    "token é necessário",
-			}
-			ResponseJson(w, msg, http.StatusForbidden)
-			return
-		}
-
-		claims, err := utils.ValidateJWT(token)
-
-		if err != nil {
-			msg = map[string]any{
-				"ok":      false,
-				"message": "acesso não autorizado",
-				"erro":    "token inválido",
-			}
-			ResponseJson(w, msg, http.StatusForbidden)
-			return
-		}
-
-		if !claims.Admin {
-			msg = map[string]any{
-				"ok":      false,
-				"message": "acesso não autorizado",
-				"erro":    "sem permissão de admin",
-			}
-			ResponseJson(w, msg, http.StatusNotFound)
-			return
-		}
-
-		newsInput, file, err := c.GetNewsDataFromTheForm(r)
-
-		if err != nil {
-			msg = map[string]any{
-				"ok":      false,
-				"message": "problema com os dados do formulário",
-				"erro":    "não foi possível resgatar os dados corretamente",
-			}
-			ResponseJson(w, msg, http.StatusNotFound)
-			return
-		}
-
-		new, err := c.news_service.UpdateNewsUsingTheForm(file, newsInput)
-
-		if err != nil {
-			msg := map[string]any{
-				"ok":      false,
-				"message": "A notícia não pode ser atualizada!",
-				"erro":    err,
-			}
-			ResponseJson(w, msg, http.StatusNotFound)
-			return
-		}
-
-		ResponseJson(w, new, http.StatusOK)
-		return
-
-	} else {
-		msg := map[string]any{
+	if token == "" {
+		msg = map[string]any{
 			"ok":      false,
-			"message": "Token do captcha inválido",
+			"message": "acesso não autorizado",
+			"erro":    "token é necessário",
+		}
+		ResponseJson(w, msg, http.StatusForbidden)
+		return
+	}
+
+	claims, err := utils.ValidateJWT(token)
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "acesso não autorizado",
+			"erro":    "token inválido",
+		}
+		ResponseJson(w, msg, http.StatusForbidden)
+		return
+	}
+
+	if !claims.Admin {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "acesso não autorizado",
+			"erro":    "sem permissão de admin",
 		}
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
+
+	newsInput, file, err := c.GetNewsDataFromTheForm(r)
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "problema com os dados do formulário",
+			"erro":    "não foi possível resgatar os dados corretamente",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	new, err := c.news_service.UpdateNewsUsingTheForm(file, newsInput)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok":      false,
+			"message": "A notícia não pode ser atualizada!",
+			"erro":    err,
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	ResponseJson(w, new, http.StatusOK)
+
 }
 
 func (c *NewsController) CreateNewsUsingTheForm(w http.ResponseWriter, r *http.Request) {
