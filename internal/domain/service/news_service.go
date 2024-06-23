@@ -79,7 +79,10 @@ func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput enti
 	newNews := entity.UpdateNews(oldnew)
 
 	news := ChangeLink(*newNews)
-	news = RenamePathImage(news)
+
+	if file != nil {
+		news = RenamePathImage(news)
+	}
 
 	new, err := s.newsrepository.Update(news)
 
