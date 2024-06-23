@@ -529,6 +529,7 @@ func listOfBlockedWords(titulo string) bool {
 	return false
 }
 func changeWords(text string) string {
+	text = strings.Replace(text, " ", " ", -1)
 	text = strings.Replace(text, "Siga o @bnhall_ no Instagram e fique de olho nas principais notícias.", "", -1)
 
 	text = strings.Replace(text, "Bahia Notícias", "NB", -1)
