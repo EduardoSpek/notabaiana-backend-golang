@@ -11,14 +11,14 @@ import (
 func GoogleRecaptchaVerify(r *http.Request) bool {
 	// Captura o token enviado pelo cliente
 	token := r.FormValue("g-recaptcha-response")
-        
+
 	// Faça uma solicitação POST para a API de verificação do reCAPTCHA v3 do Google
-	response, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", 
+	response, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify",
 		map[string][]string{
-			"secret":   {os.Getenv("KEY_GOOGLE_RECAPTCHA")},
+			"secret":   {os.Getenv("KEY_GOOGLE_RECAPTCHA_LOCAL")},
 			"response": {token},
 		})
-	
+
 	if err != nil {
 		fmt.Println("Erro ao fazer a solicitação:", err)
 		return false
