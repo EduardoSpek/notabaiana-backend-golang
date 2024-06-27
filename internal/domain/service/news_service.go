@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	"image/jpeg"
 	"io"
 	"math"
 	"mime/multipart"
@@ -20,7 +19,6 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gocolly/colly"
-	"github.com/nfnt/resize"
 )
 
 var (
@@ -155,7 +153,12 @@ func (s *NewsService) SaveImageForm(file multipart.File, news entity.News) error
 	if err != nil {
 		return ErrDecodeImage
 	}
-	resizedImg := resize.Resize(400, 254, img, resize.Lanczos3)
+	//resizedImg := resize.Resize(400, 254, img, resize.Lanczos3)
+	err = s.imagedownloader.CropAndSaveImage(img, 400, 254, pathImage)
+
+	if err != nil {
+		return ErrDecodeImage
+	}
 
 	// Save the resized image
 	out, err := os.Create(pathImage)
@@ -164,11 +167,11 @@ func (s *NewsService) SaveImageForm(file multipart.File, news entity.News) error
 	}
 	defer out.Close()
 
-	err = jpeg.Encode(out, resizedImg, nil)
+	// err = jpeg.Encode(out, resizedImg, nil)
 
-	if err != nil {
-		return ErrDecodeImage
-	}
+	// if err != nil {
+	// 	return ErrDecodeImage
+	// }
 
 	return nil
 
