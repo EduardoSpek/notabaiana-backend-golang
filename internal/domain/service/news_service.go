@@ -157,6 +157,7 @@ func (s *NewsService) SaveImageForm(file multipart.File, news entity.News) error
 	err = s.imagedownloader.CropAndSaveImage(img, 400, 254, pathImage)
 
 	if err != nil {
+		fmt.Println(err)
 		return ErrDecodeImage
 	}
 
