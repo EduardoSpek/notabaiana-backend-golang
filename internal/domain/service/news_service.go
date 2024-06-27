@@ -153,26 +153,13 @@ func (s *NewsService) SaveImageForm(file multipart.File, news entity.News) error
 	if err != nil {
 		return ErrDecodeImage
 	}
-	//resizedImg := resize.Resize(400, 254, img, resize.Lanczos3)
+
 	err = s.imagedownloader.CropAndSaveImage(img, 400, 254, pathImage)
 
 	if err != nil {
 		fmt.Println(err)
 		return ErrDecodeImage
 	}
-
-	// Save the resized image
-	out, err := os.Create(pathImage)
-	if err != nil {
-		return ErrDecodeImage
-	}
-	defer out.Close()
-
-	// err = jpeg.Encode(out, resizedImg, nil)
-
-	// if err != nil {
-	// 	return ErrDecodeImage
-	// }
 
 	return nil
 
