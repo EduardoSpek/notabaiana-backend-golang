@@ -1,6 +1,6 @@
 module github.com/eduardospek/notabaiana-backend-golang
 
-go 1.22.3
+go 1.22.4
 
 require (
 	github.com/gocolly/colly v1.2.0
@@ -27,6 +27,7 @@ require (
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/disintegration/imaging v1.6.2
 	github.com/gorilla/mux v1.8.1
 	github.com/lib/pq v1.10.9
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646

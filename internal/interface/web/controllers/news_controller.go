@@ -29,7 +29,7 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 }
 
 func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
-	fotoURL := r.URL.Query().Get("foto")
+	imageURL := r.URL.Query().Get("image")
 	title := r.URL.Query().Get("title")
 	var numberLines int
 
@@ -65,7 +65,7 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	overlayImg, err := utils.DownloadImage(fotoURL)
+	overlayImg, err := utils.DownloadImage(imageURL)
 	if err != nil {
 		http.Error(w, "Could not download overlay image", http.StatusInternalServerError)
 		return

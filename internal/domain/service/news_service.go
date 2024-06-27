@@ -413,7 +413,7 @@ func (s *NewsService) SaveImage(id, url, diretorio string) (string, error) {
 	width := 400
 	height := int(float64(img.Bounds().Dy()) * (float64(width) / float64(img.Bounds().Dx())))
 
-	err = s.imagedownloader.ResizeAndSaveImage(img, width, height, outputPath)
+	err = s.imagedownloader.CropAndSaveImage(img, width, height, outputPath)
 
 	if err != nil {
 		//fmt.Println("Erro ao redimensionar e salvar a imagem:", err)
