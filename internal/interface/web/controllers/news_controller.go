@@ -71,17 +71,17 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	distaceY := 210 + (int(numberLines) * 56)
+	distaceY := 210 + (int(numberLines) * 50)
 	resizedOverlay := utils.ResizeImage(overlayImg, 645, 405)
 	finalImg := utils.OverlayImage(baseImg, resizedOverlay, 36, distaceY)
 
-	fontFace, err := utils.LoadFont(diretorio+"RobotoCondensed-VariableFont_wght.ttf", 44)
+	fontFace, err := utils.LoadFont(diretorio+"roboto-latin-500-normal.ttf", 40)
 	if err != nil {
 		http.Error(w, "Could not load font", http.StatusInternalServerError)
 		return
 	}
 
-	utils.AddLabel(finalImg, 26, 180, title, fontFace)
+	utils.AddLabel(finalImg, 26, 170, title, fontFace)
 
 	w.Header().Set("Content-Disposition", "attachment; filename=final_image.jpg")
 	w.Header().Set("Content-Type", "image/jpeg")

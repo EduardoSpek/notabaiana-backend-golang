@@ -59,7 +59,7 @@ func AddLabel(img *image.RGBA, x, y int, label string, face font.Face) {
 	for i, word := range words {
 		if (i+1)%5 == 0 {
 			d.DrawString(line + " " + word)
-			y += 56 // Adjust line height as needed
+			y += 50 // Adjust line height as needed
 			d.Dot = fixed.P(x, y)
 			line = ""
 		} else {
