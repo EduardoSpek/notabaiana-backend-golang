@@ -61,6 +61,30 @@ func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloa
 	return &NewsService{newsrepository: repository, imagedownloader: downloader, hitsrepository: hits}
 }
 
+func (s *NewsService) NewsMake() (interface{}, error) {
+
+	news, err := s.newsrepository.NewsMake()
+
+	if err != nil {
+		return nil, err
+	}
+
+	newsOutput := struct {
+		ID    string `json:"id"`
+		Title string `json:"title"`
+		Link  string `json:"link"`
+		Image string `json:"image"`
+	}{
+		ID:    news.ID,
+		Title: news.Title,
+		Link:  news.Link,
+		Image: news.Image,
+	}
+
+	return newsOutput, nil
+
+}
+
 func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput entity.News) (entity.News, error) {
 
 	oldnew, err := s.newsrepository.GetBySlug(newsInput.Slug)

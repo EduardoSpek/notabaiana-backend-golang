@@ -27,6 +27,33 @@ func NewNewsPostgresRepository(db_adapter port.DBAdapter) *NewsPostgresRepositor
 	return &NewsPostgresRepository{db: db}
 }
 
+func (repo *NewsPostgresRepository) NewsMake() (entity.News, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var news entity.News
+
+	result := repo.db.Model(&entity.News{}).Where("visible = true AND Make = false AND category = 'famosos' AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("created_at DESC").Limit(1).First(&news)
+
+	if result.Error != nil {
+		return entity.News{}, result.Error
+	}
+
+	result = repo.db.Model(&news).Updates(map[string]interface{}{
+		"Make": true,
+	})
+
+	if result.Error != nil {
+		tx.Rollback()
+		return entity.News{}, result.Error
+	}
+
+	return news, nil
+}
+
 // insertNews insere um novo usuário no banco de dados
 func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error) {
 	repo.mutex.Lock()

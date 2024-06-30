@@ -28,6 +28,33 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 	return &NewsController{news_service: newsservice}
 }
 
+func (c *NewsController) NewsMake(w http.ResponseWriter, r *http.Request) {
+
+	var msg map[string]any
+
+	vars := mux.Vars(r)
+	key := vars["key"]
+
+	if key != os.Getenv("KEY") {
+		return
+	}
+
+	news, err := c.news_service.NewsMake()
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "não há notícia para resgatar",
+			"erro":    "sem novas notícias",
+		}
+		ResponseJson(w, msg, http.StatusForbidden)
+		return
+	}
+
+	ResponseJson(w, news, http.StatusOK)
+
+}
+
 func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 	imageURL := r.URL.Query().Get("image")
 	title := r.URL.Query().Get("title")
