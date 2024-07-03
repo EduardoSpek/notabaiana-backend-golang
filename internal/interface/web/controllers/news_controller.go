@@ -102,7 +102,7 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 	resizedOverlay := utils.ResizeImage(overlayImg, 645, 405)
 	finalImg := utils.OverlayImage(baseImg, resizedOverlay, 36, distaceY)
 
-	fontFace, err := utils.LoadFont(diretorio+"roboto-latin-500-normal.ttf", 40)
+	fontFace, err := utils.LoadFont(diretorio+"roboto-latin-700-normal.ttf", 40)
 	if err != nil {
 		http.Error(w, "Could not load font", http.StatusInternalServerError)
 		return
