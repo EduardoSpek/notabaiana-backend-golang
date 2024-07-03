@@ -715,6 +715,8 @@ func (s *NewsService) ReturnPathFromLink(link string) (string, error) {
 		return "justica_noticias", nil
 	} else if strings.Contains(link, "bnhall/noticia") {
 		return "hall_noticias", nil
+	} else if strings.Contains(link, "bnhall/enjoy") {
+		return "hall_enjoy", nil
 	} else if strings.Contains(link, "esportes/vitoria") {
 		return "esportes_vitorias", nil
 	} else if strings.Contains(link, "esportes/bahia") {
