@@ -57,7 +57,7 @@ func AddLabel(img *image.RGBA, x, y int, label string, face font.Face) {
 	words := strings.Split(label, " ")
 	line := ""
 	for i, word := range words {
-		if (i+1)%5 == 0 {
+		if (i+1)%4 == 0 {
 			d.DrawString(line + " " + word)
 			y += 50 // Adjust line height as needed
 			d.Dot = fixed.P(x, y)
