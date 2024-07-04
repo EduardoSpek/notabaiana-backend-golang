@@ -20,6 +20,11 @@ type NewsMemoryRepository struct {
 func NewNewsMemoryRepository() *NewsMemoryRepository {
 	return &NewsMemoryRepository{Newsdb: make(map[string]entity.News)}
 }
+
+func (r *NewsMemoryRepository) CleanNews() {
+
+}
+
 func (r *NewsMemoryRepository) NewsMake() (entity.News, error) {
 	return entity.News{}, nil
 }

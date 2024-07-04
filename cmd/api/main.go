@@ -26,15 +26,15 @@ var list_pages = []string{
 	"https://www.bahianoticias.com.br/municipios",
 }
 
-func main() {	
+func main() {
 
 	//newsrepo := database.NewNewsSQLiteRepository()
 	//newsrepo := database.NewNewsMemoryRepository()
-	postgres := adapter.NewPostgresAdapter()	
+	postgres := adapter.NewPostgresAdapter()
 	newsrepo := database.NewNewsPostgresRepository(postgres)
-	imagedownloader := utils.NewImgDownloader()	
+	imagedownloader := utils.NewImgDownloader()
 	hitrepo := database.NewHitsPostgresRepository(postgres)
-	news_service := service.NewNewsService(newsrepo, imagedownloader, hitrepo)	
+	news_service := service.NewNewsService(newsrepo, imagedownloader, hitrepo)
 
 	crawler_service := service.NewCrawler()
 	copier_service := service.NewCopier(*news_service, *crawler_service)
@@ -57,10 +57,13 @@ func main() {
 	server.CrawlerController(*crawler_controller)
 	server.NewsController(*news_controller)
 
-	go copier_service.Start(list_pages, 10)	
-		
+	go copier_service.Start(list_pages, 10)
+
 	//Função para gerar as top notícias a cada 60 minutos
 	go top_service.Start(60)
+
+	//Função para limpar as notícias inativas
+	go news_service.StartCleanNews(60 * 24)
 
 	server.Start()
 

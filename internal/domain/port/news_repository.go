@@ -19,4 +19,5 @@ type NewsRepository interface {
 	GetTotalNewsBySearch(str_search string) int
 	GetTotalNewsByCategory(category string) int
 	NewsMake() (entity.News, error)
+	CleanNews()
 }

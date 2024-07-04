@@ -9,3 +9,12 @@ func FileExsists(filename string) bool {
 		return true
 	}
 }
+
+func RemoveImage(file string) bool {
+	err := os.Remove(file)
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}

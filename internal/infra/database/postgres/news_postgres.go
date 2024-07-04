@@ -8,6 +8,7 @@ import (
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 )
@@ -25,6 +26,28 @@ type NewsPostgresRepository struct {
 func NewNewsPostgresRepository(db_adapter port.DBAdapter) *NewsPostgresRepository {
 	db, _ := db_adapter.Connect()
 	return &NewsPostgresRepository{db: db}
+}
+
+func (repo *NewsPostgresRepository) CleanNews() {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var news []entity.News
+
+	repo.db.Model(&entity.News{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&news)
+
+	for _, n := range news {
+
+		if n.Image != "" {
+			image := "./images/" + n.Image
+			utils.RemoveImage(image)
+		}
+
+		repo.db.Unscoped().Delete(n)
+	}
 }
 
 func (repo *NewsPostgresRepository) NewsMake() (entity.News, error) {

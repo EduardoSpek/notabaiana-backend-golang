@@ -28,6 +28,28 @@ func NewNewsController(newsservice service.NewsService) *NewsController {
 	return &NewsController{news_service: newsservice}
 }
 
+func (c *NewsController) CleanNews(w http.ResponseWriter, r *http.Request) {
+
+	var msg map[string]any
+
+	vars := mux.Vars(r)
+	key := vars["key"]
+
+	if key != os.Getenv("KEY") {
+		return
+	}
+
+	c.news_service.CleanNews()
+
+	msg = map[string]any{
+		"ok":      true,
+		"message": "notícias inativas removidas",
+	}
+
+	ResponseJson(w, msg, http.StatusOK)
+
+}
+
 func (c *NewsController) NewsMake(w http.ResponseWriter, r *http.Request) {
 
 	var msg map[string]any

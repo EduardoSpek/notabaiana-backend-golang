@@ -14,6 +14,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
@@ -59,6 +60,24 @@ type NewsService struct {
 
 func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloader, hits port.HitsRepository) *NewsService {
 	return &NewsService{newsrepository: repository, imagedownloader: downloader, hitsrepository: hits}
+}
+
+func (s *NewsService) StartCleanNews(minutes time.Duration) {
+
+	go s.CleanNews()
+
+	ticker := time.NewTicker(minutes * time.Minute)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		go s.CleanNews()
+	}
+}
+
+func (s *NewsService) CleanNews() {
+
+	s.newsrepository.CleanNews()
+
 }
 
 func (s *NewsService) NewsMake() (interface{}, error) {
@@ -549,6 +568,8 @@ func listOfBlockedWords(titulo string) bool {
 func changeWords(text string) string {
 	text = strings.Replace(text, " ", " ", -1)
 	text = strings.Replace(text, "Siga o @bnhall_ no Instagram e fique de olho nas principais notícias.", "", -1)
+
+	text = strings.Replace(text, "BN", "NB", -1)
 
 	text = strings.Replace(text, "Bahia Notícias", "NB", -1)
 
