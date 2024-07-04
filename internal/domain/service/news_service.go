@@ -534,8 +534,15 @@ func listOfBlockedWords(titulo string) bool {
 		"Nota Baiana",
 		"NotaBaiana",
 		"notabaiana",
+<<<<<<< HEAD
 		"apple-touch-icon.png",
 		"Davidson pelo mundo:",
+=======
+		"apple-touch-icon.png", 
+		"Davidson pelo mundo", 
+		"Bolsonaro", 
+		"Lula",
+>>>>>>> 30db2e3c87893dde7509a272a95f6ee51b7d1ee8
 	}
 	for _, palavra := range palavras {
 		if strings.Contains(titulo, palavra) {
