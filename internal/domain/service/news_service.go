@@ -242,11 +242,11 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 		return entity.News{}, err
 	}
 
-	newtitle, err := s.ChangeTitleWithGemini(new.Title)
+	//newtitle, err := s.ChangeTitleWithGemini(new.Title)
 
-	if err == nil && newtitle != "" {
-		new.TitleAi = strings.TrimSpace(newtitle)
-	}
+	//if err == nil && newtitle != "" {
+	//	new.TitleAi = strings.TrimSpace(newtitle)
+	//}
 
 	_, err = s.newsrepository.Create(new)
 
