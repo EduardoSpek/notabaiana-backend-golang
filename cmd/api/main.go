@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
@@ -9,12 +12,22 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 )
 
-// func init() {
-// 	err := godotenv.Load(".env")
-// 	if err != nil {
-//         log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
-//     }
-// }
+func init() {
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
+	// }
+
+	err := os.MkdirAll("images", os.ModePerm)
+	if err != nil {
+		fmt.Println("Erro ao criar pasta:", err)
+	}
+
+	err = os.MkdirAll("images/banners", os.ModePerm)
+	if err != nil {
+		fmt.Println("Erro ao criar pasta:", err)
+	}
+}
 
 var list_pages = []string{
 	"https://www.bahianoticias.com.br",

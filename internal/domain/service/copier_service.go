@@ -19,27 +19,21 @@ func NewCopier(newsservice NewsService, crawlerservice CrawlerService) *CopierSe
 }
 
 func (c *CopierService) Start(rss []string, minutes time.Duration) {
-	
+
 	go c.Run(rss)
 
 	ticker := time.NewTicker(minutes * time.Minute)
-    defer ticker.Stop()
+	defer ticker.Stop()
 
-    for range ticker.C {
+	for range ticker.C {
 		go c.Run(rss)
 	}
 }
 
 func (c *CopierService) Run(list_pages []string) {
 
-	err := os.MkdirAll("images", os.ModePerm)
-	if err != nil {
-		fmt.Println("Erro ao criar pasta:", err)
-		return
-	}
-
 	cwd, err := os.Getwd()
-	
+
 	if err != nil {
 		fmt.Println("Erro ao obter o caminho do executável:", err)
 	}
@@ -48,7 +42,7 @@ func (c *CopierService) Run(list_pages []string) {
 
 	// rss := c.crawler_service.GetRSS(rss_url)
 	// category, _ := c.news_service.GetCategory(rss_url)
-	
+
 	//var page string
 
 	// for _, item := range rss.Channel.Items {
@@ -60,11 +54,10 @@ func (c *CopierService) Run(list_pages []string) {
 	// 		Visible: true,
 	// 		Category: category,
 	// 	}
-		
+
 	// 	lista = append(lista, n)
 	// }
 
-	
 	lista := c.news_service.CopierPage(list_pages)
 
 	for _, n := range lista {
@@ -72,24 +65,24 @@ func (c *CopierService) Run(list_pages []string) {
 		embed, text := c.news_service.GetEmded(n.Link)
 
 		if text != "" {
-			n.Text = text			
-		}	
-		
+			n.Text = text
+		}
+
 		if embed != "" {
 			n.Text += "<br><br>"
 			n.Text += embed
-		}		
+		}
 
 		new, err := c.news_service.CreateNews(n)
 
-		if err == nil {			
+		if err == nil {
 
 			outputPath, err := c.news_service.SaveImage(new.ID, n.Image, diretorio)
 
 			if err != nil {
 				fmt.Println("Erro ao Salvar Image: ", err)
-			}	
-			
+			}
+
 			fileExists := utils.FileExsists(outputPath)
 
 			if !fileExists {
@@ -98,7 +91,7 @@ func (c *CopierService) Run(list_pages []string) {
 				if err != nil {
 					fmt.Println("não foi possível atualizar o caminho da imagem")
 				}
-			}		
+			}
 		}
 	}
 }
