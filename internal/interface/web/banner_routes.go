@@ -5,5 +5,6 @@ import (
 )
 
 func (s *ServerWeb) BannerController(bannercontroller controllers.BannerController) {
-	s.router.HandleFunc("/banner/create", bannercontroller.CreateBannerUsingTheForm).Methods("POST")
+	s.router.HandleFunc("/banners/create", bannercontroller.CreateBannerUsingTheForm).Methods("POST")
+	s.router.HandleFunc("/banners", bannercontroller.BannerList).Methods("GET")
 }

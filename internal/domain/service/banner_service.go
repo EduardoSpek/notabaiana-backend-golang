@@ -6,6 +6,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
@@ -21,6 +22,24 @@ func NewBannerService(banner_repository port.BannerRepository, downloader port.I
 	return &BannerService{BannerRepository: banner_repository, imagedownloader: downloader}
 }
 
+func (bs *BannerService) FindAll() (interface{}, error) {
+
+	banners, err := bs.BannerRepository.FindAll()
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := struct {
+		Banners []entity.BannerDTO `json:"banners"`
+	}{
+		Banners: banners,
+	}
+
+	return result, nil
+
+}
+
 func (bs *BannerService) CreateBannerUsingTheForm(images []multipart.File, banner entity.BannerDTO) (entity.BannerDTO, error) {
 	newbanner := entity.NewBanner(banner)
 	_, err := newbanner.Validations()
@@ -29,7 +48,11 @@ func (bs *BannerService) CreateBannerUsingTheForm(images []multipart.File, banne
 		return entity.BannerDTO{}, err
 	}
 
+	fmt.Println("NewBanner: ", newbanner)
+
 	bannerWithImages := bs.SaveImages(images, *newbanner)
+
+	fmt.Println("bannerWithImages: ", bannerWithImages)
 
 	bannerCreated, err := bs.BannerRepository.Create(bannerWithImages)
 
@@ -53,11 +76,11 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 
 	for i, image := range images {
 
-		file = banner.ID + "_" + string(i)
+		file = banner.ID + "_" + strconv.Itoa(i) + ".jpg"
 		pathFile := diretorio + file
 
 		if i == 0 {
-			err = bs.SaveImageForm(image, diretorio, file, 920, 90)
+			err = bs.SaveImageForm(image, diretorio, file, 1300, 190)
 
 			if err != nil {
 				pathFile = ""
@@ -65,7 +88,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 
 			banner.Image1 = pathFile
 		} else if i == 1 {
-			err = bs.SaveImageForm(image, diretorio, file, 728, 90)
+			err = bs.SaveImageForm(image, diretorio, file, 726, 106)
 
 			if err != nil {
 				pathFile = ""
@@ -87,7 +110,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 	return banner
 }
 
-func (bs *BannerService) SaveImageForm(file multipart.File, diretorio, id string, width, height int) error {
+func (bs *BannerService) SaveImageForm(file multipart.File, diretorio, filename string, width, height int) error {
 
 	if file == nil {
 		return nil
@@ -95,7 +118,7 @@ func (bs *BannerService) SaveImageForm(file multipart.File, diretorio, id string
 
 	defer file.Close()
 
-	pathImage := diretorio + id + ".jpg"
+	pathImage := diretorio + filename
 
 	f, err := os.Create(pathImage)
 	if err != nil {

@@ -23,6 +23,25 @@ func NewBannerPostgresRepository(db_adapter port.DBAdapter) *BannerPostgresRepos
 	return &BannerPostgresRepository{db: db}
 }
 
+func (repo *BannerPostgresRepository) FindAll() ([]entity.BannerDTO, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var banners []entity.BannerDTO
+	repo.db.Model(&entity.Banner{}).Where("visible = true").Order("RANDOM()").Find(&banners)
+
+	if repo.db.Error != nil {
+		return []entity.BannerDTO{}, repo.db.Error
+	}
+
+	tx.Commit()
+
+	return banners, nil
+}
+
 func (repo *BannerPostgresRepository) GetByID(id string) (entity.BannerDTO, error) {
 
 	repo.mutex.RLock()

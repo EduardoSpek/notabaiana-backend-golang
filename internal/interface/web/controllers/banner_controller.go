@@ -7,7 +7,6 @@ import (
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -19,42 +18,31 @@ func NewBannerController(bannerservice service.BannerService) *BannerController 
 	return &BannerController{banner_service: bannerservice}
 }
 
-func (bc *BannerController) CreateBannerUsingTheForm(w http.ResponseWriter, r *http.Request) {
+func (bc *BannerController) BannerList(w http.ResponseWriter, r *http.Request) {
 
 	var msg map[string]any
-	token := r.FormValue("token")
 
-	if token == "" {
-		msg = map[string]any{
-			"ok":      false,
-			"message": "acesso não autorizado",
-			"erro":    "token é necessário",
-		}
-		ResponseJson(w, msg, http.StatusForbidden)
-		return
-	}
-
-	claims, err := utils.ValidateJWT(token)
+	banners, err := bc.banner_service.FindAll()
 
 	if err != nil {
 		msg = map[string]any{
 			"ok":      false,
-			"message": "acesso não autorizado",
-			"erro":    "token inválido",
-		}
-		ResponseJson(w, msg, http.StatusForbidden)
-		return
-	}
-
-	if !claims.Admin {
-		msg = map[string]any{
-			"ok":      false,
-			"message": "acesso não autorizado",
-			"erro":    "sem permissão de admin",
+			"message": "nenhum banner encontrado",
+			"erro":    "sem banners",
 		}
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
+
+	ResponseJson(w, banners, http.StatusOK)
+
+}
+
+func (bc *BannerController) CreateBannerUsingTheForm(w http.ResponseWriter, r *http.Request) {
+
+	var msg map[string]any
+
+	TokenVerifyByForm(w, r)
 
 	bannerInput, images, err := bc.GetBannerDataFromTheForm(r)
 
