@@ -15,15 +15,15 @@ var (
 
 // Input and Output DTO
 type BannerDTO struct {
-	ID      string
-	Title   string
-	Link    string
-	Html    string
-	Image1  string
-	Image2  string
-	Image3  string
-	Tag     string
-	Visible bool
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Link    string `json:"link"`
+	Html    string `json:"html"`
+	Image1  string `json:"banner_pc"`
+	Image2  string `json:"banner_tablet"`
+	Image3  string `json:"banner_mobile"`
+	Tag     string `json:"tag"`
+	Visible bool   `json:"visible"`
 }
 
 type Banner struct {

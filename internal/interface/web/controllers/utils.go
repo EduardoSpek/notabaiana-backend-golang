@@ -47,3 +47,25 @@ func TokenVerifyByForm(w http.ResponseWriter, r *http.Request) error {
 
 	return nil
 }
+func TokenVerifyByHeader(w http.ResponseWriter, r *http.Request) error {
+
+	tokenStr := r.Header.Get("Authorization")
+	if tokenStr == "" {
+		return ErrToken
+	}
+
+	tokenStr = tokenStr[len("Bearer "):]
+
+	claims, err := utils.ValidateJWT(tokenStr)
+
+	if err != nil {
+		return ErrToken
+	}
+
+	if !claims.Admin {
+		return ErrToken
+	}
+
+	return nil
+
+}
