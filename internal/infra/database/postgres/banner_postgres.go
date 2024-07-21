@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
@@ -210,10 +211,23 @@ func (repo *BannerPostgresRepository) Delete(id string) error {
 		return ErrBannerNotFound
 	}
 
-	utils.RemoveImage("." + banner.Image1)
-	utils.RemoveImage("." + banner.Image2)
-	utils.RemoveImage("." + banner.Image3)
+	del1 := utils.RemoveImage("." + banner.Image1)
 
+	if !del1 {
+		fmt.Println("Imagem 1 não deletada")
+	}
+
+	del2 := utils.RemoveImage("." + banner.Image2)
+
+	if !del2 {
+		fmt.Println("Imagem 2 não deletada")
+	}
+
+	del3 := utils.RemoveImage("." + banner.Image3)
+
+	if !del3 {
+		fmt.Println("Imagem 3 não deletada")
+	}
 	repo.db.Unscoped().Delete(banner)
 
 	tx.Commit()

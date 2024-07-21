@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -215,8 +214,6 @@ func (bc *BannerController) GetBannerDataFromTheForm(r *http.Request) (entity.Ba
 	html := r.FormValue("html")
 	tag := r.FormValue("tag")
 	visible, _ := strconv.ParseBool(r.FormValue("visible"))
-
-	fmt.Println("VISIBLE: ", visible)
 
 	// Parse the multipart form data
 	r.ParseMultipartForm(10 << 20) // 10 MB maximum
