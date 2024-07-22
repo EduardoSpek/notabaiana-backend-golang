@@ -63,12 +63,17 @@ func main() {
 	user_service := service.NewUserService(user_repo)
 	user_controller := controllers.NewUserController(*user_service)
 
+	banner_repo := database.NewBannerPostgresRepository(postgres)
+	banner_service := service.NewBannerService(banner_repo, imagedownloader)
+	banner_controller := controllers.NewBannerController(*banner_service)
+
 	server := web.NewServerWeb()
 
 	server.UserController(*user_controller)
 	server.TopController(*top_controller)
 	server.CrawlerController(*crawler_controller)
 	server.NewsController(*news_controller)
+	server.BannerController(*banner_controller)
 
 	go copier_service.Start(list_pages, 10)
 
