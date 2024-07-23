@@ -35,7 +35,7 @@ func (d *ImgDownloader) DownloadImage(url string) (image.Image, error) {
 
 func (d *ImgDownloader) ResizeAndSaveImage(img image.Image, width, height int, outputPath string) error {
 	// Redimensiona a imagem
-	resizedImg := resize.Resize(uint(width), uint(height), img, resize.Lanczos3)
+	resizedImg := resize.Resize(uint(width), 0, img, resize.Lanczos3)
 
 	// Cria o arquivo de saída
 	outputFile, err := os.Create(outputPath)
