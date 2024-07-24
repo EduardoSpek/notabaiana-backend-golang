@@ -234,3 +234,47 @@ func (repo *BannerPostgresRepository) Delete(id string) error {
 
 	return nil
 }
+
+func (repo *BannerPostgresRepository) DeleteAll(banners []entity.BannerDTO) error {
+
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	for _, b := range banners {
+
+		var banner entity.Banner
+		bannerSelected := repo.db.Model(&entity.Banner{}).Where("id = ?", b.ID).First(&banner)
+
+		if bannerSelected.Error != nil {
+			return ErrBannerNotFound
+		}
+
+		del1 := utils.RemoveImage("." + banner.Image1)
+
+		if !del1 {
+			fmt.Println("Imagem 1 não deletada")
+		}
+
+		del2 := utils.RemoveImage("." + banner.Image2)
+
+		if !del2 {
+			fmt.Println("Imagem 2 não deletada")
+		}
+
+		del3 := utils.RemoveImage("." + banner.Image3)
+
+		if !del3 {
+			fmt.Println("Imagem 3 não deletada")
+		}
+
+		repo.db.Unscoped().Delete(banner)
+
+	}
+
+	tx.Commit()
+
+	return nil
+}

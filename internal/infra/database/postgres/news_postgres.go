@@ -220,6 +220,27 @@ func (repo *NewsPostgresRepository) GetTotalNews() int {
 
 }
 
+func (repo *NewsPostgresRepository) AdminFindAll(page, limit int) ([]entity.News, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	offset := (page - 1) * limit
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var news []entity.News
+	repo.db.Model(&entity.News{}).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+
+	if repo.db.Error != nil {
+		return []entity.News{}, repo.db.Error
+	}
+
+	tx.Commit()
+
+	return news, nil
+}
+
 func (repo *NewsPostgresRepository) FindAll(page, limit int) ([]entity.News, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()

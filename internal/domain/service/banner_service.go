@@ -37,6 +37,16 @@ func (bs *BannerService) FindBanner(id string) (entity.BannerDTO, error) {
 	return banner, nil
 }
 
+func (bs *BannerService) AdminDeleteAll(banners []entity.BannerDTO) error {
+	err := bs.BannerRepository.DeleteAll(banners)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (bs *BannerService) Delete(id string) error {
 	err := bs.BannerRepository.Delete(id)
 

@@ -325,6 +325,31 @@ func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 
 }
 
+func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
+
+	//Limita o total de registros que deve ser retornado
+	if limit > LimitPerPage {
+		limit = LimitPerPage
+	}
+
+	news, _ := s.newsrepository.AdminFindAll(page, limit)
+
+	total := s.newsrepository.GetTotalNews()
+
+	pagination := s.Pagination(page, total)
+
+	result := struct {
+		List_news  []entity.News    `json:"news"`
+		Pagination map[string][]int `json:"pagination"`
+	}{
+		List_news:  news,
+		Pagination: pagination,
+	}
+
+	return result
+
+}
+
 func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 	//Limita o total de registros que deve ser retornado

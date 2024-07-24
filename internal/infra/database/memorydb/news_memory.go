@@ -47,6 +47,15 @@ func (r *NewsMemoryRepository) GetBySlug(slug string) (entity.News, error) {
 	return entity.News{}, ErrNotNewSlug
 }
 
+func (r *NewsMemoryRepository) AdminFindAll(page, limit int) ([]entity.News, error) {
+	var news []entity.News
+	for _, n := range r.Newsdb {
+		news = append(news, n)
+	}
+
+	return news, nil
+}
+
 func (r *NewsMemoryRepository) FindAll(page, limit int) ([]entity.News, error) {
 	var news []entity.News
 	for _, n := range r.Newsdb {

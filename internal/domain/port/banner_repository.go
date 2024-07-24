@@ -10,4 +10,5 @@ type BannerRepository interface {
 	FindAll() ([]entity.BannerDTO, error)
 	AdminFindAll() ([]entity.BannerDTO, error)
 	Delete(id string) error
+	DeleteAll(banners []entity.BannerDTO) error
 }

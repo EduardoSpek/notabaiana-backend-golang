@@ -403,3 +403,25 @@ func (c *NewsController) SearchNews(w http.ResponseWriter, r *http.Request) {
 	ResponseJson(w, listnews, http.StatusOK)
 
 }
+
+func (c *NewsController) AdminNews(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	pageStr := vars["page"]
+	qtdStr := vars["qtd"]
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(qtdStr)
+	if err != nil {
+		limit = 10
+	}
+
+	listnews := c.news_service.AdminFindAllNews(page, limit)
+
+	ResponseJson(w, listnews, http.StatusOK)
+
+}

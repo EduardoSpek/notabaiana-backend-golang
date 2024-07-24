@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -16,6 +17,41 @@ type BannerController struct {
 
 func NewBannerController(bannerservice service.BannerService) *BannerController {
 	return &BannerController{banner_service: bannerservice}
+}
+
+func (bc *BannerController) AdminDeleteAllBanner(w http.ResponseWriter, r *http.Request) {
+
+	var msg map[string]any
+	var ids []string
+	var banners []entity.BannerDTO
+
+	err := json.NewDecoder(r.Body).Decode(&ids)
+	if err != nil {
+		ResponseJson(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	for _, id := range ids {
+		banners = append(banners, entity.BannerDTO{
+			ID: id,
+		})
+	}
+
+	err = bc.banner_service.AdminDeleteAll(banners)
+
+	if err != nil {
+		ResponseJson(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	msg = map[string]any{
+		"ok":      true,
+		"message": "Todos os banners selecionados foram removidos",
+		"erro":    false,
+	}
+
+	ResponseJson(w, msg, http.StatusOK)
+
 }
 
 func (bc *BannerController) AdminBannerList(w http.ResponseWriter, r *http.Request) {

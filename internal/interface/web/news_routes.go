@@ -1,7 +1,10 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/controllers"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/middlewares"
 )
 
 func (s *ServerWeb) NewsController(newscontroller controllers.NewsController) {
@@ -14,6 +17,7 @@ func (s *ServerWeb) NewsController(newscontroller controllers.NewsController) {
 	s.router.HandleFunc("/news/busca/{page}", newscontroller.SearchNews).Methods("GET")
 	s.router.HandleFunc("/news/{slug}", newscontroller.GetNewsBySlug).Methods("GET")
 	s.router.HandleFunc("/news/{page}/{qtd}", newscontroller.News).Methods("GET")
-	s.router.HandleFunc("/news/create", newscontroller.CreateNewsUsingTheForm).Methods("POST")
-	s.router.HandleFunc("/update/news/{slug}", newscontroller.UpdateNewsUsingTheForm).Methods("POST")
+	s.router.Handle("/admin/news/{page}/{qtd}", middlewares.JwtMiddleware(http.HandlerFunc(newscontroller.AdminNews))).Methods("GET")
+	s.router.HandleFunc("/admin/news/create", newscontroller.CreateNewsUsingTheForm).Methods("POST")
+	s.router.HandleFunc("/admin/news/update/{slug}", newscontroller.UpdateNewsUsingTheForm).Methods("POST")
 }
