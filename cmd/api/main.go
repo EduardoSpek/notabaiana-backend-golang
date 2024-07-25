@@ -18,7 +18,13 @@ func init() {
 	// 	log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
 	// }
 
-	err := os.MkdirAll("images", os.ModePerm)
+	err := os.MkdirAll("files", os.ModePerm)
+	if err != nil {
+		fmt.Println("Erro ao criar pasta:", err)
+		return
+	}
+
+	err = os.MkdirAll("images", os.ModePerm)
 	if err != nil {
 		fmt.Println("Erro ao criar pasta:", err)
 	}

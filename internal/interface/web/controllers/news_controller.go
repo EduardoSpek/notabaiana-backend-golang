@@ -156,15 +156,21 @@ func (c *NewsController) NewsMake(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
-	imageURL := r.URL.Query().Get("image")
-	title := r.URL.Query().Get("title")
-	var numberLines int
+	var msg map[string]any
+	key := r.URL.Query().Get("key")
 
-	err := os.MkdirAll("files", os.ModePerm)
-	if err != nil {
-		fmt.Println("Erro ao criar pasta:", err)
+	if key != os.Getenv("KEY") {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "acesso não autorizado",
+			"erro":    "token é necessário",
+		}
+		ResponseJson(w, msg, http.StatusForbidden)
 		return
 	}
+
+	imageURL := r.URL.Query().Get("image")
+	title := r.URL.Query().Get("title")
 
 	cwd, err := os.Getwd()
 
@@ -173,11 +179,6 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	diretorio := strings.Replace(cwd, "test", "", -1) + "/files/"
-
-	totalWords := strings.Split(title, " ")
-	if len(totalWords) > 1 {
-		numberLines = len(totalWords) / 5
-	}
 
 	baseImgFile, err := os.Open(diretorio + "base_image.jpg")
 	if err != nil {
@@ -198,17 +199,18 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	distaceY := 220 + (int(numberLines) * 60)
-	resizedOverlay := utils.ResizeImage(overlayImg, 645, 405)
-	finalImg := utils.OverlayImage(baseImg, resizedOverlay, 36, distaceY)
-
-	fontFace, err := utils.LoadFont(diretorio+"roboto-latin-700-normal.ttf", 42)
+	fontFace, err := utils.LoadFont("./files/roboto-latin-700-normal.ttf", 46)
 	if err != nil {
 		http.Error(w, "Could not load font", http.StatusInternalServerError)
 		return
 	}
 
-	utils.AddLabel(finalImg, 26, 170, title, fontFace)
+	marginTop := 180
+	distaceY := utils.GetHeightPositionImage(marginTop+50, title, fontFace)
+	resizedOverlay := utils.ResizeImage(overlayImg, 645, 405)
+	finalImg := utils.OverlayImage(baseImg, resizedOverlay, 36, distaceY)
+
+	utils.AddLabel(finalImg, 36, marginTop, title, fontFace)
 
 	w.Header().Set("Content-Disposition", "attachment; filename=final_image.jpg")
 	w.Header().Set("Content-Type", "image/jpeg")
