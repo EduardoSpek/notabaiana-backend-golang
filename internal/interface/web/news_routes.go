@@ -20,4 +20,6 @@ func (s *ServerWeb) NewsController(newscontroller controllers.NewsController) {
 	s.router.Handle("/admin/news/{page}/{qtd}", middlewares.JwtMiddleware(http.HandlerFunc(newscontroller.AdminNews))).Methods("GET")
 	s.router.HandleFunc("/admin/news/create", newscontroller.CreateNewsUsingTheForm).Methods("POST")
 	s.router.HandleFunc("/admin/news/update/{slug}", newscontroller.UpdateNewsUsingTheForm).Methods("POST")
+	s.router.Handle("/admin/news/deleteall", middlewares.JwtMiddleware(http.HandlerFunc(newscontroller.AdminDeleteAllNews))).Methods("DELETE")
+	s.router.Handle("/admin/news/{id}", middlewares.JwtMiddleware(http.HandlerFunc(newscontroller.DeleteNews))).Methods("DELETE")
 }

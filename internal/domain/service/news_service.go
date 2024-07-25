@@ -62,6 +62,25 @@ func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloa
 	return &NewsService{newsrepository: repository, imagedownloader: downloader, hitsrepository: hits}
 }
 
+func (s *NewsService) AdminDeleteAll(banners []entity.News) error {
+	err := s.newsrepository.DeleteAll(banners)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *NewsService) Delete(id string) error {
+	err := s.newsrepository.Delete(id)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *NewsService) StartCleanNews(minutes time.Duration) {
 
 	go s.CleanNews()

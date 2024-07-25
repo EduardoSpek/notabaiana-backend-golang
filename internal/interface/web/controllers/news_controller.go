@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"image/jpeg"
@@ -26,6 +27,83 @@ type NewsController struct {
 
 func NewNewsController(newsservice service.NewsService) *NewsController {
 	return &NewsController{news_service: newsservice}
+}
+
+func (c *NewsController) AdminDeleteAllNews(w http.ResponseWriter, r *http.Request) {
+
+	var msg map[string]any
+	var ids []string
+	var news []entity.News
+
+	err := json.NewDecoder(r.Body).Decode(&ids)
+	if err != nil {
+		ResponseJson(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	for _, id := range ids {
+		news = append(news, entity.News{
+			ID: id,
+		})
+	}
+
+	err = c.news_service.AdminDeleteAll(news)
+
+	if err != nil {
+		ResponseJson(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	msg = map[string]any{
+		"ok":      true,
+		"message": "As notícias selecionados foram removidas",
+		"erro":    false,
+	}
+
+	ResponseJson(w, msg, http.StatusOK)
+
+}
+
+func (c *NewsController) DeleteNews(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var msg map[string]any
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	err := TokenVerifyByHeader(w, r)
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": err.Error(),
+			"erro":    "não autorizado",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	err = c.news_service.Delete(id)
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "A notícia não pode ser excluída",
+			"erro":    err.Error(),
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	msg = map[string]any{
+		"ok":      true,
+		"message": "Notícia excluída",
+		"erro":    false,
+	}
+
+	ResponseJson(w, msg, http.StatusOK)
+
 }
 
 func (c *NewsController) CleanNews(w http.ResponseWriter, r *http.Request) {

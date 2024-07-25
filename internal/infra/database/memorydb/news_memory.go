@@ -125,6 +125,13 @@ func (r *NewsMemoryRepository) GetTotalNewsByCategory(category string) int {
 	return total
 }
 
+func (r *NewsMemoryRepository) Delete(id string) error {
+	return nil
+}
+func (r *NewsMemoryRepository) DeleteAll(news []entity.News) error {
+	return nil
+}
+
 func (r *NewsMemoryRepository) GetTotalNews() int {
 	total := len(r.Newsdb)
 

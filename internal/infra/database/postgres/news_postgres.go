@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -16,6 +17,7 @@ import (
 var (
 	ErrNewsExists          = errors.New("notícia já cadastrada com este título")
 	ErrNewsNotExistsWithID = errors.New("não existe notícia com este ID")
+	ErrNewsNotFound        = errors.New("notícia não encontrada")
 )
 
 type NewsPostgresRepository struct {
@@ -343,27 +345,27 @@ func (repo *NewsPostgresRepository) ClearViews() error {
 	return nil
 }
 
-func (repo *NewsPostgresRepository) Delete(id string) error {
-	repo.mutex.Lock()
-	defer repo.mutex.Unlock()
+// func (repo *NewsPostgresRepository) Delete(id string) error {
+// 	repo.mutex.Lock()
+// 	defer repo.mutex.Unlock()
 
-	tx := repo.db.Begin()
-	defer tx.Rollback()
+// 	tx := repo.db.Begin()
+// 	defer tx.Rollback()
 
-	var news entity.News
+// 	var news entity.News
 
-	// Utilize o método `Delete` e passe o ID do registro como argumento
-	repo.db.Model(&news).Where("id = ?", id).Delete(&news)
+// 	// Utilize o método `Delete` e passe o ID do registro como argumento
+// 	repo.db.Model(&news).Where("id = ?", id).Delete(&news)
 
-	if repo.db.Error != nil {
-		return nil
-	}
+// 	if repo.db.Error != nil {
+// 		return nil
+// 	}
 
-	tx.Commit()
+// 	tx.Commit()
 
-	return nil
+// 	return nil
 
-}
+// }
 
 func (repo *NewsPostgresRepository) ClearImagePath(id string) error {
 	repo.mutex.Lock()
@@ -419,4 +421,63 @@ func (repo *NewsPostgresRepository) NewsExists(title string) error {
 	}
 
 	return ErrNewsExists
+}
+
+func (repo *NewsPostgresRepository) Delete(id string) error {
+
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var news entity.News
+	newsSelected := repo.db.Model(&entity.News{}).Where("id = ?", id).First(&news)
+
+	if newsSelected.Error != nil {
+		return ErrNewsNotFound
+	}
+
+	del1 := utils.RemoveImage("." + news.Image)
+
+	if !del1 {
+		fmt.Println("Imagem não deletada")
+	}
+	repo.db.Unscoped().Delete(news)
+
+	tx.Commit()
+
+	return nil
+}
+
+func (repo *NewsPostgresRepository) DeleteAll(news []entity.News) error {
+
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	for _, b := range news {
+
+		var news entity.News
+		newsSelected := repo.db.Model(&entity.News{}).Where("id = ?", b.ID).First(&news)
+
+		if newsSelected.Error != nil {
+			return ErrNewsNotFound
+		}
+
+		del1 := utils.RemoveImage("." + news.Image)
+
+		if !del1 {
+			fmt.Println("Imagem da notícia não deletada")
+		}
+
+		repo.db.Unscoped().Delete(news)
+
+	}
+
+	tx.Commit()
+
+	return nil
 }
