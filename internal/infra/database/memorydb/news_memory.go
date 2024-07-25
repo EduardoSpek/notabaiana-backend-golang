@@ -132,6 +132,13 @@ func (r *NewsMemoryRepository) GetTotalNews() int {
 
 }
 
+func (r *NewsMemoryRepository) GetTotalNewsVisible() int {
+	total := len(r.Newsdb)
+
+	return total
+
+}
+
 func (r *NewsMemoryRepository) FindAllViews() ([]entity.News, error) {
 	var news []entity.News
 	for _, n := range r.Newsdb {

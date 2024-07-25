@@ -17,6 +17,7 @@ type NewsRepository interface {
 	SearchNews(page int, str_search string) []entity.News
 	ClearImagePath(id string) error
 	GetTotalNews() int
+	GetTotalNewsVisible() int
 	GetTotalNewsBySearch(str_search string) int
 	GetTotalNewsByCategory(category string) int
 	NewsMake() (entity.News, error)

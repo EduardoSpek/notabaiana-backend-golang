@@ -359,7 +359,7 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 	news, _ := s.newsrepository.FindAll(page, limit)
 
-	total := s.newsrepository.GetTotalNews()
+	total := s.newsrepository.GetTotalNewsVisible()
 
 	pagination := s.Pagination(page, total)
 

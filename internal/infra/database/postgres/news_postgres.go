@@ -214,6 +214,17 @@ func (repo *NewsPostgresRepository) GetTotalNews() int {
 	defer repo.mutex.RUnlock()
 
 	var total int64
+	repo.db.Model(&entity.News{}).Count(&total)
+
+	return int(total)
+
+}
+
+func (repo *NewsPostgresRepository) GetTotalNewsVisible() int {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	var total int64
 	repo.db.Model(&entity.News{}).Where("visible = true").Count(&total)
 
 	return int(total)
