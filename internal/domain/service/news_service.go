@@ -134,6 +134,7 @@ func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput enti
 	oldnew.Title = newsInput.Title
 	oldnew.Text = newsInput.Text
 	oldnew.Visible = newsInput.Visible
+	oldnew.TopStory = newsInput.TopStory
 	oldnew.Category = newsInput.Category
 
 	newNews := entity.UpdateNews(oldnew)

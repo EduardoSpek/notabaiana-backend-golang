@@ -111,6 +111,7 @@ func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error
 		"title":      news.Title,
 		"text":       news.Text,
 		"visible":    news.Visible,
+		"topstory":   news.TopStory,
 		"category":   news.Category,
 		"slug":       news.Slug,
 		"link":       news.Link,
