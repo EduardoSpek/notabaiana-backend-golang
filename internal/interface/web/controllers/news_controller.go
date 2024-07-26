@@ -227,6 +227,7 @@ func (s *NewsController) GetNewsDataFromTheForm(r *http.Request) (entity.News, m
 	category := r.FormValue("category")
 	id := r.FormValue("id")
 	visible, _ := strconv.ParseBool(r.FormValue("visible"))
+	topstory, _ := strconv.ParseBool(r.FormValue("topstory"))
 
 	// Parse the multipart form data
 	r.ParseMultipartForm(10 << 20) // 10 MB maximum
@@ -239,6 +240,7 @@ func (s *NewsController) GetNewsDataFromTheForm(r *http.Request) (entity.News, m
 		Title:    title,
 		Text:     text,
 		Visible:  visible,
+		TopStory: topstory,
 		Category: category,
 		Slug:     slug,
 	}

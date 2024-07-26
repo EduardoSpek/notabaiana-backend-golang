@@ -22,6 +22,7 @@ type News struct {
 	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
 	Visible   bool      `gorm:"column:visible;" json:"visible"`
+	TopStory  bool      `gorm:"column:topstory;" json:"topstory"`
 	Views     int       `gorm:"column:views;default:0" json:"views"`
 	Category  string    `gorm:"column:category" json:"category"`
 	Make      bool      `gorm:"column:make;default:false" json:"make"`
@@ -48,6 +49,7 @@ func NewNews(news News) *News {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Visible:   news.Visible,
+		TopStory:  false,
 		Category:  news.Category,
 	}
 }
@@ -72,6 +74,7 @@ func UpdateNews(news News) *News {
 		Slug:      slug,
 		UpdatedAt: time.Now(),
 		Visible:   news.Visible,
+		TopStory:  news.TopStory,
 		Category:  news.Category,
 		Make:      news.Make,
 	}

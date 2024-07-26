@@ -61,7 +61,7 @@ func (repo *NewsPostgresRepository) NewsMake() (entity.News, error) {
 
 	var news entity.News
 
-	result := repo.db.Model(&entity.News{}).Where("visible = true AND Make = false AND category = 'famosos' AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("created_at DESC").Limit(1).First(&news)
+	result := repo.db.Model(&entity.News{}).Where("((visible = true AND category='famosos' AND topstory = false) OR (topstory = true AND visible = true)) AND Make = false AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("created_at DESC").Limit(1).First(&news)
 
 	if result.Error != nil {
 		return entity.News{}, result.Error
@@ -344,28 +344,6 @@ func (repo *NewsPostgresRepository) ClearViews() error {
 
 	return nil
 }
-
-// func (repo *NewsPostgresRepository) Delete(id string) error {
-// 	repo.mutex.Lock()
-// 	defer repo.mutex.Unlock()
-
-// 	tx := repo.db.Begin()
-// 	defer tx.Rollback()
-
-// 	var news entity.News
-
-// 	// Utilize o método `Delete` e passe o ID do registro como argumento
-// 	repo.db.Model(&news).Where("id = ?", id).Delete(&news)
-
-// 	if repo.db.Error != nil {
-// 		return nil
-// 	}
-
-// 	tx.Commit()
-
-// 	return nil
-
-// }
 
 func (repo *NewsPostgresRepository) ClearImagePath(id string) error {
 	repo.mutex.Lock()

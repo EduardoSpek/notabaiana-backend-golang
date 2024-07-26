@@ -753,6 +753,7 @@ func (s *NewsService) GetNewsFromPage(link string) []entity.News {
 			Image:    images[i],
 			Link:     links[i],
 			Visible:  true,
+			TopStory: false,
 			Category: category,
 		})
 		lista = append(lista, *new)
