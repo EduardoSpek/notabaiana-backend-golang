@@ -81,7 +81,7 @@ func main() {
 	server.NewsController(*news_controller)
 	server.BannerController(*banner_controller)
 
-	go copier_service.Start(list_pages, 10)
+	go copier_service.Start(list_pages, 3)
 
 	//Função para gerar as top notícias a cada 60 minutos
 	go top_service.Start(60)
