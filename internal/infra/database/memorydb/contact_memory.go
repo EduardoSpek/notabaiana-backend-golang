@@ -78,4 +78,13 @@ func (c *ContactMemoryRepository) AdminDelete(id string) error {
 	}
 }
 
-func (c *ContactMemoryRepository) AdminDeleteAll() {}
+func (c *ContactMemoryRepository) AdminDeleteAll(contacts []entity.ContactDTO) error {
+
+	for _, cc := range contacts {
+
+		delete(c.db, cc.ID)
+
+	}
+
+	return nil
+}

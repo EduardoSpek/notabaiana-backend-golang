@@ -87,7 +87,7 @@ func TestContactService(t *testing.T) {
 	repo := database.NewContactMemoryRepository()
 	contato_service := service.NewContactService(repo)
 
-	var id string
+	var id, id2 string
 
 	t.Run("Deve Criar um novo contato", func(t *testing.T) {
 		dto := entity.ContactDTO{
@@ -126,6 +126,8 @@ func TestContactService(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+
+		id2 = newcontato.ID
 
 		if !isStruct(newcontato) {
 			t.Error()
@@ -185,4 +187,40 @@ func TestContactService(t *testing.T) {
 		}
 
 	})
+
+	t.Run("Deve deletar os contatos informados", func(t *testing.T) {
+		var contacts_list []entity.ContactDTO
+
+		c1 := entity.ContactDTO{
+			ID: id,
+		}
+
+		contacts_list = append(contacts_list, c1)
+
+		c2 := entity.ContactDTO{
+			ID: id2,
+		}
+
+		contacts_list = append(contacts_list, c2)
+
+		err := contato_service.AdminDeleteAll(contacts_list)
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		lista, err := contato_service.AdminFindAll()
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		esperado := 0
+
+		if len(lista) < esperado {
+			t.Errorf("Esperado um total de %d e retornado %d", esperado, len(lista))
+		}
+
+	})
+
 }

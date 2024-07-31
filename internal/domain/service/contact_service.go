@@ -9,25 +9,25 @@ type ContactService struct {
 	ContactRepository port.ContactRepository
 }
 
-func NewContactService(contato_repository port.ContactRepository) *ContactService {
-	return &ContactService{ContactRepository: contato_repository}
+func NewContactService(contact_repository port.ContactRepository) *ContactService {
+	return &ContactService{ContactRepository: contact_repository}
 }
 
-func (cs *ContactService) AdminCreate(contato entity.ContactDTO) (entity.ContactDTO, error) {
+func (cs *ContactService) AdminCreate(contact entity.ContactDTO) (entity.ContactDTO, error) {
 
-	newcontato := entity.NewContact(contato)
-	_, err := newcontato.Validations()
-
-	if err != nil {
-		return entity.ContactDTO{}, err
-	}
-
-	contato, err = cs.ContactRepository.AdminCreate(*newcontato)
+	newcontact := entity.NewContact(contact)
+	_, err := newcontact.Validations()
 
 	if err != nil {
 		return entity.ContactDTO{}, err
 	}
-	return contato, nil
+
+	contact, err = cs.ContactRepository.AdminCreate(*newcontact)
+
+	if err != nil {
+		return entity.ContactDTO{}, err
+	}
+	return contact, nil
 }
 
 func (cs *ContactService) AdminFindAll() ([]entity.ContactDTO, error) {
@@ -42,17 +42,27 @@ func (cs *ContactService) AdminFindAll() ([]entity.ContactDTO, error) {
 
 func (cs *ContactService) AdminGetByID(id string) (entity.ContactDTO, error) {
 
-	contato, err := cs.ContactRepository.AdminGetByID(id)
+	contact, err := cs.ContactRepository.AdminGetByID(id)
 
 	if err != nil {
 		return entity.ContactDTO{}, err
 	}
-	return contato, nil
+	return contact, nil
 }
 
 func (cs *ContactService) AdminDelete(id string) error {
 
 	err := cs.ContactRepository.AdminDelete(id)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (cs *ContactService) AdminDeleteAll(contacts []entity.ContactDTO) error {
+
+	err := cs.ContactRepository.AdminDeleteAll(contacts)
 
 	if err != nil {
 		return err
