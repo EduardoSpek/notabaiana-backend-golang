@@ -1,12 +1,16 @@
 package test
 
 import (
+	"log"
 	"reflect"
 	"testing"
 
+	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
-	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/memorydb"
+	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
+	"github.com/joho/godotenv"
 )
 
 func isStruct(v interface{}) bool {
@@ -36,7 +40,7 @@ func isSliceOfStructs(v interface{}) bool {
 func TestContactEntity(t *testing.T) {
 	t.Parallel()
 
-	contatoDTO := entity.ContactDTO{
+	contactDTO := entity.ContactDTO{
 		Name:     "Eduardo Spek",
 		Email:    "eu@vc.com",
 		Title:    "Estou com uma dúvida Loren ipsun dolor sit iamet",
@@ -44,9 +48,9 @@ func TestContactEntity(t *testing.T) {
 		Answered: false,
 	}
 
-	contato := entity.NewContact(contatoDTO)
+	contact := entity.NewContact(contactDTO)
 
-	_, err := contato.Validations()
+	_, err := contact.Validations()
 
 	if err != nil {
 		t.Error(err)
@@ -55,22 +59,22 @@ func TestContactEntity(t *testing.T) {
 	testcases := []TestCase{
 		{
 			Esperado:  "Eduardo Spek",
-			Recebido:  contato.Name,
+			Recebido:  contact.Name,
 			Descricao: "Validação do Name",
 		},
 		{
 			Esperado:  "Estou com uma dúvida Loren ipsun dolor sit iamet",
-			Recebido:  contato.Title,
+			Recebido:  contact.Title,
 			Descricao: "Validação do Title",
 		},
 		{
 			Esperado:  "eu@vc.com",
-			Recebido:  contato.Email,
+			Recebido:  contact.Email,
 			Descricao: "Validação do Email",
 		},
 		{
 			Esperado:  false,
-			Recebido:  contato.Answered,
+			Recebido:  contact.Answered,
 			Descricao: "Respondido?",
 		},
 	}
@@ -84,12 +88,19 @@ func TestContactEntity(t *testing.T) {
 func TestContactService(t *testing.T) {
 	t.Parallel()
 
-	repo := database.NewContactMemoryRepository()
-	contato_service := service.NewContactService(repo)
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
+	}
 
-	var id, id2 string
+	postgres := adapter.NewPostgresAdapter()
+	repo := database.NewContactPostgresRepository(postgres)
+	imagedownloader := utils.NewImgDownloader()
+	contact_service := service.NewContactService(repo, imagedownloader)
 
-	t.Run("Deve Criar um novo contato", func(t *testing.T) {
+	var id, id2, id3 string
+
+	t.Run("Deve Criar um novo contact", func(t *testing.T) {
 		dto := entity.ContactDTO{
 			Name:     "Eduardo Spek",
 			Email:    "eu@vc.com.br",
@@ -98,21 +109,25 @@ func TestContactService(t *testing.T) {
 			Answered: false,
 		}
 
-		newcontato, err := contato_service.AdminCreate(dto)
+		newcontact, err := contact_service.AdminCreate(dto)
 
 		if err != nil {
 			t.Error(err)
 		}
 
-		id = newcontato.ID
+		id = newcontact.ID
 
-		if !isStruct(newcontato) {
+		if newcontact.ID == "" {
+			t.Error("ID vazio")
+		}
+
+		if !isStruct(newcontact) {
 			t.Error()
 		}
 
 	})
 
-	t.Run("Deve Criar um novo contato 2", func(t *testing.T) {
+	t.Run("Deve Criar um novo contact 2", func(t *testing.T) {
 		dto := entity.ContactDTO{
 			Name:     "Thaís Freire",
 			Email:    "thais@freire.com.br",
@@ -121,22 +136,45 @@ func TestContactService(t *testing.T) {
 			Answered: true,
 		}
 
-		newcontato, err := contato_service.AdminCreate(dto)
+		newcontact, err := contact_service.AdminCreate(dto)
 
 		if err != nil {
 			t.Error(err)
 		}
 
-		id2 = newcontato.ID
+		id2 = newcontact.ID
 
-		if !isStruct(newcontato) {
+		if !isStruct(newcontact) {
 			t.Error()
 		}
 
 	})
 
-	t.Run("Deve listar os contatos", func(t *testing.T) {
-		lista, err := contato_service.AdminFindAll()
+	t.Run("Deve criar um novo contact 3", func(t *testing.T) {
+		dto := entity.ContactDTO{
+			Name:     "Nathan Freire",
+			Email:    "nathan@freire.com.br",
+			Title:    "Preciso de ajuda",
+			Text:     "Loren ipsun sit iamet sit iamet sit iamet sit iamet sit iamet sit iamet",
+			Answered: false,
+		}
+
+		newcontact, err := contact_service.AdminCreate(dto)
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		id3 = newcontact.ID
+
+		if !isStruct(newcontact) {
+			t.Error()
+		}
+
+	})
+
+	t.Run("Deve listar os contacts", func(t *testing.T) {
+		lista, err := contact_service.AdminFindAll()
 
 		if err != nil {
 			t.Error(err)
@@ -154,27 +192,31 @@ func TestContactService(t *testing.T) {
 
 	})
 
-	t.Run("Deve obter o contato informado por ID", func(t *testing.T) {
-		contato, err := contato_service.AdminGetByID(id)
+	t.Run("Deve obter o contact informado por ID", func(t *testing.T) {
+		contact, err := contact_service.AdminGetByID(id)
 
 		if err != nil {
 			t.Error(err)
 		}
 
-		if isSliceOfStructs(contato) {
-			t.Error(contato)
+		if contact.ID == "" {
+			t.Error("ID vazio")
+		}
+
+		if isSliceOfStructs(contact) {
+			t.Error(contact)
 		}
 
 	})
 
-	t.Run("Deve deletar o contato por ID", func(t *testing.T) {
-		err := contato_service.AdminDelete(id)
+	t.Run("Deve deletar o contact por ID", func(t *testing.T) {
+		err := contact_service.AdminDelete(id)
 
 		if err != nil {
 			t.Error(err)
 		}
 
-		lista, err := contato_service.AdminFindAll()
+		lista, err := contact_service.AdminFindAll()
 
 		if err != nil {
 			t.Error(err)
@@ -188,28 +230,28 @@ func TestContactService(t *testing.T) {
 
 	})
 
-	t.Run("Deve deletar os contatos informados", func(t *testing.T) {
+	t.Run("Deve deletar os contacts informados", func(t *testing.T) {
 		var contacts_list []entity.ContactDTO
 
 		c1 := entity.ContactDTO{
-			ID: id,
+			ID: id2,
 		}
 
 		contacts_list = append(contacts_list, c1)
 
 		c2 := entity.ContactDTO{
-			ID: id2,
+			ID: id3,
 		}
 
 		contacts_list = append(contacts_list, c2)
 
-		err := contato_service.AdminDeleteAll(contacts_list)
+		err := contact_service.AdminDeleteAll(contacts_list)
 
 		if err != nil {
 			t.Error(err)
 		}
 
-		lista, err := contato_service.AdminFindAll()
+		lista, err := contact_service.AdminFindAll()
 
 		if err != nil {
 			t.Error(err)

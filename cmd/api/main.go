@@ -33,6 +33,11 @@ func init() {
 	if err != nil {
 		fmt.Println("Erro ao criar pasta:", err)
 	}
+
+	err = os.MkdirAll("images/contacts", os.ModePerm)
+	if err != nil {
+		fmt.Println("Erro ao criar pasta:", err)
+	}
 }
 
 var list_pages = []string{

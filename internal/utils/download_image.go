@@ -10,6 +10,8 @@ import (
 	"github.com/nfnt/resize"
 )
 
+var image_dimensions_limit = [2]int{1280, 1280}
+
 type ImgDownloader struct{}
 
 func NewImgDownloader() *ImgDownloader {
@@ -31,6 +33,40 @@ func (d *ImgDownloader) DownloadImage(url string) (image.Image, error) {
 	}
 
 	return img, nil
+}
+
+func (d *ImgDownloader) SaveImage(img image.Image, width, height int, outputPath string) error {
+
+	// Obter as dimensões da imagem original
+	srcWidth := img.Bounds().Max.X
+	srcHeight := img.Bounds().Max.Y
+
+	var resizedImg image.Image
+
+	if srcWidth > image_dimensions_limit[0] {
+		// Redimensiona a imagem
+		resizedImg = resize.Resize(uint(width), 0, img, resize.Lanczos3)
+	}
+
+	if srcHeight > image_dimensions_limit[1] {
+		// Redimensiona a imagem
+		resizedImg = resize.Resize(0, uint(height), img, resize.Lanczos3)
+	}
+
+	// Cria o arquivo de saída
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+
+	// Salva a imagem redimensionada no arquivo
+	err = jpeg.Encode(outputFile, resizedImg, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *ImgDownloader) ResizeAndSaveImage(img image.Image, width, height int, outputPath string) error {
