@@ -17,13 +17,14 @@ var (
 
 // Input and Output DTO
 type ContactDTO struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Title    string `json:"title"`
-	Text     string `json:"text"`
-	Image    string `json:"image"`
-	Answered bool   `json:"answered"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Title     string    `json:"title"`
+	Text      string    `json:"text"`
+	Image     string    `json:"image"`
+	Answered  bool      `json:"answered"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Contact struct {

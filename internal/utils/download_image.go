@@ -42,6 +42,7 @@ func (d *ImgDownloader) SaveImage(img image.Image, width, height int, outputPath
 	srcHeight := img.Bounds().Max.Y
 
 	var resizedImg image.Image
+	resizedImg = img
 
 	if srcWidth > image_dimensions_limit[0] {
 		// Redimensiona a imagem
