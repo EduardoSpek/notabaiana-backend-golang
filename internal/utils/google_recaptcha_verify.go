@@ -15,7 +15,7 @@ func GoogleRecaptchaVerify(r *http.Request) bool {
 	// Faça uma solicitação POST para a API de verificação do reCAPTCHA v3 do Google
 	response, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify",
 		map[string][]string{
-			"secret":   {os.Getenv("KEY_GOOGLE_RECAPTCHA_LOCAL")},
+			"secret":   {os.Getenv("KEY_GOOGLE_RECAPTCHA")},
 			"response": {token},
 		})
 
