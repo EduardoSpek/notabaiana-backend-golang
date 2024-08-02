@@ -33,6 +33,11 @@ func init() {
 	if err != nil {
 		fmt.Println("Erro ao criar pasta:", err)
 	}
+
+	err = os.MkdirAll("images/contacts", os.ModePerm)
+	if err != nil {
+		fmt.Println("Erro ao criar pasta:", err)
+	}
 }
 
 var list_pages = []string{
@@ -73,6 +78,10 @@ func main() {
 	banner_service := service.NewBannerService(banner_repo, imagedownloader)
 	banner_controller := controllers.NewBannerController(*banner_service)
 
+	contact_repo := database.NewContactPostgresRepository(postgres)
+	contact_service := service.NewContactService(contact_repo, imagedownloader)
+	contact_controller := controllers.NewContactController(*contact_service)
+
 	server := web.NewServerWeb()
 
 	server.UserController(*user_controller)
@@ -80,6 +89,7 @@ func main() {
 	server.CrawlerController(*crawler_controller)
 	server.NewsController(*news_controller)
 	server.BannerController(*banner_controller)
+	server.ContactController(*contact_controller)
 
 	go copier_service.Start(list_pages, 3)
 
