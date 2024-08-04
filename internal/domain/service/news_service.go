@@ -625,7 +625,7 @@ func listOfBlockedWords(titulo string) bool {
 		"Govern", 
 		"sancio", 
 		"Minist", 
-		"minist", 
+		"minist"
 	}
 	for _, palavra := range palavras {
 		if strings.Contains(titulo, palavra) {
