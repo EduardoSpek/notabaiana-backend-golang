@@ -14,11 +14,9 @@ import (
 )
 
 func isStruct(v interface{}) bool {
-	// Obtendo o tipo da variável
-	t := reflect.TypeOf(v)
 
 	// Verificando se o tipo é uma struct
-	return t.Kind() == reflect.Struct
+	return reflect.TypeOf(v).Kind() == reflect.Struct
 }
 
 func isSliceOfStructs(v interface{}) bool {
