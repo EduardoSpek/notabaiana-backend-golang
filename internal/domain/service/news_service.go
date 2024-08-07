@@ -257,6 +257,24 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	return new, nil
 }
 
+func (s *NewsService) AdminGetNewsBySlug(slug string) (entity.News, error) {
+
+	// err := s.Hit(slug)
+
+	// if err != nil {
+	// 	return entity.News{}, err
+	// }
+
+	new, err := s.newsrepository.AdminGetBySlug(slug)
+
+	if err != nil {
+		return entity.News{}, err
+	}
+
+	return new, nil
+
+}
+
 func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
 
 	// err := s.Hit(slug)
@@ -612,6 +630,7 @@ func listOfBlockedWords(titulo string) bool {
 		"petista",
 		"Chapa",
 		"chapa",
+		"PRD",
 	}
 	for _, palavra := range palavras {
 		if strings.Contains(titulo, palavra) {
