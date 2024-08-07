@@ -38,6 +38,14 @@ func (r *NewsMemoryRepository) Create(news entity.News) (entity.News, error) {
 	r.Newsdb[news.ID] = news
 	return news, nil
 }
+func (r *NewsMemoryRepository) AdminGetBySlug(slug string) (entity.News, error) {
+	for _, n := range r.Newsdb {
+		if slug == n.Slug {
+			return n, nil
+		}
+	}
+	return entity.News{}, ErrNotNewSlug
+}
 func (r *NewsMemoryRepository) GetBySlug(slug string) (entity.News, error) {
 	for _, n := range r.Newsdb {
 		if slug == n.Slug {

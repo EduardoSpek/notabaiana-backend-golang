@@ -105,7 +105,7 @@ func (s *NewsService) NewsMake() (interface{}, error) {
 
 func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput entity.News) (entity.News, error) {
 
-	oldnew, err := s.newsrepository.GetBySlug(newsInput.Slug)
+	oldnew, err := s.newsrepository.AdminGetBySlug(newsInput.Slug)
 
 	if err != nil {
 		return entity.News{}, err
@@ -591,7 +591,8 @@ func listOfBlockedWords(titulo string) bool {
 		"Jerônimo",
 		"LGBT",
 		"Jaques Wagner",
-		"Bolsonaro",
+		"Bolsonar",
+		"bolsonar",
 		"PL",
 		"Govern",
 		"govern",
@@ -606,6 +607,11 @@ func listOfBlockedWords(titulo string) bool {
 		"Drag Queen",
 		"boyceta",
 		"mulher trans",
+		"Caetano Veloso",
+		"Gilberto Gil",
+		"petista",
+		"Chapa",
+		"chapa",
 	}
 	for _, palavra := range palavras {
 		if strings.Contains(titulo, palavra) {

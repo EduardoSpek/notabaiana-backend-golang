@@ -11,6 +11,7 @@ type NewsRepository interface {
 	FindRecent() (entity.News, error)
 	NewsExists(title string) error
 	GetBySlug(slug string) (entity.News, error)
+	AdminGetBySlug(slug string) (entity.News, error)
 	NewsTruncateTable() error
 	FindAllViews() ([]entity.News, error)
 	ClearViews() error

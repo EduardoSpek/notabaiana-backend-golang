@@ -148,6 +148,33 @@ func (repo *NewsPostgresRepository) GetById(id string) (entity.News, error) {
 	return news, nil
 }
 
+func (repo *NewsPostgresRepository) AdminGetBySlug(slug string) (entity.News, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var news entity.News
+	result := repo.db.Model(&entity.News{}).Where("slug = ?", slug).First(&news)
+
+	if result.Error != nil {
+		return entity.News{}, result.Error
+	}
+
+	news.Views += 1
+
+	result = repo.db.Save(&news)
+
+	if result.Error != nil {
+		return entity.News{}, result.Error
+	}
+
+	tx.Commit()
+
+	return news, nil
+}
+
 func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
