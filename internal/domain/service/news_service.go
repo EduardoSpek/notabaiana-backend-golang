@@ -608,6 +608,8 @@ func listOfBlockedWords(titulo string) bool {
 		"Jaques Wagner",
 		"Jerônimo",
 		"Rui Costa",
+		"Janones",
+		"Boulos",
 		"Anitta",
 		"Lulu Santos",
 		"Ludmilla",
