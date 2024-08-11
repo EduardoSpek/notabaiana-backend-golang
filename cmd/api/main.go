@@ -44,7 +44,6 @@ var list_pages = []string{
 	"https://www.bahianoticias.com.br",
 	"https://www.bahianoticias.com.br/holofote",
 	"https://www.bahianoticias.com.br/esportes",
-	"https://www.bahianoticias.com.br/bnhall",
 	"https://www.bahianoticias.com.br/justica",
 	"https://www.bahianoticias.com.br/saude",
 	"https://www.bahianoticias.com.br/municipios",
