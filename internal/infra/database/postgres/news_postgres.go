@@ -79,7 +79,6 @@ func (repo *NewsPostgresRepository) NewsMake() (entity.News, error) {
 	return news, nil
 }
 
-// insertNews insere um novo usuário no banco de dados
 func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
@@ -87,11 +86,17 @@ func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	result := repo.db.Create(&news)
+	var n entity.News
+	nresult := repo.db.Model(&entity.News{}).Where("visible = true AND title = ?", news.Title).First(&n)
 
-	if result.Error != nil {
-		tx.Rollback()
-		return entity.News{}, result.Error
+	if nresult.Error != nil {
+
+		result := repo.db.Create(&news)
+
+		if result.Error != nil {
+			tx.Rollback()
+			return entity.News{}, result.Error
+		}
 	}
 
 	tx.Commit()
