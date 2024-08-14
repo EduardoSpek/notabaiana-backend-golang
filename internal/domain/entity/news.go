@@ -9,6 +9,15 @@ import (
 	"gorm.io/gorm"
 )
 
+type NewsFindAllOutput struct {
+	ID        string    `json:"id"`
+	Title     string    `json:"title"`
+	Image     string    `json:"image"`
+	Link      string    `json:"link"`
+	Slug      string    `json:"slug"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type News struct {
 	gorm.Model
 

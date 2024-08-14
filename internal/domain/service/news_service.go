@@ -321,20 +321,24 @@ func (s *NewsService) Hit(session string) error {
 
 func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 
+	var newsOutput []entity.NewsFindAllOutput
+
 	str_search = strings.Replace(str_search, " ", "%", -1)
 
 	news := s.newsrepository.SearchNews(page, str_search)
+
+	newsOutput = s.NewsConvertListOutput(news)
 
 	total := s.newsrepository.GetTotalNewsBySearch(str_search)
 
 	pagination := utils.Pagination(page, total)
 
 	result := struct {
-		List_news  []entity.News    `json:"news"`
-		Pagination map[string][]int `json:"pagination"`
-		Search     string           `json:"search"`
+		List_news  []entity.NewsFindAllOutput `json:"news"`
+		Pagination map[string][]int           `json:"pagination"`
+		Search     string                     `json:"search"`
 	}{
-		List_news:  news,
+		List_news:  newsOutput,
 		Pagination: pagination,
 		Search:     strings.Replace(str_search, "%", " ", -1),
 	}
@@ -345,6 +349,8 @@ func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 
 func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
+	var newsOutput []entity.NewsFindAllOutput
+
 	//Limita o total de registros que deve ser retornado
 	if limit > LimitPerPage {
 		limit = LimitPerPage
@@ -352,15 +358,17 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
 	news, _ := s.newsrepository.AdminFindAll(page, limit)
 
+	newsOutput = s.NewsConvertListOutput(news)
+
 	total := s.newsrepository.GetTotalNews()
 
 	pagination := utils.Pagination(page, total)
 
 	result := struct {
-		List_news  []entity.News    `json:"news"`
-		Pagination map[string][]int `json:"pagination"`
+		List_news  []entity.NewsFindAllOutput `json:"news"`
+		Pagination map[string][]int           `json:"pagination"`
 	}{
-		List_news:  news,
+		List_news:  newsOutput,
 		Pagination: pagination,
 	}
 
@@ -370,6 +378,8 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
 func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
+	var newsOutput []entity.NewsFindAllOutput
+
 	//Limita o total de registros que deve ser retornado
 	if limit > LimitPerPage {
 		limit = LimitPerPage
@@ -377,15 +387,17 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 	news, _ := s.newsrepository.FindAll(page, limit)
 
+	newsOutput = s.NewsConvertListOutput(news)
+
 	total := s.newsrepository.GetTotalNewsVisible()
 
 	pagination := utils.Pagination(page, total)
 
 	result := struct {
-		List_news  []entity.News    `json:"news"`
-		Pagination map[string][]int `json:"pagination"`
+		List_news  []entity.NewsFindAllOutput `json:"news"`
+		Pagination map[string][]int           `json:"pagination"`
 	}{
-		List_news:  news,
+		List_news:  newsOutput,
 		Pagination: pagination,
 	}
 
@@ -407,18 +419,22 @@ func (s *NewsService) FindRecent() (entity.News, error) {
 
 func (s *NewsService) FindNewsCategory(category string, page int) interface{} {
 
+	var newsOutput []entity.NewsFindAllOutput
+
 	news, _ := s.newsrepository.FindCategory(category, page)
+
+	newsOutput = s.NewsConvertListOutput(news)
 
 	total := s.newsrepository.GetTotalNewsByCategory(category)
 
 	pagination := utils.Pagination(page, total)
 
 	result := struct {
-		List_news  []entity.News    `json:"news"`
-		Pagination map[string][]int `json:"pagination"`
-		Category   string           `json:"category"`
+		List_news  []entity.NewsFindAllOutput `json:"news"`
+		Pagination map[string][]int           `json:"pagination"`
+		Category   string                     `json:"category"`
 	}{
-		List_news:  news,
+		List_news:  newsOutput,
 		Pagination: pagination,
 		Category:   category,
 	}
@@ -655,6 +671,8 @@ func listOfBlockedWords(titulo string) bool {
 		"bônus",
 		"estupr",
 		"Prisma",
+		"Liniker",
+		"Melly",
 	}
 	for _, palavra := range palavras {
 		if strings.Contains(titulo, palavra) {
@@ -895,4 +913,22 @@ func (s *NewsService) CopierPage(list_pages []string) []entity.News {
 	}
 
 	return lista
+}
+
+func (s *NewsService) NewsConvertListOutput(news []entity.News) []entity.NewsFindAllOutput {
+
+	var newsOutput []entity.NewsFindAllOutput
+
+	for _, n := range news {
+		newsOutput = append(newsOutput, entity.NewsFindAllOutput{
+			ID:        n.ID,
+			Title:     n.Title,
+			Image:     n.Image,
+			Link:      n.Link,
+			Slug:      n.Slug,
+			CreatedAt: n.CreatedAt,
+		})
+	}
+
+	return newsOutput
 }
