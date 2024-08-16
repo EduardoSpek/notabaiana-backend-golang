@@ -18,6 +18,8 @@ var (
 	ErrNewsExists          = errors.New("notícia já cadastrada com este título")
 	ErrNewsNotExistsWithID = errors.New("não existe notícia com este ID")
 	ErrNewsNotFound        = errors.New("notícia não encontrada")
+
+	PerPage = 24
 )
 
 type NewsPostgresRepository struct {
@@ -211,7 +213,7 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) []en
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
-	limit := 16
+	limit := PerPage
 	offset := (page - 1) * limit
 
 	var news []entity.News
@@ -332,7 +334,7 @@ func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]e
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
-	limit := 16
+	limit := PerPage
 	offset := (page - 1) * limit
 
 	tx := repo.db.Begin()

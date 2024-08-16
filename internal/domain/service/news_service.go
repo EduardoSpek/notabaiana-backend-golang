@@ -30,6 +30,7 @@ var (
 	AllowedDomains    = "www.bahianoticias.com.br"
 
 	LimitPerPage = 100
+	perPage      = 24
 )
 
 type NewsService struct {
@@ -331,7 +332,7 @@ func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 
 	total := s.newsrepository.GetTotalNewsBySearch(str_search)
 
-	pagination := utils.Pagination(page, total)
+	pagination := utils.Pagination(page, perPage, total)
 
 	result := struct {
 		List_news  []entity.NewsFindAllOutput `json:"news"`
@@ -362,7 +363,7 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
 	total := s.newsrepository.GetTotalNews()
 
-	pagination := utils.Pagination(page, total)
+	pagination := utils.Pagination(page, perPage, total)
 
 	result := struct {
 		List_news  []entity.NewsFindAllOutput `json:"news"`
@@ -391,7 +392,7 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 	total := s.newsrepository.GetTotalNewsVisible()
 
-	pagination := utils.Pagination(page, total)
+	pagination := utils.Pagination(page, perPage, total)
 
 	result := struct {
 		List_news  []entity.NewsFindAllOutput `json:"news"`
@@ -427,7 +428,7 @@ func (s *NewsService) FindNewsCategory(category string, page int) interface{} {
 
 	total := s.newsrepository.GetTotalNewsByCategory(category)
 
-	pagination := utils.Pagination(page, total)
+	pagination := utils.Pagination(page, perPage, total)
 
 	result := struct {
 		List_news  []entity.NewsFindAllOutput `json:"news"`

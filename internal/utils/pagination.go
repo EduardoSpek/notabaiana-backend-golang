@@ -3,10 +3,10 @@ package utils
 import "math"
 
 // Pagination recebe a página atual e o total de noticias para retornar a páginação de resultado
-func Pagination(currentPage, total int) map[string][]int {
+func Pagination(currentPage, perPage, total int) map[string][]int {
 
 	// Calcula o total de páginas
-	totalPages := int(math.Ceil(float64(total) / 16))
+	totalPages := int(math.Ceil(float64(total) / float64(perPage)))
 
 	// Garante que a página atual esteja dentro dos limites
 	if currentPage < 1 {
