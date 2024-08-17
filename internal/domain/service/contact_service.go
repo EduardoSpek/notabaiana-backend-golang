@@ -6,6 +6,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
@@ -19,10 +20,11 @@ var (
 type ContactService struct {
 	ContactRepository port.ContactRepository
 	imagedownloader   port.ImageDownloader
+	EmailServer       port.EmailPort
 }
 
-func NewContactService(contact_repository port.ContactRepository, downloader port.ImageDownloader) *ContactService {
-	return &ContactService{ContactRepository: contact_repository, imagedownloader: downloader}
+func NewContactService(contact_repository port.ContactRepository, downloader port.ImageDownloader, emailserver port.EmailPort) *ContactService {
+	return &ContactService{ContactRepository: contact_repository, imagedownloader: downloader, EmailServer: emailserver}
 }
 
 func (cs *ContactService) AdminCreate(contact entity.ContactDTO) (entity.ContactDTO, error) {
@@ -96,6 +98,19 @@ func (cs *ContactService) AdminCreateForm(image multipart.File, contact entity.C
 
 	if err != nil {
 		return entity.ContactDTO{}, err
+	}
+
+	//Configuramos o EmailServer e enviamos o Email de contato
+	port, _ := strconv.Atoi(os.Getenv("PORT_EMAILSERVER"))
+	cs.EmailServer.Config(os.Getenv("HOST_EMAILSERVER"), port, os.Getenv("USERNAME_EMAILSERVER"), os.Getenv("PASSWORD_EMAILSERVER"))
+	cs.EmailServer.SetFrom(os.Getenv("FROM_EMAILSERVER"))
+	cs.EmailServer.SetTo(os.Getenv("TO_EMAILSERVER"))
+	cs.EmailServer.SetSubject(contactCreated.Title)
+	cs.EmailServer.SetMessage(contactCreated.Text)
+	err = cs.EmailServer.Send()
+
+	if err != nil {
+		fmt.Println("Erro: Email de contato não enviado!")
 	}
 
 	return contactCreated, nil

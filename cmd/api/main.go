@@ -7,6 +7,7 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/emailserver"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
@@ -77,8 +78,10 @@ func main() {
 	banner_service := service.NewBannerService(banner_repo, imagedownloader)
 	banner_controller := controllers.NewBannerController(*banner_service)
 
+	email_server := emailserver.NewMailtrapEmailServer()
+
 	contact_repo := database.NewContactPostgresRepository(postgres)
-	contact_service := service.NewContactService(contact_repo, imagedownloader)
+	contact_service := service.NewContactService(contact_repo, imagedownloader, email_server)
 	contact_controller := controllers.NewContactController(*contact_service)
 
 	server := web.NewServerWeb()

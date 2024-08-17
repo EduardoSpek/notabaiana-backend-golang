@@ -9,6 +9,7 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/emailserver"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/joho/godotenv"
 )
@@ -94,7 +95,8 @@ func TestContactService(t *testing.T) {
 	postgres := adapter.NewPostgresAdapter()
 	repo := database.NewContactPostgresRepository(postgres)
 	imagedownloader := utils.NewImgDownloader()
-	contact_service := service.NewContactService(repo, imagedownloader)
+	email_server := emailserver.NewMailtrapEmailServer()
+	contact_service := service.NewContactService(repo, imagedownloader, email_server)
 
 	var id, id2, id3 string
 
