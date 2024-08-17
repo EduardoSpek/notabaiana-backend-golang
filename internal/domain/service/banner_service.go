@@ -105,6 +105,9 @@ func (bs *BannerService) UpdateBannerUsingTheForm(images []multipart.File, banne
 	currentBanner.Html = banner.Html
 	currentBanner.Tag = banner.Tag
 	currentBanner.Visible = banner.Visible
+	currentBanner.VisibleImage1 = banner.VisibleImage1
+	currentBanner.VisibleImage2 = banner.VisibleImage2
+	currentBanner.VisibleImage3 = banner.VisibleImage3
 
 	newbanner := entity.UpdateBanner(currentBanner)
 	_, err = newbanner.Validations()
@@ -159,6 +162,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 
 			if err != nil {
 				pathFile = ""
+				banner.VisibleImage1 = false
 			}
 
 			if image != nil {
@@ -169,6 +173,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 
 			if err != nil {
 				pathFile = ""
+				banner.VisibleImage2 = false
 			}
 
 			if image != nil {
@@ -179,6 +184,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 
 			if err != nil {
 				pathFile = ""
+				banner.VisibleImage3 = false
 			}
 
 			if image != nil {

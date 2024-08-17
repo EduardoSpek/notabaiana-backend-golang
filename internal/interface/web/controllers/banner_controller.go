@@ -250,6 +250,9 @@ func (bc *BannerController) GetBannerDataFromTheForm(r *http.Request) (entity.Ba
 	html := r.FormValue("html")
 	tag := r.FormValue("tag")
 	visible, _ := strconv.ParseBool(r.FormValue("visible"))
+	visible_image1, _ := strconv.ParseBool(r.FormValue("visible_image1"))
+	visible_image2, _ := strconv.ParseBool(r.FormValue("visible_image2"))
+	visible_image3, _ := strconv.ParseBool(r.FormValue("visible_image3"))
 
 	// Parse the multipart form data
 	r.ParseMultipartForm(10 << 20) // 10 MB maximum
@@ -264,12 +267,15 @@ func (bc *BannerController) GetBannerDataFromTheForm(r *http.Request) (entity.Ba
 	images = append(images, image3)
 
 	banner := &entity.BannerDTO{
-		ID:      id,
-		Title:   title,
-		Link:    link,
-		Html:    html,
-		Tag:     tag,
-		Visible: visible,
+		ID:            id,
+		Title:         title,
+		Link:          link,
+		Html:          html,
+		Tag:           tag,
+		Visible:       visible,
+		VisibleImage1: visible_image1,
+		VisibleImage2: visible_image2,
+		VisibleImage3: visible_image3,
 	}
 
 	return *banner, images, nil

@@ -81,15 +81,18 @@ func (repo *BannerPostgresRepository) GetByID(id string) (entity.BannerDTO, erro
 	tx.Commit()
 
 	dto := entity.BannerDTO{
-		ID:      banner.ID,
-		Title:   banner.Title,
-		Link:    banner.Link,
-		Html:    banner.Html,
-		Image1:  banner.Image1,
-		Image2:  banner.Image2,
-		Image3:  banner.Image3,
-		Tag:     banner.Tag,
-		Visible: banner.Visible,
+		ID:            banner.ID,
+		Title:         banner.Title,
+		Link:          banner.Link,
+		Html:          banner.Html,
+		Image1:        banner.Image1,
+		Image2:        banner.Image2,
+		Image3:        banner.Image3,
+		Tag:           banner.Tag,
+		Visible:       banner.Visible,
+		VisibleImage1: banner.VisibleImage1,
+		VisibleImage2: banner.VisibleImage2,
+		VisibleImage3: banner.VisibleImage3,
 	}
 
 	return dto, nil
@@ -164,15 +167,18 @@ func (repo *BannerPostgresRepository) Update(banner entity.Banner) (entity.Banne
 	defer tx.Rollback()
 
 	result := repo.db.Model(&banner).Updates(map[string]interface{}{
-		"title":      banner.Title,
-		"link":       banner.Link,
-		"html":       banner.Html,
-		"image1":     banner.Image1,
-		"image2":     banner.Image2,
-		"image3":     banner.Image3,
-		"tag":        banner.Tag,
-		"visible":    banner.Visible,
-		"updated_at": banner.UpdatedAt,
+		"title":          banner.Title,
+		"link":           banner.Link,
+		"html":           banner.Html,
+		"image1":         banner.Image1,
+		"image2":         banner.Image2,
+		"image3":         banner.Image3,
+		"tag":            banner.Tag,
+		"visible":        banner.Visible,
+		"visible_image1": banner.VisibleImage1,
+		"visible_image2": banner.VisibleImage2,
+		"visible_image3": banner.VisibleImage3,
+		"updated_at":     banner.UpdatedAt,
 	})
 
 	if result.Error != nil {
