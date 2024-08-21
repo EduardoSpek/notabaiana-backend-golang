@@ -22,10 +22,10 @@ var (
 )
 
 type NewsController struct {
-	news_service service.NewsService
+	news_service *service.NewsService
 }
 
-func NewNewsController(newsservice service.NewsService) *NewsController {
+func NewNewsController(newsservice *service.NewsService) *NewsController {
 	return &NewsController{news_service: newsservice}
 }
 

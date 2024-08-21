@@ -26,15 +26,15 @@ func TestCrawler(t *testing.T) {
 	crawler := service.NewCrawler()
 
 	t.Run("Deve obter os dados do RSS", func(t *testing.T) {
-		
-		rss := crawler.GetRSS(os.Getenv("URL_RSS"))	
-		
+
+		rss := crawler.GetRSS(os.Getenv("URL_RSS"))
+
 		title := rss.Channel.Items[0].Title
 
 		if title == "" {
 			t.Error("Erro: Não foi possível obter o RSS")
 		}
-		
+
 	})
 }
 
@@ -48,8 +48,8 @@ func TestCrawlerController(t *testing.T) {
 
 	t.Run("Deve cadastrar as noticias no banco e retornar status 200", func(t *testing.T) {
 
-		req, err := http.NewRequest("GET", "/crawler/" + os.Getenv("KEY"), nil)
-		
+		req, err := http.NewRequest("GET", "/crawler/"+os.Getenv("KEY"), nil)
+
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -59,9 +59,9 @@ func TestCrawlerController(t *testing.T) {
 		hits := database.NewHitsMemoryRepository()
 		news := service.NewNewsService(repo, imagedownloader, hits)
 		crawler := service.NewCrawler()
-		copier := service.NewCopier(*news, *crawler)
-		controller := controllers.NewCrawlerController(*copier)
-		
+		copier := service.NewCopier(news, crawler)
+		controller := controllers.NewCrawlerController(copier)
+
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
 		router.HandleFunc("/crawler/{key}", controller.Crawler)
@@ -77,7 +77,7 @@ func TestCrawlerController(t *testing.T) {
 		if rr.Body.String() != expected {
 			t.Errorf("handler returned unexpected body: got %v want %v",
 				rr.Body.String(), expected)
-		}		
+		}
 
 	})
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/middlewares"
 )
 
-func (s *ServerWeb) NewsController(newscontroller controllers.NewsController) {
+func (s *ServerWeb) NewsController(newscontroller *controllers.NewsController) {
 	s.router.HandleFunc("/news/image", newscontroller.NewsImage).Methods("GET")
 	s.router.HandleFunc("/truncate/news/{key}", newscontroller.NewsTruncateTable).Methods("GET")
 	s.router.HandleFunc("/clean/news/{key}", newscontroller.CleanNews).Methods("GET")

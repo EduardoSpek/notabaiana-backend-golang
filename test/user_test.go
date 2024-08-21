@@ -62,7 +62,7 @@ func TestUserService(t *testing.T) {
 
 	repo := database.NewUserMemoryRepository()
 	user_service := service.NewUserService(repo)
-	controller := controllers.NewUserController(*user_service)
+	controller := controllers.NewUserController(user_service)
 
 	var responseRoute entity.User
 

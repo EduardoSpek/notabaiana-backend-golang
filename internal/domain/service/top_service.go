@@ -10,13 +10,13 @@ import (
 
 type TopService struct {
 	HitsRepository port.HitsRepository
-	TopRepository port.TopRepository
+	TopRepository  port.TopRepository
 	NewsRepository port.NewsRepository
-	NewsService NewsService
+	NewsService    *NewsService
 }
 
-func NewTopService(toprepo port.TopRepository, newsrepo port.NewsRepository, hitsrepo port.HitsRepository, newsservice NewsService) *TopService {
-	return &TopService{  TopRepository: toprepo, NewsRepository: newsrepo, HitsRepository: hitsrepo,NewsService: newsservice }
+func NewTopService(toprepo port.TopRepository, newsrepo port.NewsRepository, hitsrepo port.HitsRepository, newsservice *NewsService) *TopService {
+	return &TopService{TopRepository: toprepo, NewsRepository: newsrepo, HitsRepository: hitsrepo, NewsService: newsservice}
 }
 
 func (t *TopService) TopCreate() {
@@ -25,11 +25,11 @@ func (t *TopService) TopCreate() {
 	// hits, _ := t.HitsRepository.TopHits()
 
 	// for _, hit := range hits {
-		
+
 	// 	new, err := t.NewsRepository.GetBySlug(hit.Session)
 
 	// 	if err != nil {
-	// 		return 
+	// 		return
 	// 	}
 
 	// 	news = append(news, new)
@@ -44,22 +44,22 @@ func (t *TopService) TopCreate() {
 	var tops []entity.Top
 	var newtop entity.Top
 	var ntop entity.Top
-	
+
 	for _, top := range news {
-		
+
 		newtop = entity.Top{
-			Title: top.Title,
-			TitleAi: top.TitleAi,
-			Link: top.Link,
-			Image: top.Image,
+			Title:     top.Title,
+			TitleAi:   top.TitleAi,
+			Link:      top.Link,
+			Image:     top.Image,
 			CreatedAt: top.CreatedAt,
-			Views: top.Views,
+			Views:     top.Views,
 		}
 
-		ntop = *entity.NewTop(newtop)		
+		ntop = *entity.NewTop(newtop)
 
 		tops = append(tops, ntop)
-	}	
+	}
 
 	err = t.TopRepository.TopTruncateTable()
 
@@ -91,13 +91,13 @@ func (t *TopService) FindAll() ([]entity.Top, error) {
 }
 
 func (t *TopService) Start(minutes time.Duration) {
-	
+
 	go t.TopCreate()
 
 	ticker := time.NewTicker(minutes * time.Minute)
-    defer ticker.Stop()
+	defer ticker.Stop()
 
-    for range ticker.C {
+	for range ticker.C {
 		go t.TopCreate()
 	}
 }

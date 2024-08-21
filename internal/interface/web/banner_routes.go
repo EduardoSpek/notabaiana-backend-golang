@@ -7,7 +7,7 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/middlewares"
 )
 
-func (s *ServerWeb) BannerController(bannercontroller controllers.BannerController) {
+func (s *ServerWeb) BannerController(bannercontroller *controllers.BannerController) {
 	s.router.HandleFunc("/admin/banners/update/{id}", bannercontroller.UpdateBannerUsingTheForm).Methods("POST")
 	s.router.HandleFunc("/admin/banners/create", bannercontroller.CreateBannerUsingTheForm).Methods("POST")
 	s.router.Handle("/admin/banners/{id}", middlewares.JwtMiddleware(http.HandlerFunc(bannercontroller.FindBanner))).Methods("GET")

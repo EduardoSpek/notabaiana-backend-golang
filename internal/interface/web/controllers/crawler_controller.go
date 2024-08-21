@@ -19,15 +19,15 @@ var list_pages = []string{
 }
 
 type CrawlerController struct {
-	Copier service.CopierService	
+	Copier *service.CopierService
 }
 
-func NewCrawlerController(copier service.CopierService) *CrawlerController {
-	return &CrawlerController{ Copier: copier }
+func NewCrawlerController(copier *service.CopierService) *CrawlerController {
+	return &CrawlerController{Copier: copier}
 }
 
 func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
-	
+
 	vars := mux.Vars(r)
 	key := vars["key"]
 
@@ -35,13 +35,12 @@ func (c *CrawlerController) Crawler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go c.Copier.Start(list_pages, 10)	
+	go c.Copier.Start(list_pages, 10)
 
 	msg := map[string]any{
-		"ok": true,
+		"ok":      true,
 		"message": "Notícias resgatadas!",
-
 	}
 	ResponseJson(w, msg, http.StatusOK)
-	
+
 }

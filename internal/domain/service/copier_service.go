@@ -10,11 +10,11 @@ import (
 )
 
 type CopierService struct {
-	news_service    NewsService
-	crawler_service CrawlerService
+	news_service    *NewsService
+	crawler_service *CrawlerService
 }
 
-func NewCopier(newsservice NewsService, crawlerservice CrawlerService) *CopierService {
+func NewCopier(newsservice *NewsService, crawlerservice *CrawlerService) *CopierService {
 	return &CopierService{news_service: newsservice, crawler_service: crawlerservice}
 }
 

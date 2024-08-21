@@ -61,18 +61,18 @@ func main() {
 	news_service := service.NewNewsService(newsrepo, imagedownloader, hitrepo)
 
 	crawler_service := service.NewCrawler()
-	copier_service := service.NewCopier(*news_service, *crawler_service)
-	crawler_controller := controllers.NewCrawlerController(*copier_service)
+	copier_service := service.NewCopier(news_service, crawler_service)
+	crawler_controller := controllers.NewCrawlerController(copier_service)
 
-	news_controller := controllers.NewNewsController(*news_service)
+	news_controller := controllers.NewNewsController(news_service)
 
 	toprepo := database.NewTopPostgresRepository(postgres)
-	top_service := service.NewTopService(toprepo, newsrepo, hitrepo, *news_service)
+	top_service := service.NewTopService(toprepo, newsrepo, hitrepo, news_service)
 	top_controller := controllers.NewTopController(*top_service)
 
 	user_repo := database.NewUserPostgresRepository(postgres)
 	user_service := service.NewUserService(user_repo)
-	user_controller := controllers.NewUserController(*user_service)
+	user_controller := controllers.NewUserController(user_service)
 
 	banner_repo := database.NewBannerPostgresRepository(postgres)
 	banner_service := service.NewBannerService(banner_repo, imagedownloader)
@@ -86,12 +86,12 @@ func main() {
 
 	server := web.NewServerWeb()
 
-	server.UserController(*user_controller)
-	server.TopController(*top_controller)
-	server.CrawlerController(*crawler_controller)
-	server.NewsController(*news_controller)
-	server.BannerController(*banner_controller)
-	server.ContactController(*contact_controller)
+	server.UserController(user_controller)
+	server.TopController(top_controller)
+	server.CrawlerController(crawler_controller)
+	server.NewsController(news_controller)
+	server.BannerController(banner_controller)
+	server.ContactController(contact_controller)
 
 	go copier_service.Start(list_pages, 3)
 
