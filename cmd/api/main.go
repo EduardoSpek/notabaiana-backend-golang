@@ -5,9 +5,10 @@ import (
 	"os"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/emailserver"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/notifications"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
@@ -78,10 +79,14 @@ func main() {
 	banner_service := service.NewBannerService(banner_repo, imagedownloader)
 	banner_controller := controllers.NewBannerController(*banner_service)
 
-	email_server := emailserver.NewMailtrapEmailServer()
+	var list_notifications []port.EmailPort
+	email_notifications := notifications.NewMailtrapEmailServer()
+	ntfy_notifications := notifications.NewNtfyMobilePushNotifications()
+	list_notifications = append(list_notifications, email_notifications, ntfy_notifications)
+	notifications := notifications.NewNotifications(list_notifications)
 
 	contact_repo := database.NewContactPostgresRepository(postgres)
-	contact_service := service.NewContactService(contact_repo, imagedownloader, email_server)
+	contact_service := service.NewContactService(contact_repo, imagedownloader, notifications)
 	contact_controller := controllers.NewContactController(*contact_service)
 
 	server := web.NewServerWeb()
