@@ -47,10 +47,16 @@ func (m *Notifications) SetMessage(message string) {
 func (m *Notifications) Send() error {
 
 	for i := range m.Services {
-		err := m.Services[i].Send()
-		if err != nil {
-			return err
-		}
+
+		go func(i int) error {
+			err := m.Services[i].Send()
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}(i)
+
 	}
 
 	return nil
