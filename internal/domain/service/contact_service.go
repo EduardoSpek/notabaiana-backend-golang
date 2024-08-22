@@ -100,13 +100,15 @@ func (cs *ContactService) AdminCreateForm(image multipart.File, contact entity.C
 		return entity.ContactDTO{}, err
 	}
 
+	message := contactCreated.Text + "<br><br>Nome: " + contactCreated.Name + "<br>Email: " + contactCreated.Email
+
 	//Configuramos o EmailServer e enviamos o Email de contato
 	port, _ := strconv.Atoi(os.Getenv("PORT_EMAILSERVER"))
 	cs.EmailServer.Config(os.Getenv("HOST_EMAILSERVER"), port, os.Getenv("USERNAME_EMAILSERVER"), os.Getenv("PASSWORD_EMAILSERVER"))
 	cs.EmailServer.SetFrom(os.Getenv("FROM_EMAILSERVER"))
 	cs.EmailServer.SetTo(os.Getenv("TO_EMAILSERVER"))
 	cs.EmailServer.SetSubject(contactCreated.Title)
-	cs.EmailServer.SetMessage(contactCreated.Text)
+	cs.EmailServer.SetMessage(message)
 	err = cs.EmailServer.Send()
 
 	if err != nil {
