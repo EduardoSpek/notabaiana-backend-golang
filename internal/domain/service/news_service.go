@@ -632,6 +632,12 @@ func listOfBlockedWords(titulo string) bool {
 		"pôker",
 		"Pôker",
 		"Poker",
+		"candidat",
+		"Candidat",
+		"Krypto",
+		"trading", 
+		"krypto",
+		"Trading",
 	}
 	for _, palavra := range palavras {
 		if strings.Contains(titulo, palavra) {
