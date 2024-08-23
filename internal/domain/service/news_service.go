@@ -635,7 +635,7 @@ func listOfBlockedWords(titulo string) bool {
 		"candidat",
 		"Candidat",
 		"Krypto",
-		"trading", 
+		"trading",
 		"krypto",
 		"Trading",
 	}
@@ -888,6 +888,7 @@ func (s *NewsService) NewsConvertListOutput(news []entity.News) []entity.NewsFin
 		newsOutput = append(newsOutput, entity.NewsFindAllOutput{
 			ID:        n.ID,
 			Title:     n.Title,
+			Text:      n.Text,
 			Image:     n.Image,
 			Link:      n.Link,
 			Slug:      n.Slug,
