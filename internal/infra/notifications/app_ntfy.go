@@ -1,8 +1,8 @@
 package notifications
 
 import (
-	"bytes"
 	"net/http"
+	"strings"
 )
 
 //var ErrNotSend = errors.New("não foi posssível enviar o email")
@@ -47,8 +47,8 @@ func (m *NtfyMobilePushNotifications) SetMessage(message string) {
 
 func (m *NtfyMobilePushNotifications) Send() error {
 
-	body := []byte(`{"title":"Contato NotaBaiana", "message":"Assunto: ` + m.subject + `"}`)
-	_, err := http.Post("https://ntfy.sh/notabaiana", "application/json", bytes.NewBuffer(body))
+	body := `{"title":"Contato NotaBaiana", "message":"Assunto: ` + m.subject + `"}`
+	_, err := http.Post("https://ntfy.sh/notabaiana", "application/json", strings.NewReader(body))
 
 	if err != nil {
 		return err
