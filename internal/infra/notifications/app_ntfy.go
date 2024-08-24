@@ -47,8 +47,8 @@ func (m *NtfyMobilePushNotifications) SetMessage(message string) {
 
 func (m *NtfyMobilePushNotifications) Send() error {
 
-	body := `{"title":"Contato NotaBaiana", "message":"Assunto: ` + m.subject + `"}`
-	_, err := http.Post("https://ntfy.sh/notabaiana", "application/json", strings.NewReader(body))
+	body := `{"topic":"notabaiana","title":"Contato NotaBaiana", "message":"Assunto: ` + m.subject + `"}`
+	_, err := http.Post("https://ntfy.sh/", "application/json", strings.NewReader(body))
 
 	if err != nil {
 		return err
