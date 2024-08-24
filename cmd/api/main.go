@@ -80,7 +80,7 @@ func main() {
 	banner_controller := controllers.NewBannerController(*banner_service)
 
 	var list_notifications []port.EmailPort
-	email_notifications := notifications.NewMailtrapEmailServer()
+	email_notifications := notifications.NewGmailSMTP()
 	ntfy_notifications := notifications.NewNtfyMobilePushNotifications()
 	list_notifications = append(list_notifications, email_notifications, ntfy_notifications)
 	notifications := notifications.NewNotifications(list_notifications)
