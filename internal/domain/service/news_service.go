@@ -650,15 +650,13 @@ func changeWords(text string) string {
 	text = strings.Replace(text, " ", " ", -1)
 	text = strings.Replace(text, "Siga o @bnhall_ no Instagram e fique de olho nas principais notícias.", "", -1)
 
-	text = strings.Replace(text, "BN", "NotaBaiana", -1)
+	text = strings.Replace(text, "Bahia Notícias", "BN", -1)
 
-	text = strings.Replace(text, "Bahia Notícias", "NotaBaiana", -1)
+	text = strings.Replace(text, "Bahia Notícia", "BN", -1)
 
-	text = strings.Replace(text, "Bahia Notícia", "NotaBaiana", -1)
+	text = strings.Replace(text, "Bahia Noticia", "BN", -1)
 
-	text = strings.Replace(text, "Bahia Noticia", "NotaBaiana", -1)
-
-	text = strings.Replace(text, "Bahia Noticias", "NotaBaiana", -1)
+	text = strings.Replace(text, "Bahia Noticias", "BN", -1)
 
 	text = strings.Replace(text, "@BahiaNoticias", "@", -1)
 
@@ -668,13 +666,13 @@ func changeWords(text string) string {
 
 	text = strings.Replace(text, "@bhall", "@", -1)
 
-	text = strings.Replace(text, "As informações são do Metrópoles, parceiro do NotaBaiana", ".", -1)
+	text = strings.Replace(text, "As informações são do Metrópoles, parceiro do BN", ".", -1)
 
-	text = strings.Replace(text, " parceiro do NotaBaiana,", "", -1)
+	text = strings.Replace(text, " parceiro do BN,", "", -1)
 
-	text = strings.Replace(text, "Assine a newsletter de Esportes do NotaBaiana e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
+	text = strings.Replace(text, "Assine a newsletter de Esportes do BN e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
 
-	text = strings.Replace(text, "Siga o NotaBaiana no Google News e veja os conteúdos de maneira ainda mais rápida e ágil pelo celular ou pelo computador!", "", -1)
+	text = strings.Replace(text, "Siga o BN no Google News e veja os conteúdos de maneira ainda mais rápida e ágil pelo celular ou pelo computador!", "", -1)
 
 	return text
 }
