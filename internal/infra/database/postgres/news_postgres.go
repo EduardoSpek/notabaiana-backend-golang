@@ -116,6 +116,7 @@ func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error
 
 	result := repo.db.Model(&news).Updates(map[string]interface{}{
 		"title":      news.Title,
+		"title_ai":   news.TitleAi,
 		"text":       news.Text,
 		"visible":    news.Visible,
 		"topstory":   news.TopStory,

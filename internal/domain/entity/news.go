@@ -12,6 +12,7 @@ import (
 type NewsFindAllOutput struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
+	TitleAi   string    `json:"title_ai"`
 	Text      string    `json:"text"`
 	Image     string    `json:"image"`
 	Link      string    `json:"link"`

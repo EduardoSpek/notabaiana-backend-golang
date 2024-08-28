@@ -6,6 +6,7 @@ import (
 	"image"
 	"io"
 	"mime/multipart"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -113,6 +114,7 @@ func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput enti
 	}
 
 	oldnew.Title = newsInput.Title
+	oldnew.TitleAi = newsInput.TitleAi
 	oldnew.Text = newsInput.Text
 	oldnew.Visible = newsInput.Visible
 	oldnew.TopStory = newsInput.TopStory
@@ -260,12 +262,6 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 
 func (s *NewsService) AdminGetNewsBySlug(slug string) (entity.News, error) {
 
-	// err := s.Hit(slug)
-
-	// if err != nil {
-	// 	return entity.News{}, err
-	// }
-
 	new, err := s.newsrepository.AdminGetBySlug(slug)
 
 	if err != nil {
@@ -294,9 +290,9 @@ func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
 
 }
 
-func (s *NewsService) Hit(session string) error {
+func (s *NewsService) Hit(r *http.Request, session string) error {
 
-	ip := utils.GetIP()
+	ip := utils.GetIP(r)
 
 	_, err := s.hitsrepository.Get(ip, session)
 
@@ -886,6 +882,7 @@ func (s *NewsService) NewsConvertListOutput(news []entity.News) []entity.NewsFin
 		newsOutput = append(newsOutput, entity.NewsFindAllOutput{
 			ID:        n.ID,
 			Title:     n.Title,
+			TitleAi:   n.TitleAi,
 			Text:      n.Text,
 			Image:     n.Image,
 			Link:      n.Link,

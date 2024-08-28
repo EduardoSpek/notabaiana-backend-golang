@@ -1,33 +1,18 @@
 package utils
 
 import (
-	"fmt"
-	"io"
-	"log"
+	"net"
 	"net/http"
 )
 
-func GetIP() string {	
+func GetIP(r *http.Request) string {
 
-	// URL da API
-	url := "https://api.ipify.org?format=text"
-
-	// Fazer a requisição HTTP GET
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatalf("Erro ao fazer a requisição: %v", err)
+	ip := r.Header.Get("X-Real-IP")
+	if ip == "" {
+		ip = r.Header.Get("X-Forwarded-For")
 	}
-	defer resp.Body.Close()
-
-	// Ler o corpo da resposta
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Erro ao ler o corpo da resposta: %v", err)
+	if ip == "" {
+		ip, _, _ = net.SplitHostPort(r.RemoteAddr)
 	}
-
-	ip := string(body)
-
-	fmt.Println(ip)
-
 	return ip
 }
