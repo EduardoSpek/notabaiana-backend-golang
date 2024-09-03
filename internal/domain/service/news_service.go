@@ -63,6 +63,7 @@ func (s *NewsService) Delete(id string) error {
 	return nil
 }
 
+// StartCleanNews remove news with false status
 func (s *NewsService) StartCleanNews(minutes time.Duration) {
 
 	go s.CleanNews()

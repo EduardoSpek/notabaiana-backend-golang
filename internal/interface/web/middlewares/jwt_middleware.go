@@ -21,7 +21,7 @@ func JwtMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Acesso não autorizado: Token inválido!", http.StatusForbidden)
 			return
 		}
-		
+
 		next.ServeHTTP(w, r)
 	})
 }
