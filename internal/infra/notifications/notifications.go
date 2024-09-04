@@ -1,6 +1,10 @@
 package notifications
 
-import "github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
+import (
+	"strings"
+
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
+)
 
 //var ErrNotSend = errors.New("não foi posssível enviar o email")
 
@@ -38,6 +42,9 @@ func (m *Notifications) SetSubject(subject string) {
 }
 
 func (m *Notifications) SetMessage(message string) {
+
+	message = strings.Replace(message, "\n", "<br>", -1)
+
 	for i := range m.Services {
 		m.Services[i].SetMessage(message)
 	}

@@ -3,7 +3,6 @@ package notifications
 import (
 	"net/smtp"
 	"os"
-	"strings"
 )
 
 //var ErrNotSend = errors.New("não foi posssível enviar o email")
@@ -43,7 +42,7 @@ func (m *GmailSMTP) SetSubject(subject string) {
 }
 
 func (m *GmailSMTP) SetMessage(message string) {
-	m.message = strings.Replace(message, "\n", "<br>", -1)
+	m.message = message
 }
 
 func (m *GmailSMTP) Send() error {
