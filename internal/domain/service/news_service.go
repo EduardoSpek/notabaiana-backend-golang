@@ -25,7 +25,7 @@ var (
 	ErrCreateNews     = errors.New("não foi possível criar a notícia")
 	ErrUpdateNews     = errors.New("não foi possível atualizar a notícia")
 	ErrParseForm      = errors.New("erro ao obter a imagem")
-	ErrWordsBlackList = errors.New("o título contém palavras bloqueadas")
+	ErrWordsBlackList = errors.New("o título ou texto contém palavras bloqueadas")
 	ErrNoCategory     = errors.New("nenhuma categoria no rss")
 	ErrSimilarTitle   = errors.New("título similar ao recente adicionado detectado")
 	AllowedDomains    = "www.bahianoticias.com.br"
@@ -233,6 +233,12 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	new = ChangeLink(new)
 
 	result := listOfBlockedWords(new.Title)
+
+	if result {
+		return entity.News{}, ErrWordsBlackList
+	}
+
+	result = listOfBlockedText(new.Text)
 
 	if result {
 		return entity.News{}, ErrWordsBlackList
@@ -598,6 +604,19 @@ func RenamePathImage(news entity.News) entity.News {
 func ChangeLink(news entity.News) entity.News {
 	news.Link = "/news/" + news.Slug
 	return news
+}
+func listOfBlockedText(text string) bool {
+	words := []string{
+		"IMG_OFER_0.jpg",
+		"JusPod",
+	}
+
+	for _, word := range words {
+		if strings.Contains(text, word) {
+			return true
+		}
+	}
+	return false
 }
 func listOfBlockedWords(titulo string) bool {
 	palavras := []string{
