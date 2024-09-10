@@ -1,0 +1,62 @@
+package entity
+
+import (
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
+type Download struct {
+	gorm.Model
+
+	ID        string    `gorm:"column:id;primaryKey" json:"id"`
+	Category  string    `gorm:"column:category;index:idx_visible_category" json:"category"`
+	Title     string    `gorm:"column:title;index:idx_visible_title" json:"title"`
+	Text      string    `gorm:"column:text" json:"text"`
+	Link      string    `gorm:"column:link" json:"link"`
+	Image     string    `gorm:"column:image" json:"image"`
+	Slug      string    `gorm:"column:slug;index:idx_slug_visible" json:"slug"`
+	Views     int       `gorm:"column:views;default:0;index:,sort:desc" json:"views"`
+	Downloads int       `gorm:"column:downloads;default:0" json:"downloads"`
+	Visible   bool      `gorm:"column:visible;default:true;index:idx_visible_title" json:"visible"`
+	Make      bool      `gorm:"column:make;default:false" json:"make"`
+	CreatedAt time.Time `gorm:"column:created_at;index:,sort:desc" json:"created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
+}
+
+func NewDownload(download Download) *Download {
+
+	slug := SlugTitle(download.Title)
+
+	return &Download{
+		ID:        uuid.NewString(),
+		Category:  download.Category,
+		Title:     strings.TrimSpace(download.Title),
+		Text:      strings.TrimSpace(download.Text),
+		Link:      strings.TrimSpace(download.Link),
+		Image:     strings.TrimSpace(download.Image),
+		Slug:      slug,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+}
+
+func UpdateDownload(download Download) *Download {
+
+	slug := SlugTitle(download.Title)
+
+	return &Download{
+		ID:        strings.TrimSpace(download.ID),
+		Category:  download.Category,
+		Title:     strings.TrimSpace(download.Title),
+		Text:      strings.TrimSpace(download.Text),
+		Link:      strings.TrimSpace(download.Link),
+		Image:     strings.TrimSpace(download.Image),
+		Slug:      slug,
+		Visible:   download.Visible,
+		Make:      download.Make,
+		UpdatedAt: time.Now(),
+	}
+}

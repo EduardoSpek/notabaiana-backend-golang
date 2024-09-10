@@ -40,6 +40,11 @@ func init() {
 	if err != nil {
 		fmt.Println("Erro ao criar pasta:", err)
 	}
+
+	err = os.MkdirAll("images/downloads", os.ModePerm)
+	if err != nil {
+		fmt.Println("Erro ao criar pasta:", err)
+	}
 }
 
 var list_pages = []string{
@@ -69,7 +74,7 @@ func main() {
 
 	toprepo := database.NewTopPostgresRepository(postgres)
 	top_service := service.NewTopService(toprepo, newsrepo, hitrepo, news_service)
-	top_controller := controllers.NewTopController(*top_service)
+	top_controller := controllers.NewTopController(top_service)
 
 	user_repo := database.NewUserPostgresRepository(postgres)
 	user_service := service.NewUserService(user_repo)
@@ -77,7 +82,7 @@ func main() {
 
 	banner_repo := database.NewBannerPostgresRepository(postgres)
 	banner_service := service.NewBannerService(banner_repo, imagedownloader)
-	banner_controller := controllers.NewBannerController(*banner_service)
+	banner_controller := controllers.NewBannerController(banner_service)
 
 	var list_notifications []port.EmailPort
 	email_notifications := notifications.NewGmailSMTP()

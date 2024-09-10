@@ -9,11 +9,11 @@ import (
 )
 
 type TopController struct {
-	TopService service.TopService	
+	TopService *service.TopService
 }
 
-func NewTopController(topservice service.TopService) *TopController {
-	return &TopController{ TopService: topservice }
+func NewTopController(topservice *service.TopService) *TopController {
+	return &TopController{TopService: topservice}
 }
 
 func (t *TopController) CreateTop(w http.ResponseWriter, r *http.Request) {
@@ -25,33 +25,29 @@ func (t *TopController) CreateTop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go t.TopService.TopCreate()	
+	go t.TopService.TopCreate()
 
 	msg := map[string]any{
-		"ok": true,
+		"ok":      true,
 		"message": "Criado o Top Notícias",
-
 	}
 	ResponseJson(w, msg, http.StatusOK)
-	
-	
+
 }
 
 func (t *TopController) FindAll(w http.ResponseWriter, r *http.Request) {
 
-
-	tops, err := t.TopService.FindAll()	
+	tops, err := t.TopService.FindAll()
 
 	if err != nil {
 		msg := map[string]any{
-			"ok": false,
+			"ok":      false,
 			"message": "Não foi possível retornar Top Notícias",
-	
 		}
 		ResponseJson(w, msg, http.StatusOK)
 		return
 	}
 
 	ResponseJson(w, tops, http.StatusOK)
-	
+
 }

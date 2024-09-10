@@ -12,10 +12,10 @@ import (
 )
 
 type BannerController struct {
-	banner_service service.BannerService
+	banner_service *service.BannerService
 }
 
-func NewBannerController(bannerservice service.BannerService) *BannerController {
+func NewBannerController(bannerservice *service.BannerService) *BannerController {
 	return &BannerController{banner_service: bannerservice}
 }
 

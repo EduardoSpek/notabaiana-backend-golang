@@ -24,18 +24,18 @@ type News struct {
 	gorm.Model
 
 	ID        string    `gorm:"column:id;primaryKey" json:"id"`
-	Title     string    `gorm:"column:title" json:"title"`
+	Title     string    `gorm:"column:title;index:idx_visible_title" json:"title"`
 	TitleAi   string    `gorm:"column:title_ai" json:"title_ai"`
 	Text      string    `gorm:"column:text" json:"text"`
 	Link      string    `gorm:"column:link" json:"link"`
 	Image     string    `gorm:"column:image" json:"image"`
-	Slug      string    `gorm:"column:slug" json:"slug"`
-	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
+	Slug      string    `gorm:"column:slug;index:idx_slug_visible" json:"slug"`
+	CreatedAt time.Time `gorm:"column:created_at;index:,sort:desc" json:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
-	Visible   bool      `gorm:"column:visible;" json:"visible"`
+	Visible   bool      `gorm:"column:visible;index:idx_visible_title" json:"visible"`
 	TopStory  bool      `gorm:"column:topstory;" json:"topstory"`
-	Views     int       `gorm:"column:views;default:0" json:"views"`
-	Category  string    `gorm:"column:category" json:"category"`
+	Views     int       `gorm:"column:views;default:0;index:,sort:desc" json:"views"`
+	Category  string    `gorm:"column:category;index:idx_visible_category" json:"category"`
 	Make      bool      `gorm:"column:make;default:false" json:"make"`
 }
 
