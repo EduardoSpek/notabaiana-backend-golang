@@ -24,6 +24,10 @@ type Response struct {
 }
 
 type PageProps struct {
+	AlbumsResponse AlbumsResponse `json:"albumsResponse"`
+}
+
+type AlbumsResponse struct {
 	Albums []Album `json:"albums"`
 }
 
