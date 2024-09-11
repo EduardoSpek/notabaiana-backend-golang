@@ -139,7 +139,7 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 			fmt.Println("Erro ao decodificar o JSON:", err)
 		}
 
-		for _, album := range response.PageProps.Albums {
+		for _, album := range response.PageProps.AlbumsResponse.Albums {
 			download := &entity.Download{
 				Title: album.Title,
 				Link:  urlSite + "/" + album.Username + "/" + album.Slug,
