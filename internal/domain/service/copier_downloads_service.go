@@ -85,6 +85,9 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 				fmt.Println("CopierDownload: ", err)
 			}
 
+			fmt.Println("ImageJson: ", n.Image)
+			fmt.Println("ImageDown: ", downloadCreated.Image) 
+
 			img, err := utils.DownloadImage(downloadCreated.Image)
 
 			if err != nil {
