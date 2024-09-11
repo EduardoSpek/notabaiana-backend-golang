@@ -30,6 +30,7 @@ func NewDownloadController(repository *postgres.DownloadPostgresRepository, imag
 func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, r *http.Request) {
 
 	var msg map[string]any
+	var downloadCreated *entity.Download
 
 	TokenVerifyByForm(w, r)
 
@@ -46,7 +47,7 @@ func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, 
 	}
 
 	createDownloadUsecase := usecase.NewCreateDownloadUsecase(bc.DownloadRepository)
-	downloadCreated, err := createDownloadUsecase.Create(downloadInput)
+	downloadCreated, err = createDownloadUsecase.Create(downloadInput)
 
 	if err != nil {
 		msg = map[string]any{
@@ -58,20 +59,22 @@ func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, 
 		return
 	}
 
-	err = SaveImageForm(image, downloadCreated.Image, "downloads")
+	imgSaved, err := SaveImageForm(image, downloadCreated.Image, "downloads", 300, 300)
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	if err != nil {
-		msg = map[string]any{
-			"ok":      false,
-			"message": "A notícia não pode ser criada",
-			"erro":    err.Error(),
+	if !imgSaved {
+		downloadCreated.Image = ""
+		updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
+		downloadUpdated, err := updateDownloadUsecase.Update(downloadCreated)
+
+		if err != nil {
+			fmt.Println(err)
 		}
-		ResponseJson(w, msg, http.StatusNotFound)
-		return
+
+		downloadCreated = downloadUpdated
 	}
 
 	ResponseJson(w, downloadCreated, http.StatusOK)

@@ -1,11 +1,17 @@
 package entity
 
 import (
+	"errors"
 	"strings"
 	"time"
 
+	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+)
+
+var (
+	ErrLink = errors.New("o link não é válido")
 )
 
 type Download struct {
@@ -17,7 +23,7 @@ type Download struct {
 	Text      string    `gorm:"column:text" json:"text"`
 	Link      string    `gorm:"column:link" json:"link"`
 	Image     string    `gorm:"column:image" json:"image"`
-	Slug      string    `gorm:"column:slug;index:idx_slug_visible" json:"slug"`
+	Slug      string    `gorm:"column:slug;unique;index:idx_slug_visible" json:"slug"`
 	Views     int       `gorm:"column:views;default:0;index:,sort:desc" json:"views"`
 	Downloads int       `gorm:"column:downloads;default:0" json:"downloads"`
 	Visible   bool      `gorm:"column:visible;default:true;index:idx_visible_title" json:"visible"`
@@ -59,4 +65,24 @@ func UpdateDownload(download Download) *Download {
 		Make:      download.Make,
 		UpdatedAt: time.Now(),
 	}
+}
+
+func (v *Download) Validations() (bool, error) {
+
+	if v.Title == "" || len(v.Title) < 2 || len(v.Title) > 144 {
+		return false, ErrTitle
+	}
+
+	if v.Link == "" || len(v.Link) < 2 || len(v.Link) > 144 {
+		return false, ErrLink
+	}
+
+	isValidUrl := utils.IsValidURL(v.Link)
+
+	if !isValidUrl {
+		return false, ErrLink
+	}
+
+	return true, nil
+
 }

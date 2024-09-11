@@ -13,3 +13,9 @@ func IsValidEmail(email string) bool {
 	// Retorna verdadeiro se o email corresponder à expressão regular, falso caso contrário
 	return re.MatchString(email)
 }
+
+func IsValidURL(str string) bool {
+	urlPattern := `^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$`
+	regex := regexp.MustCompile(urlPattern)
+	return regex.MatchString(str)
+}

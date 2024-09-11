@@ -76,10 +76,10 @@ func TokenVerifyByHeader(w http.ResponseWriter, r *http.Request) error {
 
 }
 
-func SaveImageForm(file multipart.File, filename string, pasta string) error {
+func SaveImageForm(file multipart.File, filename string, pasta string, imgWidth, imgHeight int) (bool, error) {
 
 	if file == nil {
-		return nil
+		return false, nil
 	}
 
 	defer file.Close()
@@ -90,12 +90,12 @@ func SaveImageForm(file multipart.File, filename string, pasta string) error {
 		fmt.Println("Erro ao obter o caminho do executável:", err)
 	}
 
-	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/" + pasta
+	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/" + pasta + "/"
 	pathImage := diretorio + filename
 
 	f, err := os.Create(pathImage)
 	if err != nil {
-		return ErrParseForm
+		return false, ErrParseForm
 	}
 	defer f.Close()
 	io.Copy(f, file)
@@ -103,24 +103,24 @@ func SaveImageForm(file multipart.File, filename string, pasta string) error {
 	f, err = os.Open(pathImage)
 
 	if err != nil {
-		return ErrParseForm
+		return false, ErrParseForm
 	}
 
 	// Resize the image
 	img, _, err := image.Decode(f)
 	if err != nil {
-		return ErrDecodeImage
+		return false, ErrDecodeImage
 	}
 
 	ImgDownloader := utils.NewImgDownloader()
 
-	err = ImgDownloader.CropAndSaveImage(img, 400, 254, pathImage)
+	err = ImgDownloader.CropAndSaveImage(img, imgWidth, imgHeight, pathImage)
 
 	if err != nil {
 		fmt.Println(err)
-		return ErrDecodeImage
+		return false, ErrDecodeImage
 	}
 
-	return nil
+	return true, nil
 
 }

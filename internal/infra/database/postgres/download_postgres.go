@@ -41,3 +41,30 @@ func (repo *DownloadPostgresRepository) Create(download *entity.Download) (*enti
 
 	return download, nil
 }
+
+func (repo *DownloadPostgresRepository) Update(download *entity.Download) (*entity.Download, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	result := repo.db.Model(&download).Updates(map[string]interface{}{
+		"category":   download.Category,
+		"title":      download.Title,
+		"link":       download.Link,
+		"text":       download.Text,
+		"image":      download.Image,
+		"visible":    download.Visible,
+		"updated_at": download.UpdatedAt,
+	})
+
+	if result.Error != nil {
+		tx.Rollback()
+		return &entity.Download{}, result.Error
+	}
+
+	tx.Commit()
+
+	return download, nil
+}

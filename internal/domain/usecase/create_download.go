@@ -6,18 +6,21 @@ import (
 )
 
 type CreateDownloadUsecase struct {
-	CreateDownload port.CreateDownload
+	DownloadRepository port.CreateDownloadRepository
 }
 
-func NewCreateDownloadUsecase(download port.CreateDownload) *CreateDownloadUsecase {
+func NewCreateDownloadUsecase(repository port.CreateDownloadRepository) *CreateDownloadUsecase {
 	return &CreateDownloadUsecase{
-		CreateDownload: download,
+		DownloadRepository: repository,
 	}
 }
 
 func (d *CreateDownloadUsecase) Create(download *entity.Download) (*entity.Download, error) {
 	newDownload := entity.NewDownload(*download)
-	created, err := d.CreateDownload.Create(newDownload)
+
+	newDownload.Image = newDownload.ID + ".jpg"
+
+	created, err := d.DownloadRepository.Create(newDownload)
 
 	if err != nil {
 		return &entity.Download{}, err
