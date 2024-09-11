@@ -56,9 +56,9 @@ var (
 		"https://www.bahianoticias.com.br/saude",
 		"https://www.bahianoticias.com.br/municipios",
 	}
-	list_downloads = []string{
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/pagode.json?category=pagode",
-	}
+	// list_downloads = []string{
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/pagode.json?category=pagode",
+	// }
 )
 
 func main() {
