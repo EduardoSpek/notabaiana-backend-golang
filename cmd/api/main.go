@@ -47,14 +47,19 @@ func init() {
 	}
 }
 
-var list_pages = []string{
-	"https://www.bahianoticias.com.br",
-	"https://www.bahianoticias.com.br/holofote",
-	"https://www.bahianoticias.com.br/esportes",
-	"https://www.bahianoticias.com.br/justica",
-	"https://www.bahianoticias.com.br/saude",
-	"https://www.bahianoticias.com.br/municipios",
-}
+var (
+	list_pages = []string{
+		"https://www.bahianoticias.com.br",
+		"https://www.bahianoticias.com.br/holofote",
+		"https://www.bahianoticias.com.br/esportes",
+		"https://www.bahianoticias.com.br/justica",
+		"https://www.bahianoticias.com.br/saude",
+		"https://www.bahianoticias.com.br/municipios",
+	}
+	list_downloads = []string{
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/pagode.json?category=pagode",
+	}
+)
 
 func main() {
 
@@ -69,6 +74,9 @@ func main() {
 	crawler_service := service.NewCrawler()
 	copier_service := service.NewCopier(news_service, crawler_service)
 	crawler_controller := controllers.NewCrawlerController(copier_service)
+
+	download_repository := database.NewDownloadPostgresRepository(postgres)
+	copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
 
 	news_controller := controllers.NewNewsController(news_service)
 
@@ -104,6 +112,7 @@ func main() {
 	server.ContactController(contact_controller)
 
 	go copier_service.Start(list_pages, 3)
+	go copier_downloads.Start(list_downloads, 30)
 
 	//Função para gerar as top notícias a cada 60 minutos
 	go top_service.Start(60)
