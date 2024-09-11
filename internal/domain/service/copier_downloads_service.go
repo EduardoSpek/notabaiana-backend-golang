@@ -91,6 +91,7 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 				downloadCreated.Image = ""
 				updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(c.DownloadRepository)
 				updateDownloadUsecase.Update(downloadCreated)
+				fmt.Println("CopierDownload: Erro ao baixar imagem:", err) 
 				return
 			}
 
@@ -107,6 +108,10 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 				updateDownloadUsecase.Update(downloadCreated)
 
 				fmt.Println("CopierDownload: Erro ao salvar a imagem:", err)
+			} else {
+				downloadCreated.Image = downloadCreated.ID + ".jpg"
+				updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(c.DownloadRepository)
+				updateDownloadUsecase.Update(downloadCreated)
 			}
 
 		}()
