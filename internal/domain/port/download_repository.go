@@ -9,3 +9,8 @@ type CreateDownloadRepository interface {
 type UpdateDownloadRepository interface {
 	Update(download *entity.Download) (*entity.Download, error)
 }
+
+type CreateAndUpdateDownloadRepository interface {
+	Create(download *entity.Download) (*entity.Download, error)
+	Update(download *entity.Download) (*entity.Download, error)
+}

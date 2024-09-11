@@ -129,7 +129,7 @@ func TestDownloadController(t *testing.T) {
 
 		dto := &entity.Download{
 			Category: "pagode",
-			Title:    "Harmnonia do Samba 9",
+			Title:    "Harmnonia do Samba 1",
 			Link:     "https://www.suamusica.com.br/harmonia-do-samba",
 			Text:     "Loren ipsun dolor sit iamet",
 		}
@@ -170,8 +170,6 @@ func TestDownloadController(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Erro ao decodificar resposta JSON: %v", err)
 		}
-
-		t.Fail()
 
 	})
 
