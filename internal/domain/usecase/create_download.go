@@ -18,8 +18,6 @@ func NewCreateDownloadUsecase(repository port.CreateDownloadRepository) *CreateD
 func (d *CreateDownloadUsecase) Create(download *entity.Download) (*entity.Download, error) {
 	newDownload := entity.NewDownload(*download)
 
-	newDownload.Image = newDownload.ID + ".jpg"
-
 	created, err := d.DownloadRepository.Create(newDownload)
 
 	if err != nil {
