@@ -110,6 +110,9 @@ func main() {
 	contact_service := service.NewContactService(contact_repo, imagedownloader, notifications)
 	contact_controller := controllers.NewContactController(*contact_service)
 
+	download_repo := database.NewDownloadPostgresRepository(postgres)
+	download_controller := controllers.NewDownloadController(download_repo, imagedownloader)
+
 	server := web.NewServerWeb()
 
 	server.UserController(user_controller)
@@ -118,6 +121,7 @@ func main() {
 	server.NewsController(news_controller)
 	server.BannerController(banner_controller)
 	server.ContactController(contact_controller)
+	server.DownloadController(download_controller)
 
 	go copier_service.Start(list_pages, 3)
 	go copier_downloads.Start(list_downloads, 30)
