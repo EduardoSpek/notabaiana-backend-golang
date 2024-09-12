@@ -205,7 +205,8 @@ func (bc *DownloadController) FindCategory(w http.ResponseWriter, r *http.Reques
 		page = 1
 	}
 
-	listnews, err := bc.DownloadRepository.FindCategory(category, page)
+	downloadUsecase := usecase.NewFindCategoryDownloadUsecase(bc.DownloadRepository)
+	downloads, err := downloadUsecase.FindCategory(category, page)
 
 	if err != nil {
 		msg := map[string]any{
@@ -217,6 +218,6 @@ func (bc *DownloadController) FindCategory(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	ResponseJson(w, listnews, http.StatusOK)
+	ResponseJson(w, downloads, http.StatusOK)
 
 }
