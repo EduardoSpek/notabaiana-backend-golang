@@ -33,9 +33,11 @@ func (d *FindCategoryDownloadUsecase) FindCategory(str_search string, page int) 
 	result := struct {
 		Downloads  []*entity.Download `json:"downloads"`
 		Pagination map[string][]int   `json:"pagination"`
+		Category   string             `json:"category"`
 	}{
 		Downloads:  downloads,
 		Pagination: pagination,
+		Category:   str_search,
 	}
 
 	return result, nil
