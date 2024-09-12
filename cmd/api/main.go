@@ -85,6 +85,7 @@ func main() {
 
 	download_repository := database.NewDownloadPostgresRepository(postgres)
 	copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
+	download_controller := controllers.NewDownloadController(download_repository, imagedownloader)
 
 	news_controller := controllers.NewNewsController(news_service)
 
@@ -109,9 +110,6 @@ func main() {
 	contact_repo := database.NewContactPostgresRepository(postgres)
 	contact_service := service.NewContactService(contact_repo, imagedownloader, notifications)
 	contact_controller := controllers.NewContactController(*contact_service)
-
-	download_repo := database.NewDownloadPostgresRepository(postgres)
-	download_controller := controllers.NewDownloadController(download_repo, imagedownloader)
 
 	server := web.NewServerWeb()
 
