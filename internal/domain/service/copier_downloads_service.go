@@ -85,16 +85,13 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 				fmt.Println("CopierDownload: ", err)
 			}
 
-			fmt.Println("ImageJson: ", n.Image)
-			fmt.Println("ImageDown: ", downloadCreated.Image) 
-
 			img, err := utils.DownloadImage(downloadCreated.Image)
 
 			if err != nil {
 				downloadCreated.Image = ""
 				updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(c.DownloadRepository)
 				updateDownloadUsecase.Update(downloadCreated)
-				fmt.Println("CopierDownload: Erro ao baixar imagem:", err) 
+				fmt.Println("CopierDownload: Erro ao baixar imagem:", err)
 				return
 			}
 

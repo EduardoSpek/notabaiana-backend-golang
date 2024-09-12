@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -12,18 +13,36 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/math/fixed"
+	"golang.org/x/image/webp"
 )
 
 func DownloadImage(url string) (image.Image, error) {
+
+	var img image.Image
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	img, _, err := image.Decode(resp.Body)
-	if err != nil {
-		return nil, err
+	contentType := resp.Header.Get("Content-Type")
+
+	// Verifica o tipo de imagem
+	switch contentType {
+	case "image/webp":
+		img, err = webp.Decode(resp.Body)
+		if err != nil {
+			fmt.Println("Erro ao decodificar a imagem WebP:", err)
+			return nil, err
+		}
+	case "image/jpeg":
+		img, _, err = image.Decode(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		fmt.Println("DownloadImage: Tipo de imagem desconhecido ou não suportado")
 	}
 
 	return img, nil
