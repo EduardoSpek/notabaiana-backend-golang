@@ -143,3 +143,80 @@ func (bc *DownloadController) FindAll(w http.ResponseWriter, r *http.Request) {
 	ResponseJson(w, downloads, http.StatusOK)
 
 }
+
+func (bc *DownloadController) GetBySlug(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	downloadUsecase := usecase.NewGetBySlugDownloadUsecase(bc.DownloadRepository)
+	download, err := downloadUsecase.GetBySlug(slug)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok":      false,
+			"message": "não foi possível obter os dados do download",
+			"erro":    "erro ao buscar registro",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	ResponseJson(w, download, http.StatusOK)
+
+}
+
+func (bc *DownloadController) Search(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	pageStr := vars["page"]
+	str_search := r.URL.Query().Get("search")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	downloadUsecase := usecase.NewSearchDownloadUsecase(bc.DownloadRepository)
+	downloads, err := downloadUsecase.Search(page, str_search)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok":      false,
+			"message": "não foi possível obter a lista de downloads",
+			"erro":    "erro ao buscar lista",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	ResponseJson(w, downloads, http.StatusOK)
+
+}
+
+func (bc *DownloadController) FindCategory(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	category := vars["category"]
+	pageStr := vars["page"]
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	listnews, err := bc.DownloadRepository.FindCategory(category, page)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok":      false,
+			"message": "não foi possível obter a lista de downloads desta categoria",
+			"erro":    "erro ao buscar lista por categoria",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	ResponseJson(w, listnews, http.StatusOK)
+
+}

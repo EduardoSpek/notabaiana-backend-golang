@@ -88,6 +88,33 @@ func (repo *DownloadPostgresRepository) GetByLink(link string) (*entity.Download
 	return download, nil
 }
 
+func (repo *DownloadPostgresRepository) GetBySlug(slug string) (*entity.Download, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var download *entity.Download
+	result := repo.db.Model(&entity.Download{}).Where("visible = true AND slug = ?", slug).First(&download)
+
+	if result.Error != nil {
+		return &entity.Download{}, result.Error
+	}
+
+	download.Views += 1
+
+	result = repo.db.Save(&download)
+
+	if result.Error != nil {
+		return &entity.Download{}, result.Error
+	}
+
+	tx.Commit()
+
+	return download, nil
+}
+
 func (repo *DownloadPostgresRepository) FindAll(page, limit int) ([]*entity.Download, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
@@ -109,6 +136,28 @@ func (repo *DownloadPostgresRepository) FindAll(page, limit int) ([]*entity.Down
 	return download, nil
 }
 
+func (repo *DownloadPostgresRepository) FindCategory(category string, page int) ([]*entity.Download, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	limit := PerPage
+	offset := (page - 1) * limit
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var downloads []*entity.Download
+	repo.db.Model(&entity.Download{}).Where("visible = true AND category=?", category).Order("created_at DESC").Limit(limit).Offset(offset).Find(&downloads)
+
+	if repo.db.Error != nil {
+		return []*entity.Download{}, repo.db.Error
+	}
+
+	tx.Commit()
+
+	return downloads, nil
+}
+
 func (repo *DownloadPostgresRepository) GetTotalVisible() int {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
@@ -118,4 +167,41 @@ func (repo *DownloadPostgresRepository) GetTotalVisible() int {
 
 	return int(total)
 
+}
+
+func (repo *DownloadPostgresRepository) GetTotalFindCategory(category string) int {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	var total int64
+	repo.db.Model(&entity.Download{}).Where("visible = true AND category=?", category).Count(&total)
+
+	return int(total)
+
+}
+
+func (repo *DownloadPostgresRepository) GetTotalSearch(str_search string) int {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	var count int64
+	repo.db.Model(&entity.Download{}).Where("visible = true AND unaccent(title) ILIKE unaccent(?)", "%"+str_search+"%").Count(&count)
+
+	total := int(count)
+
+	return total
+
+}
+
+func (repo *DownloadPostgresRepository) Search(page int, str_search string) []*entity.Download {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	limit := PerPage
+	offset := (page - 1) * limit
+
+	var downloads []*entity.Download
+	repo.db.Model(&entity.Download{}).Where("visible = true AND unaccent(title) ILIKE unaccent(?)", "%"+str_search+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&downloads)
+
+	return downloads
 }
