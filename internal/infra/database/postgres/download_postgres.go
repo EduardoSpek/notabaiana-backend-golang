@@ -68,3 +68,22 @@ func (repo *DownloadPostgresRepository) Update(download *entity.Download) (*enti
 
 	return download, nil
 }
+
+func (repo *DownloadPostgresRepository) GetByLink(link string) (*entity.Download, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var download *entity.Download
+	result := repo.db.Model(&entity.Download{}).Where("link = ?", link).First(&download)
+
+	if result.Error != nil {
+		return &entity.Download{}, result.Error
+	}
+
+	tx.Commit()
+
+	return download, nil
+}

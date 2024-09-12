@@ -42,11 +42,11 @@ type Album struct {
 }
 
 type CopierDownloadService struct {
-	DownloadRepository port.CreateAndUpdateDownloadRepository
+	DownloadRepository port.DownloadRepository
 	ImgDownloader      port.ImageDownloader
 }
 
-func NewCopierDownload(DownloadRepository port.CreateAndUpdateDownloadRepository, ImgDownloader port.ImageDownloader) *CopierDownloadService {
+func NewCopierDownload(DownloadRepository port.DownloadRepository, ImgDownloader port.ImageDownloader) *CopierDownloadService {
 	return &CopierDownloadService{DownloadRepository: DownloadRepository, ImgDownloader: ImgDownloader}
 }
 
@@ -77,6 +77,13 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 	for _, n := range lista {
 
 		go func() {
+
+			getByLinkDownloadUsecase := usecase.NewGetByLinkDownloadUsecase(c.DownloadRepository)
+			_, err := getByLinkDownloadUsecase.GetByLink(n.Link)
+
+			if err == nil {
+				return
+			}
 
 			createDownloadUsecase := usecase.NewCreateDownloadUsecase(c.DownloadRepository)
 			downloadCreated, err := createDownloadUsecase.Create(n)
@@ -123,7 +130,15 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 	var response Response
 	var lista []*entity.Download
 
+	var category string
+
 	for _, item := range list_downloads {
+
+		partes := strings.Split(item, "=")
+
+		if partes[1] != "" {
+			category = partes[1]
+		}
 
 		// Fazendo a requisição GET
 		resp, err := http.Get(item)
@@ -146,9 +161,10 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 
 		for _, album := range response.PageProps.AlbumsResponse.Albums {
 			download := &entity.Download{
-				Title: album.Title,
-				Link:  urlSite + "/" + album.Username + "/" + album.Slug,
-				Image: album.Cover,
+				Category: category,
+				Title:    album.Title,
+				Link:     urlSite + "/" + album.Username + "/" + album.Slug,
+				Image:    album.Cover,
 			}
 
 			lista = append(lista, download)

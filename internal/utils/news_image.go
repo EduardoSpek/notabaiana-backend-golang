@@ -36,13 +36,11 @@ func DownloadImage(url string) (image.Image, error) {
 			fmt.Println("Erro ao decodificar a imagem WebP:", err)
 			return nil, err
 		}
-	case "image/jpeg":
+	default:
 		img, _, err = image.Decode(resp.Body)
 		if err != nil {
 			return nil, err
 		}
-	default:
-		fmt.Println("DownloadImage: Tipo de imagem desconhecido ou não suportado")
 	}
 
 	return img, nil

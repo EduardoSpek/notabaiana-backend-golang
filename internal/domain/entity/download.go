@@ -21,7 +21,7 @@ type Download struct {
 	Category  string    `gorm:"column:category;index:idx_visible_category" json:"category"`
 	Title     string    `gorm:"column:title;index:idx_visible_title" json:"title"`
 	Text      string    `gorm:"column:text" json:"text"`
-	Link      string    `gorm:"column:link" json:"link"`
+	Link      string    `gorm:"column:link;unique;index:idx_link_visible" json:"link"`
 	Image     string    `gorm:"column:image" json:"image"`
 	Slug      string    `gorm:"column:slug;unique;index:idx_slug_visible" json:"slug"`
 	Views     int       `gorm:"column:views;default:0;index:,sort:desc" json:"views"`

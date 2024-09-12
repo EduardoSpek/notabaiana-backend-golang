@@ -58,6 +58,14 @@ var (
 	}
 	list_downloads = []string{
 		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/pagode.json?category=pagode",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/swingueira.json?category=swingueira",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/samba.json?category=samba",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/forro.json?category=forro",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/axe.json?category=axe",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/arrocha.json?category=arrocha",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/piseiro.json?category=piseiro",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/arrochadeira.json?category=arrochadeira",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/variados.json?category=variados",
 	}
 )
 
