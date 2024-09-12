@@ -87,3 +87,35 @@ func (repo *DownloadPostgresRepository) GetByLink(link string) (*entity.Download
 
 	return download, nil
 }
+
+func (repo *DownloadPostgresRepository) FindAll(page, limit int) ([]*entity.Download, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	offset := (page - 1) * limit
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var download []*entity.Download
+	repo.db.Model(&entity.Download{}).Where("visible = true").Order("created_at DESC").Limit(limit).Offset(offset).Find(&download)
+
+	if repo.db.Error != nil {
+		return []*entity.Download{}, repo.db.Error
+	}
+
+	tx.Commit()
+
+	return download, nil
+}
+
+func (repo *DownloadPostgresRepository) GetTotalVisible() int {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	var total int64
+	repo.db.Model(&entity.Download{}).Where("visible = true").Count(&total)
+
+	return int(total)
+
+}

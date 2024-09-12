@@ -6,6 +6,8 @@ type DownloadRepository interface {
 	Create(download *entity.Download) (*entity.Download, error)
 	Update(download *entity.Download) (*entity.Download, error)
 	GetByLink(link string) (*entity.Download, error)
+	FindAll(page, limit int) ([]*entity.Download, error)
+	GetTotalVisible() int
 }
 
 type CreateDownloadRepository interface {
@@ -18,4 +20,12 @@ type UpdateDownloadRepository interface {
 
 type GetByLinkDownloadRepository interface {
 	GetByLink(download string) (*entity.Download, error)
+}
+
+type FindAllDownloadRepository interface {
+	FindAll(page, limit int) ([]*entity.Download, error)
+}
+
+type GetTotalVisibleDownloadRepository interface {
+	GetTotalVisible() int
 }
