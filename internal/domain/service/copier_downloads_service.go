@@ -24,11 +24,7 @@ type Response struct {
 }
 
 type PageProps struct {
-	Top Top `json:"top"`
-}
-
-type Top struct {
-	Album []Album `json:"album"`
+	Top []Album `json:"top"`
 }
 
 type Album struct {
@@ -53,8 +49,6 @@ func NewCopierDownload(DownloadRepository port.DownloadRepository, ImgDownloader
 
 func (c *CopierDownloadService) Start(rss []string, minutes time.Duration) {
 
-	fmt.Println("CopierDownload start...")
-
 	go c.Run(rss)
 
 	ticker := time.NewTicker(minutes * time.Minute)
@@ -66,8 +60,6 @@ func (c *CopierDownloadService) Start(rss []string, minutes time.Duration) {
 }
 
 func (c *CopierDownloadService) Run(list_downloads []string) {
-
-	fmt.Println("CopierDownload run...")
 
 	cwd, err := os.Getwd()
 
@@ -167,8 +159,7 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 			fmt.Println("Erro ao decodificar o JSON:", err)
 		}
 
-		for _, album := range response.PageProps.Top.Album {
-			fmt.Println(album.Title)
+		for _, album := range response.PageProps.Top {
 			download := &entity.Download{
 				Category: category,
 				Title:    album.Title,
@@ -179,8 +170,6 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 			lista = append(lista, download)
 
 		}
-
-		fmt.Println("PASSOU")
 
 	}
 
