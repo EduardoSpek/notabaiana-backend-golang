@@ -75,6 +75,10 @@ func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, 
 		}
 
 		downloadCreated = downloadUpdated
+	} else {
+		downloadCreated.Image = downloadCreated.ID + ".jpg"
+		updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
+		updateDownloadUsecase.Update(downloadCreated)
 	}
 
 	ResponseJson(w, downloadCreated, http.StatusOK)
