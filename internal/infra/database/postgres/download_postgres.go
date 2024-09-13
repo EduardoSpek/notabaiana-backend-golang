@@ -24,6 +24,9 @@ func NewDownloadPostgresRepository(db_adapter port.DBAdapter) *DownloadPostgresR
 }
 
 func (repo *DownloadPostgresRepository) Create(download *entity.Download) (*entity.Download, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
 	tx := repo.db.Begin()
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -46,9 +49,12 @@ func (repo *DownloadPostgresRepository) Update(download *entity.Download) (*enti
 	defer repo.mutex.Unlock()
 
 	tx := repo.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 	defer tx.Rollback()
 
-	result := repo.db.Model(&download).Updates(map[string]interface{}{
+	result := tx.Model(download).Updates(map[string]interface{}{
 		"category":   download.Category,
 		"title":      download.Title,
 		"link":       download.Link,
@@ -59,32 +65,31 @@ func (repo *DownloadPostgresRepository) Update(download *entity.Download) (*enti
 	})
 
 	if result.Error != nil {
-		tx.Rollback()
-		return &entity.Download{}, result.Error
+		return nil, result.Error
 	}
 
-	tx.Commit()
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
 
 	return download, nil
 }
 
 func (repo *DownloadPostgresRepository) GetByLink(link string) (*entity.Download, error) {
-	repo.mutex.Lock()
-	defer repo.mutex.Unlock()
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
 
-	tx := repo.db.Begin()
-	defer tx.Rollback()
-
-	var download *entity.Download
-	result := repo.db.Model(&entity.Download{}).Where("link = ?", link).First(&download)
+	var download entity.Download
+	result := repo.db.Where("link = ?", link).First(&download)
 
 	if result.Error != nil {
-		return &entity.Download{}, result.Error
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, result.Error
 	}
 
-	tx.Commit()
-
-	return download, nil
+	return &download, nil
 }
 
 func (repo *DownloadPostgresRepository) GetBySlug(slug string) (*entity.Download, error) {
@@ -92,26 +97,29 @@ func (repo *DownloadPostgresRepository) GetBySlug(slug string) (*entity.Download
 	defer repo.mutex.Unlock()
 
 	tx := repo.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 	defer tx.Rollback()
 
-	var download *entity.Download
-	result := repo.db.Model(&entity.Download{}).Where("visible = true AND slug = ?", slug).First(&download)
-
-	if result.Error != nil {
-		return &entity.Download{}, result.Error
+	var download entity.Download
+	if err := tx.Where("visible = true AND slug = ?", slug).First(&download).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
 	}
 
-	download.Views += 1
-
-	result = repo.db.Save(&download)
-
-	if result.Error != nil {
-		return &entity.Download{}, result.Error
+	download.Views++
+	if err := tx.Save(&download).Error; err != nil {
+		return nil, err
 	}
 
-	tx.Commit()
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
 
-	return download, nil
+	return &download, nil
 }
 
 func (repo *DownloadPostgresRepository) FindAll(page, limit int) ([]*entity.Download, error) {
@@ -119,20 +127,19 @@ func (repo *DownloadPostgresRepository) FindAll(page, limit int) ([]*entity.Down
 	defer repo.mutex.RUnlock()
 
 	offset := (page - 1) * limit
+	var downloads []*entity.Download
 
-	tx := repo.db.Begin()
-	defer tx.Rollback()
+	err := repo.db.Where("visible = true").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&downloads).Error
 
-	var download []*entity.Download
-	repo.db.Model(&entity.Download{}).Where("visible = true").Order("created_at DESC").Limit(limit).Offset(offset).Find(&download)
-
-	if repo.db.Error != nil {
-		return []*entity.Download{}, repo.db.Error
+	if err != nil {
+		return nil, err
 	}
 
-	tx.Commit()
-
-	return download, nil
+	return downloads, nil
 }
 
 func (repo *DownloadPostgresRepository) FindCategory(category string, page int) ([]*entity.Download, error) {
@@ -141,66 +148,67 @@ func (repo *DownloadPostgresRepository) FindCategory(category string, page int) 
 
 	limit := PerPage
 	offset := (page - 1) * limit
-
-	tx := repo.db.Begin()
-	defer tx.Rollback()
-
 	var downloads []*entity.Download
-	repo.db.Model(&entity.Download{}).Where("visible = true AND category=?", category).Order("created_at DESC").Limit(limit).Offset(offset).Find(&downloads)
 
-	if repo.db.Error != nil {
-		return []*entity.Download{}, repo.db.Error
+	err := repo.db.Where("visible = true AND category = ?", category).
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&downloads).Error
+
+	if err != nil {
+		return nil, err
 	}
-
-	tx.Commit()
 
 	return downloads, nil
 }
 
-func (repo *DownloadPostgresRepository) GetTotalVisible() int {
+func (repo *DownloadPostgresRepository) GetTotalVisible() (int, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
 	var total int64
-	repo.db.Model(&entity.Download{}).Where("visible = true").Count(&total)
-
-	return int(total)
-
+	err := repo.db.Model(&entity.Download{}).Where("visible = true").Count(&total).Error
+	return int(total), err
 }
 
-func (repo *DownloadPostgresRepository) GetTotalFindCategory(category string) int {
+func (repo *DownloadPostgresRepository) GetTotalFindCategory(category string) (int, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
 	var total int64
-	repo.db.Model(&entity.Download{}).Where("visible = true AND category=?", category).Count(&total)
-
-	return int(total)
-
+	err := repo.db.Model(&entity.Download{}).Where("visible = true AND category = ?", category).Count(&total).Error
+	return int(total), err
 }
 
-func (repo *DownloadPostgresRepository) GetTotalSearch(str_search string) int {
+func (repo *DownloadPostgresRepository) GetTotalSearch(strSearch string) (int, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
 	var count int64
-	repo.db.Model(&entity.Download{}).Where("visible = true AND unaccent(title) ILIKE unaccent(?)", "%"+str_search+"%").Count(&count)
-
-	total := int(count)
-
-	return total
-
+	err := repo.db.Model(&entity.Download{}).
+		Where("visible = true AND unaccent(title) ILIKE unaccent(?)", "%"+strSearch+"%").
+		Count(&count).Error
+	return int(count), err
 }
 
-func (repo *DownloadPostgresRepository) Search(page int, str_search string) []*entity.Download {
+func (repo *DownloadPostgresRepository) Search(page int, strSearch string) ([]*entity.Download, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
 	limit := PerPage
 	offset := (page - 1) * limit
-
 	var downloads []*entity.Download
-	repo.db.Model(&entity.Download{}).Where("visible = true AND unaccent(title) ILIKE unaccent(?)", "%"+str_search+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&downloads)
 
-	return downloads
+	err := repo.db.Where("visible = true AND unaccent(title) ILIKE unaccent(?)", "%"+strSearch+"%").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&downloads).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return downloads, nil
 }

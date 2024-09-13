@@ -30,7 +30,11 @@ func (d *FindAllDownloadUsecase) FindAll(page, limit int) (interface{}, error) {
 		return nil, err
 	}
 
-	total := d.DownloadRepository.GetTotalVisible()
+	total, err := d.DownloadRepository.GetTotalVisible()
+
+	if err != nil {
+		return nil, err
+	}
 
 	pagination := utils.Pagination(page, limit, total)
 

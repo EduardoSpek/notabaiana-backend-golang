@@ -20,9 +20,17 @@ func (d *SearchDownloadUsecase) Search(page int, str_search string) (interface{}
 
 	limit := 24
 
-	downloads := d.DownloadRepository.Search(page, str_search)
+	downloads, err := d.DownloadRepository.Search(page, str_search)
 
-	total := d.DownloadRepository.GetTotalSearch(str_search)
+	if err != nil {
+		return nil, err
+	}
+
+	total, err := d.DownloadRepository.GetTotalSearch(str_search)
+
+	if err != nil {
+		return nil, err
+	}
 
 	pagination := utils.Pagination(page, limit, total)
 

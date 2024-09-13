@@ -26,7 +26,11 @@ func (d *FindCategoryDownloadUsecase) FindCategory(str_search string, page int) 
 		return nil, err
 	}
 
-	total := d.DownloadRepository.GetTotalFindCategory(str_search)
+	total, err := d.DownloadRepository.GetTotalFindCategory(str_search)
+
+	if err != nil {
+		return nil, err
+	}
 
 	pagination := utils.Pagination(page, limit, total)
 
