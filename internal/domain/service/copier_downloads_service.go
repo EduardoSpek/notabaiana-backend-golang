@@ -79,9 +79,13 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 		go func() {
 
 			getByLinkDownloadUsecase := usecase.NewGetByLinkDownloadUsecase(c.DownloadRepository)
-			_, err := getByLinkDownloadUsecase.GetByLink(n.Link)
+			downloadGet, err := getByLinkDownloadUsecase.GetByLink(n.Link)
 
-			if err == nil {
+			if err != nil {
+				return
+			}
+
+			if downloadGet != nil {
 				return
 			}
 

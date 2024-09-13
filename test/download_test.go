@@ -177,8 +177,8 @@ func TestDownloadController(t *testing.T) {
 
 		dto := &entity.Download{
 			Category: "pagode",
-			Title:    "Harmnonia do Samba 10",
-			Link:     "https://www.suamusica.com.br/harmonia-do-samba",
+			Title:    "Harmnonia do Samba 2",
+			Link:     "https://www.suamusica.com.br/harmonia-do-samba2",
 			Text:     "Loren ipsun dolor sit iamet",
 		}
 

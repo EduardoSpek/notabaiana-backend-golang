@@ -32,7 +32,7 @@ func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, 
 	var msg map[string]any
 	var downloadCreated *entity.Download
 
-	TokenVerifyByForm(w, r)
+	//TokenVerifyByForm(w, r)
 
 	downloadInput, image, err := bc.GetDownloadDataFromTheForm(r)
 
