@@ -24,20 +24,19 @@ func NewDownloadPostgresRepository(db_adapter port.DBAdapter) *DownloadPostgresR
 }
 
 func (repo *DownloadPostgresRepository) Create(download *entity.Download) (*entity.Download, error) {
-	repo.mutex.Lock()
-	defer repo.mutex.Unlock()
-
 	tx := repo.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 	defer tx.Rollback()
 
-	result := repo.db.Create(&download)
-
-	if result.Error != nil {
-		tx.Rollback()
-		return &entity.Download{}, result.Error
+	if err := tx.Create(download).Error; err != nil {
+		return nil, err
 	}
 
-	tx.Commit()
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
 
 	return download, nil
 }
