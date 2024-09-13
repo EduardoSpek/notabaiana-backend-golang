@@ -30,7 +30,7 @@ var (
 	ErrSimilarTitle   = errors.New("título similar ao recente adicionado detectado")
 	AllowedDomains    = "www.bahianoticias.com.br"
 
-	LimitPerPage = 100
+	LimitPerPage = 1000
 	perPage      = 24
 )
 
