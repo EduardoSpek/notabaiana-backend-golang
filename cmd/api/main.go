@@ -41,6 +41,11 @@ func init() {
 		fmt.Println("Erro ao criar pasta:", err)
 	}
 
+	// err = os.RemoveAll("images/downloads")
+	// if err != nil {
+	// 	fmt.Printf("Erro ao remover o diretório: %v\n", err)
+	// }
+
 	err = os.MkdirAll("images/downloads", os.ModePerm)
 	if err != nil {
 		fmt.Println("Erro ao criar pasta:", err)
@@ -56,17 +61,28 @@ var (
 		"https://www.bahianoticias.com.br/saude",
 		"https://www.bahianoticias.com.br/municipios",
 	}
-	list_downloads = []string{
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/pagode.json?category=pagode",
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/swingueira.json?category=swingueira",
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/samba.json?category=samba",
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/forro.json?category=forro",
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/axe.json?category=axe",
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/arrocha.json?category=arrocha",
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/piseiro.json?category=piseiro",
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/arrochadeira.json?category=arrochadeira",
-		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/variados.json?category=variados",
-	}
+	// list_downloads = []string{
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/pagode.json?slug=cds&slug=ouvidas&slug=dia&slug=pagode",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/swingueira.json?slug=cds&slug=ouvidas&slug=dia&slug=swingueira",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/samba.json?slug=cds&slug=ouvidas&slug=dia&slug=samba",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/forro.json?slug=cds&slug=ouvidas&slug=dia&slug=forro",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/axe.json?slug=cds&slug=ouvidas&slug=dia&slug=axe",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/arrocha.json?slug=cds&slug=ouvidas&slug=dia&slug=arrocha",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/piseiro.json?slug=cds&slug=ouvidas&slug=dia&slug=piseiro",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/arrochadeira.json?slug=cds&slug=ouvidas&slug=dia&slug=arrochadeira",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/funk.json?slug=cds&slug=ouvidas&slug=dia&slug=funk",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/reggae.json?slug=cds&slug=ouvidas&slug=dia&slug=reggae",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/pop.json?slug=cds&slug=ouvidas&slug=dia&slug=pop",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/eletronica.json?slug=cds&slug=ouvidas&slug=dia&slug=eletronica",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/mpb.json?slug=cds&slug=ouvidas&slug=dia&slug=mpb",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/sertanejo.json?slug=cds&slug=ouvidas&slug=dia&slug=sertanejo",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/rap-hip-hop.json?slug=cds&slug=ouvidas&slug=dia&slug=rap-hip-hop",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/rock.json?slug=cds&slug=ouvidas&slug=dia&slug=rock",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/brega.json?slug=cds&slug=ouvidas&slug=dia&slug=brega",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/gospel.json?slug=cds&slug=ouvidas&slug=dia&slug=gospel",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/brega-funk.json?slug=cds&slug=ouvidas&slug=dia&slug=brega-funk",
+	// 	"https://suamusica.com.br/_next/data/webid-1017/pt-BR/categorias/variados.json?slug=cds&slug=ouvidas&slug=dia&slug=variados",
+	// }
 )
 
 func main() {
@@ -84,7 +100,7 @@ func main() {
 	crawler_controller := controllers.NewCrawlerController(copier_service)
 
 	download_repository := database.NewDownloadPostgresRepository(postgres)
-	copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
+	//copier_downloads = service.NewCopierDownload(download_repository, imagedownloader)
 	download_controller := controllers.NewDownloadController(download_repository, imagedownloader)
 
 	news_controller := controllers.NewNewsController(news_service)
@@ -122,7 +138,7 @@ func main() {
 	server.DownloadController(download_controller)
 
 	go copier_service.Start(list_pages, 3)
-	go copier_downloads.Start(list_downloads, 30)
+	//go copier_downloads.Start(list_downloads, 30)
 
 	//Função para gerar as top notícias a cada 60 minutos
 	go top_service.Start(60)

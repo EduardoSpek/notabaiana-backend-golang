@@ -24,11 +24,11 @@ type Response struct {
 }
 
 type PageProps struct {
-	AlbumsResponse AlbumsResponse `json:"albumsResponse"`
+	Top Top `json:"top"`
 }
 
-type AlbumsResponse struct {
-	Albums []Album `json:"albums"`
+type Top struct {
+	Album []Album `json:"album"`
 }
 
 type Album struct {
@@ -36,6 +36,7 @@ type Album struct {
 	Title    string `json:"title"`
 	Slug     string `json:"slug"`
 	Cover    string `json:"cover"`
+	BigCover string `json:"bigCover"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
 	Size     int    `json:"size"`
@@ -52,6 +53,8 @@ func NewCopierDownload(DownloadRepository port.DownloadRepository, ImgDownloader
 
 func (c *CopierDownloadService) Start(rss []string, minutes time.Duration) {
 
+	fmt.Println("CopierDownload start...")
+
 	go c.Run(rss)
 
 	ticker := time.NewTicker(minutes * time.Minute)
@@ -63,6 +66,8 @@ func (c *CopierDownloadService) Start(rss []string, minutes time.Duration) {
 }
 
 func (c *CopierDownloadService) Run(list_downloads []string) {
+
+	fmt.Println("CopierDownload run...")
 
 	cwd, err := os.Getwd()
 
@@ -140,7 +145,7 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 		partes := strings.Split(item, "=")
 
 		if partes[1] != "" {
-			category = partes[1]
+			category = partes[4]
 		}
 
 		// Fazendo a requisição GET
@@ -162,17 +167,20 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 			fmt.Println("Erro ao decodificar o JSON:", err)
 		}
 
-		for _, album := range response.PageProps.AlbumsResponse.Albums {
+		for _, album := range response.PageProps.Top.Album {
+			fmt.Println(album.Title)
 			download := &entity.Download{
 				Category: category,
 				Title:    album.Title,
 				Link:     urlSite + "/" + album.Username + "/" + album.Slug,
-				Image:    album.Cover,
+				Image:    album.BigCover,
 			}
 
 			lista = append(lista, download)
 
 		}
+
+		fmt.Println("PASSOU")
 
 	}
 
