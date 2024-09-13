@@ -41,11 +41,6 @@ func init() {
 		fmt.Println("Erro ao criar pasta:", err)
 	}
 
-	err = os.RemoveAll("images/downloads")
-	if err != nil {
-		fmt.Printf("Erro ao remover o diretório: %v\n", err)
-	}
-
 	err = os.MkdirAll("images/downloads", os.ModePerm)
 	if err != nil {
 		fmt.Println("Erro ao criar pasta:", err)
