@@ -6,7 +6,7 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 )
 
-var perPage = 24
+var perPage = 100
 
 type FindAllDownloadUsecase struct {
 	DownloadRepository port.DownloadRepository
