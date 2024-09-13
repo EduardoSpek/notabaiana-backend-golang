@@ -35,7 +35,6 @@ type Album struct {
 	BigCover string `json:"bigCover"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
-	Size     int    `json:"size"`
 }
 
 type CopierDownloadService struct {
