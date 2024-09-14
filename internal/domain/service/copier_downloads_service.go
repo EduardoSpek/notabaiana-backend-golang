@@ -130,44 +130,49 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 	var lista []*entity.Download
 
 	var category string
+	var periodo = []string{"dia", "semana", "mes", "geral"}
 
 	for _, item := range list_downloads {
 
-		partes := strings.Split(item, "=")
+		for _, prd := range periodo {
+			url := strings.Replace(item, "dia", prd, -1)
 
-		if partes[1] != "" {
-			category = partes[4]
-		}
+			partes := strings.Split(item, "=")
 
-		// Fazendo a requisição GET
-		resp, err := http.Get(item)
-		if err != nil {
-			fmt.Println("Erro ao fazer a requisição:", err)
-		}
-		defer resp.Body.Close()
-
-		// Lendo o corpo da resposta
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println("Erro ao ler o corpo da resposta:", err)
-		}
-
-		// Decodificando o JSON
-		err = json.Unmarshal(body, &response)
-		if err != nil {
-			fmt.Println("Erro ao decodificar o JSON:", err)
-		}
-
-		for _, album := range response.PageProps.Top {
-			download := &entity.Download{
-				Category: category,
-				Title:    album.Title,
-				Link:     urlSite + "/" + album.Username + "/" + album.Slug,
-				Image:    album.BigCover,
+			if partes[1] != "" {
+				category = partes[4]
 			}
 
-			lista = append(lista, download)
+			// Fazendo a requisição GET
+			resp, err := http.Get(url)
+			if err != nil {
+				fmt.Println("Erro ao fazer a requisição:", err)
+			}
+			defer resp.Body.Close()
 
+			// Lendo o corpo da resposta
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println("Erro ao ler o corpo da resposta:", err)
+			}
+
+			// Decodificando o JSON
+			err = json.Unmarshal(body, &response)
+			if err != nil {
+				fmt.Println("Erro ao decodificar o JSON:", err)
+			}
+
+			for _, album := range response.PageProps.Top {
+				download := &entity.Download{
+					Category: category,
+					Title:    album.Title,
+					Link:     urlSite + "/" + album.Username + "/" + album.Slug,
+					Image:    album.BigCover,
+				}
+
+				lista = append(lista, download)
+
+			}
 		}
 
 	}
