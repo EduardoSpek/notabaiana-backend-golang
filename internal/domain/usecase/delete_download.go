@@ -25,7 +25,7 @@ func (d *DeleteDownloadUsecase) Delete(id string) error {
 		return err
 	}
 
-	removed := utils.RemoveImage("images/download/" + download.Image)
+	removed := utils.RemoveImage("images/downloads/" + download.Image)
 
 	if !removed {
 		fmt.Println("Delete Download: não foi possível deletar a imagem")

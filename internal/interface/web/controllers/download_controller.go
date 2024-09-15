@@ -116,6 +116,39 @@ func (bc *DownloadController) GetDownloadDataFromTheForm(r *http.Request) (*enti
 
 }
 
+func (bc *DownloadController) AdminFindAll(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	pageStr := vars["page"]
+	qtdStr := vars["qtd"]
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(qtdStr)
+	if err != nil {
+		limit = 24
+	}
+
+	downloadFindAll := usecase.NewAdminFindAllDownloadUsecase(bc.DownloadRepository)
+	downloads, err := downloadFindAll.AdminFindAll(page, limit)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok":      false,
+			"message": "não foi possível obter a lista de downloads",
+			"erro":    "erro ao buscar lista",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	ResponseJson(w, downloads, http.StatusOK)
+
+}
+
 func (bc *DownloadController) FindAll(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)

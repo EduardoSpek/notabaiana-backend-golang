@@ -15,4 +15,5 @@ func (s *ServerWeb) DownloadController(downloadcontroller *controllers.DownloadC
 	s.router.HandleFunc("/admin/downloads/create", downloadcontroller.CreateDownloadUsingTheForm).Methods("POST")
 	s.router.Handle("/admin/downloads/deleteall", middlewares.JwtMiddleware(http.HandlerFunc(downloadcontroller.DeleteAll))).Methods("DELETE")
 	s.router.Handle("/admin/downloads/{id}", middlewares.JwtMiddleware(http.HandlerFunc(downloadcontroller.Delete))).Methods("DELETE")
+	s.router.Handle("/admin/downloads/{page}/{qtd}", middlewares.JwtMiddleware(http.HandlerFunc(downloadcontroller.AdminFindAll))).Methods("GET")
 }

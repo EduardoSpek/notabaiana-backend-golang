@@ -28,7 +28,7 @@ func (d *DeleteAllDownloadUsecase) DeleteAll(downloads []*entity.Download) error
 			return err
 		}
 
-		removed := utils.RemoveImage("images/download/" + download.Image)
+		removed := utils.RemoveImage("images/downloads/" + download.Image)
 
 		if !removed {
 			fmt.Println("DeleteAll Download: não foi possível deletar a imagem")

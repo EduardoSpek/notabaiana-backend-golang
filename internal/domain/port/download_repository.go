@@ -9,6 +9,8 @@ type DownloadRepository interface {
 	GetByLink(link string) (*entity.Download, error)
 	GetBySlug(slug string) (*entity.Download, error)
 	FindAll(page, limit int) ([]*entity.Download, error)
+	AdminFindAll(page, limit int) ([]*entity.Download, error)
+	GetTotal() (int, error)
 	GetTotalVisible() (int, error)
 	GetTotalSearch(str_search string) (int, error)
 	GetTotalFindCategory(category string) (int, error)
@@ -42,8 +44,16 @@ type FindAllDownloadRepository interface {
 	FindAll(page, limit int) ([]*entity.Download, error)
 }
 
+type AdminFindAllDownloadRepository interface {
+	FindAll(page, limit int) ([]*entity.Download, error)
+}
+
 type FindCategoryDownloadRepository interface {
 	FindCategory(category string, page int) ([]*entity.Download, error)
+}
+
+type GetTotalDownloadRepository interface {
+	GetTotalVisible() (int, error)
 }
 
 type GetTotalVisibleDownloadRepository interface {

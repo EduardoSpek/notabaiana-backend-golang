@@ -139,6 +139,26 @@ func (repo *DownloadPostgresRepository) GetBySlug(slug string) (*entity.Download
 	return &download, nil
 }
 
+func (repo *DownloadPostgresRepository) AdminFindAll(page, limit int) ([]*entity.Download, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	offset := (page - 1) * limit
+	var downloads []*entity.Download
+
+	err := repo.db.
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&downloads).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return downloads, nil
+}
+
 func (repo *DownloadPostgresRepository) FindAll(page, limit int) ([]*entity.Download, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
@@ -178,6 +198,15 @@ func (repo *DownloadPostgresRepository) FindCategory(category string, page int) 
 	}
 
 	return downloads, nil
+}
+
+func (repo *DownloadPostgresRepository) GetTotal() (int, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	var total int64
+	err := repo.db.Model(&entity.Download{}).Count(&total).Error
+	return int(total), err
 }
 
 func (repo *DownloadPostgresRepository) GetTotalVisible() (int, error) {
@@ -258,7 +287,7 @@ func (repo *DownloadPostgresRepository) DeleteAll(downloads []*entity.Download) 
 
 	return repo.db.Transaction(func(tx *gorm.DB) error {
 		for _, download := range downloads {
-			if err := tx.First(&entity.Download{}, download.ID).Error; err != nil {
+			if err := tx.First(&download, "id = ?", download.ID).Error; err != nil {
 				if errors.Is(err, gorm.ErrRecordNotFound) {
 					return ErrDownloadNotFound
 				}
