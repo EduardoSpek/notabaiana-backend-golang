@@ -75,6 +75,23 @@ func (repo *DownloadPostgresRepository) Update(download *entity.Download) (*enti
 	return download, nil
 }
 
+func (repo *DownloadPostgresRepository) GetByID(id string) (*entity.Download, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	var download entity.Download
+	result := repo.db.Where("id = ?", id).First(&download)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+
+	return &download, nil
+}
+
 func (repo *DownloadPostgresRepository) GetByLink(link string) (*entity.Download, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
@@ -211,4 +228,47 @@ func (repo *DownloadPostgresRepository) Search(page int, strSearch string) ([]*e
 	}
 
 	return downloads, nil
+}
+
+func (repo *DownloadPostgresRepository) Delete(id string) error {
+	repo.mutex.Lock() // Usamos Lock em vez de RLock porque estamos modificando dados
+	defer repo.mutex.Unlock()
+
+	return repo.db.Transaction(func(tx *gorm.DB) error {
+		var download entity.Download
+
+		if err := tx.First(&download, "id = ?", id).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrDownloadNotFound
+			}
+			return err
+		}
+
+		if err := tx.Unscoped().Delete(&download).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (repo *DownloadPostgresRepository) DeleteAll(downloads []*entity.Download) error {
+	repo.mutex.Lock() // Usamos Lock em vez de RLock porque estamos modificando dados
+	defer repo.mutex.Unlock()
+
+	return repo.db.Transaction(func(tx *gorm.DB) error {
+		for _, download := range downloads {
+			if err := tx.First(&entity.Download{}, download.ID).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return ErrDownloadNotFound
+				}
+				return err
+			}
+
+			if err := tx.Unscoped().Delete(download).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

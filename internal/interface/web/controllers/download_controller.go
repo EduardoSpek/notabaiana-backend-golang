@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -223,5 +224,69 @@ func (bc *DownloadController) FindCategory(w http.ResponseWriter, r *http.Reques
 	}
 
 	ResponseJson(w, downloads, http.StatusOK)
+
+}
+
+func (bc *DownloadController) Delete(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	downloadUsecase := usecase.NewDeleteDownloadUsecase(bc.DownloadRepository)
+	err := downloadUsecase.Delete(id)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok":      false,
+			"message": "não foi possível deletar o registro",
+			"erro":    "erro ao deletar registro",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	msg := map[string]any{
+		"ok":      true,
+		"message": "registro deletado com sucesso",
+		"erro":    nil,
+	}
+
+	ResponseJson(w, msg, http.StatusOK)
+
+}
+
+func (bc *DownloadController) DeleteAll(w http.ResponseWriter, r *http.Request) {
+
+	var msg map[string]any
+	var ids []string
+	var downloads []*entity.Download
+
+	err := json.NewDecoder(r.Body).Decode(&ids)
+	if err != nil {
+		ResponseJson(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	for _, id := range ids {
+		downloads = append(downloads, &entity.Download{
+			ID: id,
+		})
+	}
+
+	downloadUsecase := usecase.NewDeleteAllDownloadUsecase(bc.DownloadRepository)
+	err = downloadUsecase.DeleteAll(downloads)
+
+	if err != nil {
+		ResponseJson(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	msg = map[string]any{
+		"ok":      true,
+		"message": "Os Downloads selecionados foram removidos",
+		"erro":    false,
+	}
+
+	ResponseJson(w, msg, http.StatusOK)
 
 }

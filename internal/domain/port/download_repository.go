@@ -5,6 +5,7 @@ import "github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 type DownloadRepository interface {
 	Create(download *entity.Download) (*entity.Download, error)
 	Update(download *entity.Download) (*entity.Download, error)
+	GetByID(id string) (*entity.Download, error)
 	GetByLink(link string) (*entity.Download, error)
 	GetBySlug(slug string) (*entity.Download, error)
 	FindAll(page, limit int) ([]*entity.Download, error)
@@ -13,6 +14,8 @@ type DownloadRepository interface {
 	GetTotalFindCategory(category string) (int, error)
 	Search(page int, str_search string) ([]*entity.Download, error)
 	FindCategory(category string, page int) ([]*entity.Download, error)
+	Delete(id string) error
+	DeleteAll(downloads []*entity.Download) error
 }
 
 type CreateDownloadRepository interface {
@@ -21,6 +24,10 @@ type CreateDownloadRepository interface {
 
 type UpdateDownloadRepository interface {
 	Update(download *entity.Download) (*entity.Download, error)
+}
+
+type GetByIDDownloadRepository interface {
+	GetByID(id string) (*entity.Download, error)
 }
 
 type GetByLinkDownloadRepository interface {
@@ -53,4 +60,12 @@ type GetTotalSearchDownloadRepository interface {
 
 type SearchDownloadRepository interface {
 	Search(page int, str_search string) ([]*entity.Download, error)
+}
+
+type DeleteDownloadRepository interface {
+	Delete(id string) error
+}
+
+type DeleteAllDownloadRepository interface {
+	DeleteAll(downloads []*entity.Download) error
 }

@@ -39,7 +39,7 @@ type News struct {
 	Make      bool      `gorm:"column:make;default:false" json:"make"`
 }
 
-func NewNews(news News) *News {
+func NewNews(news *News) *News {
 
 	var slug string
 
@@ -65,7 +65,7 @@ func NewNews(news News) *News {
 	}
 }
 
-func UpdateNews(news News) *News {
+func UpdateNews(news *News) *News {
 
 	var slug string
 

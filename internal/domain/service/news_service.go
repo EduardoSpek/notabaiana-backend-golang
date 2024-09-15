@@ -44,7 +44,7 @@ func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloa
 	return &NewsService{newsrepository: repository, imagedownloader: downloader, hitsrepository: hits}
 }
 
-func (s *NewsService) AdminDeleteAll(banners []entity.News) error {
+func (s *NewsService) AdminDeleteAll(banners []*entity.News) error {
 	err := s.newsrepository.DeleteAll(banners)
 
 	if err != nil {
@@ -55,11 +55,25 @@ func (s *NewsService) AdminDeleteAll(banners []entity.News) error {
 }
 
 func (s *NewsService) Delete(id string) error {
-	err := s.newsrepository.Delete(id)
+
+	news, err := s.newsrepository.GetByID(id)
 
 	if err != nil {
 		return err
 	}
+
+	removed := utils.RemoveImage("." + news.Image)
+
+	if !removed {
+		fmt.Println("Delete News: não foi possível deletar a imagem")
+	}
+
+	err = s.newsrepository.Delete(id)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -106,12 +120,12 @@ func (s *NewsService) NewsMake() (interface{}, error) {
 
 }
 
-func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput entity.News) (entity.News, error) {
+func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput *entity.News) (*entity.News, error) {
 
 	oldnew, err := s.newsrepository.AdminGetBySlug(newsInput.Slug)
 
 	if err != nil {
-		return entity.News{}, err
+		return &entity.News{}, err
 	}
 
 	oldnew.Title = newsInput.Title
@@ -123,7 +137,7 @@ func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput enti
 
 	newNews := entity.UpdateNews(oldnew)
 
-	news := ChangeLink(*newNews)
+	news := ChangeLink(newNews)
 
 	if file != nil {
 		news = RenamePathImage(news)
@@ -132,7 +146,7 @@ func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput enti
 	new, err := s.newsrepository.Update(news)
 
 	if err != nil {
-		return entity.News{}, err
+		return &entity.News{}, err
 	}
 
 	err = s.SaveImageForm(file, new)
@@ -145,14 +159,14 @@ func (s *NewsService) UpdateNewsUsingTheForm(file multipart.File, newsInput enti
 
 }
 
-func (s *NewsService) CreateNewsUsingTheForm(file multipart.File, news entity.News) (entity.News, error) {
+func (s *NewsService) CreateNewsUsingTheForm(file multipart.File, news *entity.News) (*entity.News, error) {
 
 	newNews := entity.NewNews(news)
 
-	new, err := s.CreateNews(*newNews)
+	new, err := s.CreateNews(newNews)
 
 	if err != nil {
-		return entity.News{}, err
+		return &entity.News{}, err
 	}
 
 	err = s.SaveImageForm(file, new)
@@ -165,7 +179,7 @@ func (s *NewsService) CreateNewsUsingTheForm(file multipart.File, news entity.Ne
 
 }
 
-func (s *NewsService) SaveImageForm(file multipart.File, news entity.News) error {
+func (s *NewsService) SaveImageForm(file multipart.File, news *entity.News) error {
 
 	if file == nil {
 		return nil
@@ -212,21 +226,21 @@ func (s *NewsService) SaveImageForm(file multipart.File, news entity.News) error
 
 }
 
-func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
+func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 
-	new := *entity.NewNews(news)
+	new := entity.NewNews(news)
 
 	recent, err := s.newsrepository.FindRecent()
 
 	if err != nil {
-		return entity.News{}, err
+		return &entity.News{}, err
 	}
 
 	similarity := utils.Similarity(recent.Title, new.Title)
 
 	if similarity > 70 {
 		fmt.Println("***titulo silimar detectado***")
-		return entity.News{}, ErrSimilarTitle
+		return &entity.News{}, ErrSimilarTitle
 	}
 
 	new = RenamePathImage(new)
@@ -235,13 +249,13 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	result := listOfBlockedWords(new.Title)
 
 	if result {
-		return entity.News{}, ErrWordsBlackList
+		return &entity.News{}, ErrWordsBlackList
 	}
 
 	result = listOfBlockedText(new.Text)
 
 	if result {
-		return entity.News{}, ErrWordsBlackList
+		return &entity.News{}, ErrWordsBlackList
 	}
 
 	new.Text = changeWords(new.Text)
@@ -249,7 +263,7 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	err = s.newsrepository.NewsExists(new.Title)
 
 	if err != nil {
-		return entity.News{}, err
+		return &entity.News{}, err
 	}
 
 	//newtitle, err := utils.ChangeTitleWithGemini("Refaça este título e mantanha o contexto. Utilize palavras-chave para melhorar o SEO. O texto não deve ultrapassar os 127 caracteres. O título é", new.Title)
@@ -261,36 +275,36 @@ func (s *NewsService) CreateNews(news entity.News) (entity.News, error) {
 	_, err = s.newsrepository.Create(new)
 
 	if err != nil {
-		return entity.News{}, err
+		return &entity.News{}, err
 	}
 
 	return new, nil
 }
 
-func (s *NewsService) AdminGetNewsBySlug(slug string) (entity.News, error) {
+func (s *NewsService) AdminGetNewsBySlug(slug string) (*entity.News, error) {
 
 	new, err := s.newsrepository.AdminGetBySlug(slug)
 
 	if err != nil {
-		return entity.News{}, err
+		return &entity.News{}, err
 	}
 
 	return new, nil
 
 }
 
-func (s *NewsService) GetNewsBySlug(slug string) (entity.News, error) {
+func (s *NewsService) GetNewsBySlug(slug string) (*entity.News, error) {
 
 	// err := s.Hit(slug)
 
 	// if err != nil {
-	// 	return entity.News{}, err
+	// 	return &entity.News{}, err
 	// }
 
 	new, err := s.newsrepository.GetBySlug(slug)
 
 	if err != nil {
-		return entity.News{}, err
+		return &entity.News{}, err
 	}
 
 	return new, nil
@@ -323,13 +337,17 @@ func (s *NewsService) Hit(r *http.Request, session string) error {
 	return nil
 }
 
-func (s *NewsService) SearchNews(page int, str_search string) interface{} {
+func (s *NewsService) SearchNews(page int, str_search string) (interface{}, error) {
 
-	var newsOutput []entity.NewsFindAllOutput
+	var newsOutput []*entity.NewsFindAllOutput
 
 	str_search = strings.Replace(str_search, " ", "%", -1)
 
-	news := s.newsrepository.SearchNews(page, str_search)
+	news, err := s.newsrepository.SearchNews(page, str_search)
+
+	if err != nil {
+		return nil, err
+	}
 
 	newsOutput = s.NewsConvertListOutput(news)
 
@@ -338,22 +356,22 @@ func (s *NewsService) SearchNews(page int, str_search string) interface{} {
 	pagination := utils.Pagination(page, perPage, total)
 
 	result := struct {
-		List_news  []entity.NewsFindAllOutput `json:"news"`
-		Pagination map[string][]int           `json:"pagination"`
-		Search     string                     `json:"search"`
+		List_news  []*entity.NewsFindAllOutput `json:"news"`
+		Pagination map[string][]int            `json:"pagination"`
+		Search     string                      `json:"search"`
 	}{
 		List_news:  newsOutput,
 		Pagination: pagination,
 		Search:     strings.Replace(str_search, "%", " ", -1),
 	}
 
-	return result
+	return result, nil
 
 }
 
 func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
-	var newsOutput []entity.NewsFindAllOutput
+	var newsOutput []*entity.NewsFindAllOutput
 
 	//Limita o total de registros que deve ser retornado
 	if limit > LimitPerPage {
@@ -369,8 +387,8 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 	pagination := utils.Pagination(page, perPage, total)
 
 	result := struct {
-		List_news  []entity.NewsFindAllOutput `json:"news"`
-		Pagination map[string][]int           `json:"pagination"`
+		List_news  []*entity.NewsFindAllOutput `json:"news"`
+		Pagination map[string][]int            `json:"pagination"`
 	}{
 		List_news:  newsOutput,
 		Pagination: pagination,
@@ -382,7 +400,7 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
 func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
-	var newsOutput []entity.NewsFindAllOutput
+	var newsOutput []*entity.NewsFindAllOutput
 
 	//Limita o total de registros que deve ser retornado
 	if limit > LimitPerPage {
@@ -398,8 +416,8 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 	pagination := utils.Pagination(page, perPage, total)
 
 	result := struct {
-		List_news  []entity.NewsFindAllOutput `json:"news"`
-		Pagination map[string][]int           `json:"pagination"`
+		List_news  []*entity.NewsFindAllOutput `json:"news"`
+		Pagination map[string][]int            `json:"pagination"`
 	}{
 		List_news:  newsOutput,
 		Pagination: pagination,
@@ -409,12 +427,12 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 }
 
-func (s *NewsService) FindRecent() (entity.News, error) {
+func (s *NewsService) FindRecent() (*entity.News, error) {
 
 	news, err := s.newsrepository.FindRecent()
 
 	if err != nil {
-		return entity.News{}, err
+		return &entity.News{}, err
 	}
 
 	return news, nil
@@ -423,7 +441,7 @@ func (s *NewsService) FindRecent() (entity.News, error) {
 
 func (s *NewsService) FindNewsCategory(category string, page int) interface{} {
 
-	var newsOutput []entity.NewsFindAllOutput
+	var newsOutput []*entity.NewsFindAllOutput
 
 	news, _ := s.newsrepository.FindCategory(category, page)
 
@@ -434,9 +452,9 @@ func (s *NewsService) FindNewsCategory(category string, page int) interface{} {
 	pagination := utils.Pagination(page, perPage, total)
 
 	result := struct {
-		List_news  []entity.NewsFindAllOutput `json:"news"`
-		Pagination map[string][]int           `json:"pagination"`
-		Category   string                     `json:"category"`
+		List_news  []*entity.NewsFindAllOutput `json:"news"`
+		Pagination map[string][]int            `json:"pagination"`
+		Category   string                      `json:"category"`
 	}{
 		List_news:  newsOutput,
 		Pagination: pagination,
@@ -446,12 +464,12 @@ func (s *NewsService) FindNewsCategory(category string, page int) interface{} {
 	return result
 }
 
-func (s *NewsService) FindAllViews() ([]entity.News, error) {
+func (s *NewsService) FindAllViews() ([]*entity.News, error) {
 
 	news, err := s.newsrepository.FindAllViews()
 
 	if err != nil {
-		return []entity.News{}, err
+		return []*entity.News{}, err
 	}
 
 	return news, nil
@@ -597,11 +615,11 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 	return html, text
 }
 
-func RenamePathImage(news entity.News) entity.News {
+func RenamePathImage(news *entity.News) *entity.News {
 	news.Image = news.ID + ".jpg"
 	return news
 }
-func ChangeLink(news entity.News) entity.News {
+func ChangeLink(news *entity.News) *entity.News {
 	news.Link = "/news/" + news.Slug
 	return news
 }
@@ -712,7 +730,7 @@ func (s *NewsService) GetCategory(rss string) (string, error) {
 
 }
 
-func (s *NewsService) GetNewsFromPage(link string) []entity.News {
+func (s *NewsService) GetNewsFromPage(link string) []*entity.News {
 	var conteudo string
 	//var err error
 
@@ -780,13 +798,13 @@ func (s *NewsService) GetNewsFromPage(link string) []entity.News {
 	// Visitando a URL inicial
 	collector.Visit(link)
 
-	var lista []entity.News
+	var lista []*entity.News
 
 	for i, item := range titulos {
 
 		category, _ := s.GetCategory(links[i])
 
-		new := entity.NewNews(entity.News{
+		new := entity.NewNews(&entity.News{
 			Title:    item,
 			Text:     texts[i],
 			Image:    images[i],
@@ -795,7 +813,7 @@ func (s *NewsService) GetNewsFromPage(link string) []entity.News {
 			TopStory: false,
 			Category: category,
 		})
-		lista = append(lista, *new)
+		lista = append(lista, new)
 	}
 
 	return lista
@@ -885,8 +903,8 @@ func (s *NewsService) GetImageLink(link string) (string, error) {
 	return newlink, nil
 }
 
-func (s *NewsService) CopierPage(list_pages []string) []entity.News {
-	var lista []entity.News
+func (s *NewsService) CopierPage(list_pages []string) []*entity.News {
+	var lista []*entity.News
 	for _, page := range list_pages {
 		lista_page := s.GetNewsFromPage(page)
 		lista = append(lista, lista_page...)
@@ -895,12 +913,12 @@ func (s *NewsService) CopierPage(list_pages []string) []entity.News {
 	return lista
 }
 
-func (s *NewsService) NewsConvertListOutput(news []entity.News) []entity.NewsFindAllOutput {
+func (s *NewsService) NewsConvertListOutput(news []*entity.News) []*entity.NewsFindAllOutput {
 
-	var newsOutput []entity.NewsFindAllOutput
+	var newsOutput []*entity.NewsFindAllOutput
 
 	for _, n := range news {
-		newsOutput = append(newsOutput, entity.NewsFindAllOutput{
+		newsOutput = append(newsOutput, &entity.NewsFindAllOutput{
 			ID:        n.ID,
 			Title:     n.Title,
 			TitleAi:   n.TitleAi,

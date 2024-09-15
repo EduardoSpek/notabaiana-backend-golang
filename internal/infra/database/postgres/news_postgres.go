@@ -54,19 +54,19 @@ func (repo *NewsPostgresRepository) CleanNews() {
 	}
 }
 
-func (repo *NewsPostgresRepository) NewsMake() (entity.News, error) {
+func (repo *NewsPostgresRepository) NewsMake() (*entity.News, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
 
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news entity.News
+	var news *entity.News
 
 	result := repo.db.Model(&entity.News{}).Where("((visible = true AND category='famosos' AND topstory = false) OR (topstory = true AND visible = true)) AND Make = false AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("created_at DESC").Limit(1).First(&news)
 
 	if result.Error != nil {
-		return entity.News{}, result.Error
+		return &entity.News{}, result.Error
 	}
 
 	result = repo.db.Model(&news).Updates(map[string]interface{}{
@@ -75,20 +75,20 @@ func (repo *NewsPostgresRepository) NewsMake() (entity.News, error) {
 
 	if result.Error != nil {
 		tx.Rollback()
-		return entity.News{}, result.Error
+		return &entity.News{}, result.Error
 	}
 
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error) {
+func (repo *NewsPostgresRepository) Create(news *entity.News) (*entity.News, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
 
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var n entity.News
+	var n *entity.News
 	nresult := repo.db.Model(&entity.News{}).Where("visible = true AND title = ?", news.Title).First(&n)
 
 	if nresult.Error != nil {
@@ -97,7 +97,7 @@ func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error
 
 		if result.Error != nil {
 			tx.Rollback()
-			return entity.News{}, result.Error
+			return &entity.News{}, result.Error
 		}
 	}
 
@@ -107,7 +107,7 @@ func (repo *NewsPostgresRepository) Create(news entity.News) (entity.News, error
 
 }
 
-func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error) {
+func (repo *NewsPostgresRepository) Update(news *entity.News) (*entity.News, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
 
@@ -129,7 +129,7 @@ func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error
 
 	if result.Error != nil {
 		tx.Rollback()
-		return entity.News{}, result.Error
+		return &entity.News{}, result.Error
 	}
 
 	tx.Commit()
@@ -137,37 +137,35 @@ func (repo *NewsPostgresRepository) Update(news entity.News) (entity.News, error
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) GetById(id string) (entity.News, error) {
+func (repo *NewsPostgresRepository) GetByID(id string) (*entity.News, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
-	tx := repo.db.Begin()
-	defer tx.Rollback()
+	var news *entity.News
+	result := repo.db.Where("id = ?", id).First(&news)
 
-	var news entity.News
-	repo.db.Model(&entity.News{}).Where("id = ?", id).First(&news)
-
-	if repo.db.Error != nil {
-		return entity.News{}, repo.db.Error
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, result.Error
 	}
-
-	tx.Commit()
 
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) AdminGetBySlug(slug string) (entity.News, error) {
+func (repo *NewsPostgresRepository) AdminGetBySlug(slug string) (*entity.News, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
 
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news entity.News
+	var news *entity.News
 	result := repo.db.Model(&entity.News{}).Where("slug = ?", slug).First(&news)
 
 	if result.Error != nil {
-		return entity.News{}, result.Error
+		return &entity.News{}, result.Error
 	}
 
 	news.Views += 1
@@ -175,7 +173,7 @@ func (repo *NewsPostgresRepository) AdminGetBySlug(slug string) (entity.News, er
 	result = repo.db.Save(&news)
 
 	if result.Error != nil {
-		return entity.News{}, result.Error
+		return &entity.News{}, result.Error
 	}
 
 	tx.Commit()
@@ -183,18 +181,18 @@ func (repo *NewsPostgresRepository) AdminGetBySlug(slug string) (entity.News, er
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) {
+func (repo *NewsPostgresRepository) GetBySlug(slug string) (*entity.News, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
 
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news entity.News
+	var news *entity.News
 	result := repo.db.Model(&entity.News{}).Where("visible = true AND slug = ?", slug).First(&news)
 
 	if result.Error != nil {
-		return entity.News{}, result.Error
+		return &entity.News{}, result.Error
 	}
 
 	news.Views += 1
@@ -202,7 +200,7 @@ func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) 
 	result = repo.db.Save(&news)
 
 	if result.Error != nil {
-		return entity.News{}, result.Error
+		return &entity.News{}, result.Error
 	}
 
 	tx.Commit()
@@ -210,17 +208,17 @@ func (repo *NewsPostgresRepository) GetBySlug(slug string) (entity.News, error) 
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) []entity.News {
+func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) ([]*entity.News, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
 	limit := PerPage
 	offset := (page - 1) * limit
 
-	var news []entity.News
+	var news []*entity.News
 	repo.db.Model(&entity.News{}).Where("visible = true AND unaccent(title) ILIKE unaccent(?)", "%"+str_search+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
-	return news
+	return news, nil
 }
 
 func (repo *NewsPostgresRepository) GetTotalNewsBySearch(str_search string) int {
@@ -269,7 +267,7 @@ func (repo *NewsPostgresRepository) GetTotalNewsVisible() int {
 
 }
 
-func (repo *NewsPostgresRepository) AdminFindAll(page, limit int) ([]entity.News, error) {
+func (repo *NewsPostgresRepository) AdminFindAll(page, limit int) ([]*entity.News, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
@@ -278,11 +276,11 @@ func (repo *NewsPostgresRepository) AdminFindAll(page, limit int) ([]entity.News
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news []entity.News
+	var news []*entity.News
 	repo.db.Model(&entity.News{}).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
 	if repo.db.Error != nil {
-		return []entity.News{}, repo.db.Error
+		return []*entity.News{}, repo.db.Error
 	}
 
 	tx.Commit()
@@ -290,7 +288,7 @@ func (repo *NewsPostgresRepository) AdminFindAll(page, limit int) ([]entity.News
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) FindAll(page, limit int) ([]entity.News, error) {
+func (repo *NewsPostgresRepository) FindAll(page, limit int) ([]*entity.News, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
@@ -299,11 +297,11 @@ func (repo *NewsPostgresRepository) FindAll(page, limit int) ([]entity.News, err
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news []entity.News
+	var news []*entity.News
 	repo.db.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
 	if repo.db.Error != nil {
-		return []entity.News{}, repo.db.Error
+		return []*entity.News{}, repo.db.Error
 	}
 
 	tx.Commit()
@@ -311,7 +309,7 @@ func (repo *NewsPostgresRepository) FindAll(page, limit int) ([]entity.News, err
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) FindRecent() (entity.News, error) {
+func (repo *NewsPostgresRepository) FindRecent() (*entity.News, error) {
 
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
@@ -319,11 +317,11 @@ func (repo *NewsPostgresRepository) FindRecent() (entity.News, error) {
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news entity.News
+	var news *entity.News
 	repo.db.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").First(&news)
 
 	if repo.db.Error != nil {
-		return entity.News{}, repo.db.Error
+		return &entity.News{}, repo.db.Error
 	}
 
 	tx.Commit()
@@ -331,7 +329,7 @@ func (repo *NewsPostgresRepository) FindRecent() (entity.News, error) {
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]entity.News, error) {
+func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]*entity.News, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
@@ -341,11 +339,11 @@ func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]e
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news []entity.News
+	var news []*entity.News
 	repo.db.Model(&entity.News{}).Where("visible = true AND category=?", category).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
 	if repo.db.Error != nil {
-		return []entity.News{}, repo.db.Error
+		return []*entity.News{}, repo.db.Error
 	}
 
 	tx.Commit()
@@ -353,16 +351,16 @@ func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]e
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) FindAllViews() ([]entity.News, error) {
+func (repo *NewsPostgresRepository) FindAllViews() ([]*entity.News, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
-	var news []entity.News
+	var news []*entity.News
 
 	result := repo.db.Model(&entity.News{}).Where("visible = true AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("views DESC").Limit(10).Find(&news)
 
 	if result.Error != nil {
-		return []entity.News{}, result.Error
+		return []*entity.News{}, result.Error
 	}
 
 	return news, nil
@@ -388,7 +386,7 @@ func (repo *NewsPostgresRepository) ClearImagePath(id string) error {
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news entity.News
+	var news *entity.News
 	news.ID = id
 
 	repo.db.Model(&news).Update("image", "")
@@ -427,7 +425,7 @@ func (repo *NewsPostgresRepository) NewsExists(title string) error {
 
 	title = strings.ToLower(title)
 
-	var news entity.News
+	var news *entity.News
 	result := repo.db.Model(&entity.News{}).Where("LOWER(title) = ?", title).First(&news)
 
 	if result.Error != nil {
@@ -445,18 +443,13 @@ func (repo *NewsPostgresRepository) Delete(id string) error {
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news entity.News
+	var news *entity.News
 	newsSelected := repo.db.Model(&entity.News{}).Where("id = ?", id).First(&news)
 
 	if newsSelected.Error != nil {
 		return ErrNewsNotFound
 	}
 
-	del1 := utils.RemoveImage("." + news.Image)
-
-	if !del1 {
-		fmt.Println("Imagem não deletada")
-	}
 	repo.db.Unscoped().Delete(news)
 
 	tx.Commit()
@@ -464,7 +457,7 @@ func (repo *NewsPostgresRepository) Delete(id string) error {
 	return nil
 }
 
-func (repo *NewsPostgresRepository) DeleteAll(news []entity.News) error {
+func (repo *NewsPostgresRepository) DeleteAll(news []*entity.News) error {
 
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
@@ -474,7 +467,7 @@ func (repo *NewsPostgresRepository) DeleteAll(news []entity.News) error {
 
 	for _, b := range news {
 
-		var news entity.News
+		var news *entity.News
 		newsSelected := repo.db.Model(&entity.News{}).Where("id = ?", b.ID).First(&news)
 
 		if newsSelected.Error != nil {

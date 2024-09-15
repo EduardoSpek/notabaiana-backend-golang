@@ -14,49 +14,57 @@ var (
 )
 
 type NewsMemoryRepository struct {
-	Newsdb map[string]entity.News
+	Newsdb map[string]*entity.News
 }
 
 func NewNewsMemoryRepository() *NewsMemoryRepository {
-	return &NewsMemoryRepository{Newsdb: make(map[string]entity.News)}
+	return &NewsMemoryRepository{Newsdb: make(map[string]*entity.News)}
 }
 
 func (r *NewsMemoryRepository) CleanNews() {
 
 }
 
-func (r *NewsMemoryRepository) NewsMake() (entity.News, error) {
-	return entity.News{}, nil
+func (r *NewsMemoryRepository) NewsMake() (*entity.News, error) {
+	return &entity.News{}, nil
 }
 
-func (r *NewsMemoryRepository) Update(news entity.News) (entity.News, error) {
+func (r *NewsMemoryRepository) Update(news *entity.News) (*entity.News, error) {
 	r.Newsdb[news.ID] = news
 	return news, nil
 }
 
-func (r *NewsMemoryRepository) Create(news entity.News) (entity.News, error) {
+func (r *NewsMemoryRepository) Create(news *entity.News) (*entity.News, error) {
 	r.Newsdb[news.ID] = news
 	return news, nil
 }
-func (r *NewsMemoryRepository) AdminGetBySlug(slug string) (entity.News, error) {
+func (r *NewsMemoryRepository) AdminGetBySlug(slug string) (*entity.News, error) {
 	for _, n := range r.Newsdb {
 		if slug == n.Slug {
 			return n, nil
 		}
 	}
-	return entity.News{}, ErrNotNewSlug
+	return &entity.News{}, ErrNotNewSlug
 }
-func (r *NewsMemoryRepository) GetBySlug(slug string) (entity.News, error) {
+func (r *NewsMemoryRepository) GetByID(id string) (*entity.News, error) {
+	for _, n := range r.Newsdb {
+		if id == n.ID {
+			return n, nil
+		}
+	}
+	return &entity.News{}, ErrNotNewSlug
+}
+func (r *NewsMemoryRepository) GetBySlug(slug string) (*entity.News, error) {
 	for _, n := range r.Newsdb {
 		if slug == n.Slug {
 			return n, nil
 		}
 	}
-	return entity.News{}, ErrNotNewSlug
+	return &entity.News{}, ErrNotNewSlug
 }
 
-func (r *NewsMemoryRepository) AdminFindAll(page, limit int) ([]entity.News, error) {
-	var news []entity.News
+func (r *NewsMemoryRepository) AdminFindAll(page, limit int) ([]*entity.News, error) {
+	var news []*entity.News
 	for _, n := range r.Newsdb {
 		news = append(news, n)
 	}
@@ -64,8 +72,8 @@ func (r *NewsMemoryRepository) AdminFindAll(page, limit int) ([]entity.News, err
 	return news, nil
 }
 
-func (r *NewsMemoryRepository) FindAll(page, limit int) ([]entity.News, error) {
-	var news []entity.News
+func (r *NewsMemoryRepository) FindAll(page, limit int) ([]*entity.News, error) {
+	var news []*entity.News
 	for _, n := range r.Newsdb {
 		news = append(news, n)
 	}
@@ -73,8 +81,8 @@ func (r *NewsMemoryRepository) FindAll(page, limit int) ([]entity.News, error) {
 	return news, nil
 }
 
-func (r *NewsMemoryRepository) FindRecent() (entity.News, error) {
-	var news entity.News
+func (r *NewsMemoryRepository) FindRecent() (*entity.News, error) {
+	var news *entity.News
 
 	var latestTime time.Time
 
@@ -89,8 +97,8 @@ func (r *NewsMemoryRepository) FindRecent() (entity.News, error) {
 	return news, nil
 }
 
-func (r *NewsMemoryRepository) FindCategory(category string, page int) ([]entity.News, error) {
-	var news []entity.News
+func (r *NewsMemoryRepository) FindCategory(category string, page int) ([]*entity.News, error) {
+	var news []*entity.News
 	for _, n := range r.Newsdb {
 		if category == n.Category {
 			news = append(news, n)
@@ -100,15 +108,15 @@ func (r *NewsMemoryRepository) FindCategory(category string, page int) ([]entity
 	return news, nil
 }
 
-func (r *NewsMemoryRepository) SearchNews(page int, str_search string) []entity.News {
-	var news []entity.News
+func (r *NewsMemoryRepository) SearchNews(page int, str_search string) ([]*entity.News, error) {
+	var news []*entity.News
 	for _, n := range r.Newsdb {
 		if strings.Contains(n.Title, str_search) {
 			news = append(news, n)
 		}
 	}
 
-	return news
+	return news, nil
 }
 
 func (r *NewsMemoryRepository) GetTotalNewsBySearch(str_search string) int {
@@ -136,7 +144,7 @@ func (r *NewsMemoryRepository) GetTotalNewsByCategory(category string) int {
 func (r *NewsMemoryRepository) Delete(id string) error {
 	return nil
 }
-func (r *NewsMemoryRepository) DeleteAll(news []entity.News) error {
+func (r *NewsMemoryRepository) DeleteAll(news []*entity.News) error {
 	return nil
 }
 
@@ -154,8 +162,8 @@ func (r *NewsMemoryRepository) GetTotalNewsVisible() int {
 
 }
 
-func (r *NewsMemoryRepository) FindAllViews() ([]entity.News, error) {
-	var news []entity.News
+func (r *NewsMemoryRepository) FindAllViews() ([]*entity.News, error) {
+	var news []*entity.News
 	for _, n := range r.Newsdb {
 		news = append(news, n)
 	}
@@ -163,7 +171,7 @@ func (r *NewsMemoryRepository) FindAllViews() ([]entity.News, error) {
 }
 func (r *NewsMemoryRepository) NewsTruncateTable() error {
 
-	r.Newsdb = make(map[string]entity.News)
+	r.Newsdb = make(map[string]*entity.News)
 
 	return nil
 }

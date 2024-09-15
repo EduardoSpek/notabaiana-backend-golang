@@ -33,7 +33,7 @@ func (c *NewsController) AdminDeleteAllNews(w http.ResponseWriter, r *http.Reque
 
 	var msg map[string]any
 	var ids []string
-	var news []entity.News
+	var news []*entity.News
 
 	err := json.NewDecoder(r.Body).Decode(&ids)
 	if err != nil {
@@ -42,7 +42,7 @@ func (c *NewsController) AdminDeleteAllNews(w http.ResponseWriter, r *http.Reque
 	}
 
 	for _, id := range ids {
-		news = append(news, entity.News{
+		news = append(news, &entity.News{
 			ID: id,
 		})
 	}
@@ -217,7 +217,7 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 	jpeg.Encode(w, finalImg, nil)
 }
 
-func (s *NewsController) GetNewsDataFromTheForm(r *http.Request) (entity.News, multipart.File, error) {
+func (s *NewsController) GetNewsDataFromTheForm(r *http.Request) (*entity.News, multipart.File, error) {
 
 	vars := mux.Vars(r)
 	slug := vars["slug"]
@@ -247,7 +247,7 @@ func (s *NewsController) GetNewsDataFromTheForm(r *http.Request) (entity.News, m
 		Slug:     slug,
 	}
 
-	return *new, file, nil
+	return new, file, nil
 
 }
 
@@ -502,7 +502,16 @@ func (c *NewsController) SearchNews(w http.ResponseWriter, r *http.Request) {
 		page = 1
 	}
 
-	listnews := c.news_service.SearchNews(page, str_search)
+	listnews, err := c.news_service.SearchNews(page, str_search)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok":      false,
+			"message": "Não foi possível buscar notícias",
+		}
+		ResponseJson(w, msg, http.StatusOK)
+		return
+	}
 
 	ResponseJson(w, listnews, http.StatusOK)
 

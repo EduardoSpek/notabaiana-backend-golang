@@ -20,7 +20,7 @@ import (
 func TestNewsEntity(t *testing.T) {
 	t.Parallel()
 
-	news := entity.News{
+	news := &entity.News{
 		Title:   "Titulo",
 		Text:    "Texto",
 		Link:    "http://www.eduardospek.com.br",
@@ -73,7 +73,7 @@ func TestNewsService(t *testing.T) {
 	news_service := service.NewNewsService(news_repo, imagedownloader, hits)
 
 	t.Run("Deve criar uma nova noticia no banco", func(t *testing.T) {
-		news := entity.News{
+		news := &entity.News{
 			Title:    "Titulo",
 			Text:     "Texto",
 			Link:     "http://www.eduardospek.com.br",
@@ -88,7 +88,7 @@ func TestNewsService(t *testing.T) {
 			t.Error(err)
 		}
 
-		news = entity.News{
+		news = &entity.News{
 			Title:    "Eduardo Spek",
 			Text:     "Texto",
 			Link:     "http://www.eduardospek.com.br",
@@ -103,7 +103,7 @@ func TestNewsService(t *testing.T) {
 			t.Error(err)
 		}
 
-		news = entity.News{
+		news = &entity.News{
 			Title:    "Eduardo Spek na tela da globo",
 			Text:     "Texto",
 			Link:     "http://www.eduardospek.com.br",
@@ -138,7 +138,11 @@ func TestNewsService(t *testing.T) {
 
 		str_search := "Eduardo"
 
-		lista := news_service.SearchNews(1, str_search)
+		lista, err := news_service.SearchNews(1, str_search)
+
+		if err != nil {
+			t.Error(err)
+		}
 
 		newsList := lista.(struct {
 			List_news  []entity.News    `json:"news"`
@@ -190,7 +194,7 @@ func TestNewsController(t *testing.T) {
 		news_service := service.NewNewsService(repo, imagedownloader, hits)
 		controller := controllers.NewNewsController(news_service)
 
-		news := entity.News{
+		news := &entity.News{
 			Title:   "Eduardo Spek",
 			Text:    "Texto",
 			Link:    "http://www.eduardospek.com.br",
