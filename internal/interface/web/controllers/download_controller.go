@@ -33,7 +33,17 @@ func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, 
 	var msg map[string]any
 	var downloadCreated *entity.Download
 
-	//TokenVerifyByForm(w, r)
+	err := TokenVerifyByForm(w, r)
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "você não tem autorização",
+			"erro":    "token inválido",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
 
 	downloadInput, image, err := bc.GetDownloadDataFromTheForm(r)
 
@@ -60,10 +70,10 @@ func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, 
 		return
 	}
 
-	imgSaved, err := SaveImageForm(image, downloadCreated.Image, "downloads", 300, 300)
+	imgSaved, err := SaveImageForm(image, downloadCreated.ID+".jpg", "downloads", 300, 300)
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("IMG SAVED:", err)
 	}
 
 	if !imgSaved {
@@ -86,11 +96,80 @@ func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, 
 
 }
 
+func (bc *DownloadController) UpdateDownloadUsingTheForm(w http.ResponseWriter, r *http.Request) {
+
+	var msg map[string]any
+	var downloadUpdated *entity.Download
+	var imgSaved = false
+
+	err := TokenVerifyByForm(w, r)
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "você não tem autorização",
+			"erro":    "token inválido",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	downloadInput, image, err := bc.GetDownloadDataFromTheForm(r)
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "problema com os dados do formulário",
+			"erro":    "não foi possível resgatar os dados corretamente",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
+	downloadUpdated, err = updateDownloadUsecase.Update(downloadInput)
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "problema ao cadastrar os dados no banco",
+			"erro":    "não foi possível cadatrar os dados corretamente",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	imgSaved, err = SaveImageForm(image, downloadUpdated.ID+".jpg", "downloads", 300, 300)
+
+	if err != nil {
+		fmt.Println("Erro ao Salvar imagem: ", err)
+		downloadUpdated.Image = ""
+		updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
+		downloadUp, err := updateDownloadUsecase.Update(downloadUpdated)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		downloadUpdated = downloadUp
+	}
+
+	if imgSaved {
+		downloadUpdated.Image = downloadUpdated.ID + ".jpg"
+		updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
+		updateDownloadUsecase.Update(downloadUpdated)
+	}
+
+	ResponseJson(w, downloadUpdated, http.StatusOK)
+
+}
+
 func (bc *DownloadController) GetDownloadDataFromTheForm(r *http.Request) (*entity.Download, multipart.File, error) {
 
 	vars := mux.Vars(r)
-	id := vars["id"]
+	slug := vars["slug"]
 
+	id := r.FormValue("id")
 	category := r.FormValue("category")
 	title := r.FormValue("title")
 	text := r.FormValue("text")
@@ -109,6 +188,7 @@ func (bc *DownloadController) GetDownloadDataFromTheForm(r *http.Request) (*enti
 		Title:    title,
 		Text:     text,
 		Link:     link,
+		Slug:     slug,
 		Visible:  visible,
 	}
 
@@ -189,6 +269,28 @@ func (bc *DownloadController) GetBySlug(w http.ResponseWriter, r *http.Request) 
 
 	downloadUsecase := usecase.NewGetBySlugDownloadUsecase(bc.DownloadRepository)
 	download, err := downloadUsecase.GetBySlug(slug)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok":      false,
+			"message": "não foi possível obter os dados do download",
+			"erro":    "erro ao buscar registro",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	ResponseJson(w, download, http.StatusOK)
+
+}
+
+func (bc *DownloadController) AdminGetBySlug(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	downloadUsecase := usecase.NewAdminGetBySlugDownloadUsecase(bc.DownloadRepository)
+	download, err := downloadUsecase.AdminGetBySlug(slug)
 
 	if err != nil {
 		msg := map[string]any{

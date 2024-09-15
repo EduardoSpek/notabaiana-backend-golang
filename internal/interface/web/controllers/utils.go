@@ -76,7 +76,7 @@ func TokenVerifyByHeader(w http.ResponseWriter, r *http.Request) error {
 
 }
 
-func SaveImageForm(file multipart.File, filename string, pasta string, imgWidth, imgHeight int) (bool, error) {
+func SaveImageForm(file multipart.File, filename, pasta string, imgWidth, imgHeight int) (bool, error) {
 
 	if file == nil {
 		return false, nil
@@ -97,6 +97,7 @@ func SaveImageForm(file multipart.File, filename string, pasta string, imgWidth,
 	if err != nil {
 		return false, ErrParseForm
 	}
+
 	defer f.Close()
 	io.Copy(f, file)
 
@@ -117,7 +118,6 @@ func SaveImageForm(file multipart.File, filename string, pasta string, imgWidth,
 	err = ImgDownloader.CropAndSaveImage(img, imgWidth, imgHeight, pathImage)
 
 	if err != nil {
-		fmt.Println(err)
 		return false, ErrDecodeImage
 	}
 

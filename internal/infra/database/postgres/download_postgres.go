@@ -54,14 +54,14 @@ func (repo *DownloadPostgresRepository) Update(download *entity.Download) (*enti
 	}
 	defer tx.Rollback()
 
-	result := tx.Model(download).Updates(map[string]interface{}{
-		"category":   download.Category,
-		"title":      download.Title,
-		"link":       download.Link,
-		"text":       download.Text,
-		"image":      download.Image,
-		"visible":    download.Visible,
-		"updated_at": download.UpdatedAt,
+	result := tx.Model(download).Updates(download)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	result = tx.Model(download).Updates(map[string]interface{}{
+		"visible": download.Visible,
 	})
 
 	if result.Error != nil {
@@ -121,6 +121,36 @@ func (repo *DownloadPostgresRepository) GetBySlug(slug string) (*entity.Download
 
 	var download entity.Download
 	if err := tx.Where("visible = true AND slug = ?", slug).First(&download).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	download.Views++
+	if err := tx.Save(&download).Error; err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &download, nil
+}
+
+func (repo *DownloadPostgresRepository) AdminGetBySlug(slug string) (*entity.Download, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	defer tx.Rollback()
+
+	var download entity.Download
+	if err := tx.Where("slug = ?", slug).First(&download).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}

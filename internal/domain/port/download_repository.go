@@ -8,6 +8,7 @@ type DownloadRepository interface {
 	GetByID(id string) (*entity.Download, error)
 	GetByLink(link string) (*entity.Download, error)
 	GetBySlug(slug string) (*entity.Download, error)
+	AdminGetBySlug(slug string) (*entity.Download, error)
 	FindAll(page, limit int) ([]*entity.Download, error)
 	AdminFindAll(page, limit int) ([]*entity.Download, error)
 	GetTotal() (int, error)
@@ -38,6 +39,10 @@ type GetByLinkDownloadRepository interface {
 
 type GetBySlugDownloadRepository interface {
 	GetBySlug(slug string) (*entity.Download, error)
+}
+
+type AdminGetBySlugDownloadRepository interface {
+	AdminGetBySlug(slug string) (*entity.Download, error)
 }
 
 type FindAllDownloadRepository interface {
