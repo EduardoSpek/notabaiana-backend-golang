@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -150,9 +149,9 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 	var cover, category string
 	var periodo = []string{"dia", "semana", "mes", "geral"}
 
-	for ii, item := range list_downloads {
+	for _, item := range list_downloads {
 
-		fmt.Printf("%d - %s\n", ii, item)
+		//fmt.Printf("%d - %s\n", ii, item)
 
 		if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
 			periodo = []string{"dia", "semana", "mes", "geral"}
@@ -160,11 +159,11 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 			periodo = []string{"dia"}
 		}
 
-		for iii, prd := range periodo {
+		for _, prd := range periodo {
 
 			url := strings.Replace(item, "dia", prd, -1)
 
-			fmt.Printf("%d - %s\n", iii, url)
+			//fmt.Printf("%d - %s\n", iii, url)
 
 			if !strings.Contains(url, "recomendados") && !strings.Contains(url, "estourados") {
 				partes := strings.Split(item, "=")
@@ -187,7 +186,7 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 				fmt.Println("Erro ao ler o corpo da resposta:", err)
 			}
 
-			body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
+			//body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
 
 			// Decodificando o JSON
 			err = json.Unmarshal(body, &response)
@@ -202,9 +201,9 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 				lista_albuns = response.PageProps.Top
 			}
 
-			for i, album := range lista_albuns {
+			for _, album := range lista_albuns {
 
-				fmt.Printf("%d - %s\n", i, album.Title)
+				//fmt.Printf("%d - %s\n", i, album.Title)
 
 				if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
 
