@@ -78,6 +78,8 @@ var (
 		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/top/cds/ouvidas/dia/gospel.json?slug=cds&slug=ouvidas&slug=dia&slug=gospel",
 		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/top/cds/ouvidas/dia/brega-funk.json?slug=cds&slug=ouvidas&slug=dia&slug=brega-funk",
 		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/top/cds/ouvidas/dia/variados.json?slug=cds&slug=ouvidas&slug=dia&slug=variados",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/top/estourados.json?slug=estourados",
+		"https://suamusica.com.br/_next/data/webid-1017/pt-BR/cds-recomendados.json",
 	}
 )
 
