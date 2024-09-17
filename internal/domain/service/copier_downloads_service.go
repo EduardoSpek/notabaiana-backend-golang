@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -146,14 +147,24 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 	var lista_albuns []*Album
 	//var files []*entity.Music
 
-	var category string
+	var cover, category string
 	var periodo = []string{"dia", "semana", "mes", "geral"}
 
-	for _, item := range list_downloads {
+	for ii, item := range list_downloads {
 
-		for _, prd := range periodo {
+		fmt.Printf("%d - %s\n", ii, item)
+
+		if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
+			periodo = []string{"dia", "semana", "mes", "geral"}
+		} else {
+			periodo = []string{"dia"}
+		}
+
+		for iii, prd := range periodo {
 
 			url := strings.Replace(item, "dia", prd, -1)
+
+			fmt.Printf("%d - %s\n", iii, url)
 
 			if !strings.Contains(url, "recomendados") && !strings.Contains(url, "estourados") {
 				partes := strings.Split(item, "=")
@@ -176,10 +187,13 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 				fmt.Println("Erro ao ler o corpo da resposta:", err)
 			}
 
+			body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
+
 			// Decodificando o JSON
 			err = json.Unmarshal(body, &response)
 			if err != nil {
 				fmt.Println("Erro ao decodificar o JSON:", err)
+				continue
 			}
 
 			if strings.Contains(url, "recomendados") {
@@ -188,15 +202,25 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 				lista_albuns = response.PageProps.Top
 			}
 
-			for _, album := range lista_albuns {
+			for i, album := range lista_albuns {
 
-				done := make(chan *AlbumChan)
-				go s.GetDataAlbum(album.Username, album.Slug, done)
-				album_data := <-done
-				close(done)
+				fmt.Printf("%d - %s\n", i, album.Title)
 
-				if album_data.Error != nil {
-					fmt.Println("Erro ao obter dados completos do album:", err)
+				if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
+
+					done := make(chan *AlbumChan)
+					go s.GetDataAlbum(album.Username, album.Slug, done)
+					album_data := <-done
+					//close(done)
+
+					if album_data.Error != nil {
+						fmt.Println("Erro ao obter dados completos do album:", err)
+						continue
+					}
+					category = strings.ToLower(album_data.Album.CatName)
+					cover = album_data.Album.BigCover
+				} else {
+					cover = album.Cover
 				}
 
 				// for _, f := range album_data.Album.Files {
@@ -206,15 +230,11 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 				// 	})
 				// }
 
-				if category == "" {
-					category = album_data.Album.CatName
-				}
-
 				download := &entity.Download{
 					Category: category,
 					Title:    album.Title,
 					Link:     urlSite + "/" + album.Username + "/" + album.Slug,
-					Image:    album_data.Album.BigCover,
+					Image:    cover,
 					//Musics:   files,
 				}
 
