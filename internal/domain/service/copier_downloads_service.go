@@ -24,7 +24,8 @@ type Response struct {
 }
 
 type PageProps struct {
-	Top []Album `json:"top"`
+	Top   []*Album `json:"top"`
+	Album *Album   `json:"album"`
 }
 
 type Album struct {
@@ -35,6 +36,18 @@ type Album struct {
 	BigCover string `json:"bigCover"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
+	File     string `json:"file"`
+	Files    []File `json:"files"`
+}
+
+type File struct {
+	File string `json:"file"`
+	Path string `json:"path"`
+}
+
+type AlbumChan struct {
+	Album *Album
+	Error error
 }
 
 type CopierDownloadService struct {
@@ -126,8 +139,9 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 
 func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Download {
 
-	var response Response
+	var response *Response
 	var lista []*entity.Download
+	var files []*entity.Music
 
 	var category string
 	var periodo = []string{"dia", "semana", "mes", "geral"}
@@ -163,11 +177,29 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 			}
 
 			for _, album := range response.PageProps.Top {
+
+				done := make(chan *AlbumChan)
+				go s.GetDataAlbum(album.Username, album.Slug, done)
+				album_data := <-done
+				close(done)
+
+				if album_data.Error != nil {
+					fmt.Println("Erro ao obter dados completos do album:", err)
+				}
+
+				for _, f := range album_data.Album.Files {
+					files = append(files, &entity.Music{
+						File: f.File,
+						Path: f.Path,
+					})
+				}
+
 				download := &entity.Download{
 					Category: category,
 					Title:    album.Title,
 					Link:     urlSite + "/" + album.Username + "/" + album.Slug,
 					Image:    album.BigCover,
+					Musics:   files,
 				}
 
 				lista = append(lista, download)
@@ -178,4 +210,50 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 	}
 
 	return lista
+}
+
+func (s *CopierDownloadService) GetDataAlbum(username, slug string, done chan<- *AlbumChan) {
+
+	var response Response
+	var album *Album
+
+	url := "https://suamusica.com.br/_next/data/webid-1017/pt-BR/" + username + "/" + slug + ".json?slug=" + username
+
+	// Fazendo a requisição GET
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Erro ao fazer a requisição:", err)
+		done <- &AlbumChan{
+			Album: nil,
+			Error: err,
+		}
+	}
+	defer resp.Body.Close()
+
+	// Lendo o corpo da resposta
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Erro ao ler o corpo da resposta:", err)
+		done <- &AlbumChan{
+			Album: nil,
+			Error: err,
+		}
+	}
+
+	// Decodificando o JSON
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		fmt.Println("Erro ao decodificar o JSON:", err)
+		done <- &AlbumChan{
+			Album: nil,
+			Error: err,
+		}
+	}
+
+	album = response.PageProps.Album
+
+	done <- &AlbumChan{
+		Album: album,
+		Error: nil,
+	}
 }
