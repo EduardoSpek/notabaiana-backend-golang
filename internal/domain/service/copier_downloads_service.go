@@ -24,8 +24,9 @@ type Response struct {
 }
 
 type PageProps struct {
-	Top   []*Album `json:"top"`
-	Album *Album   `json:"album"`
+	Top            []*Album `json:"top"`
+	Album          *Album   `json:"album"`
+	RecommendedCds []*Album `json:"recommendedCds"`
 }
 
 type Album struct {
@@ -36,6 +37,7 @@ type Album struct {
 	BigCover string `json:"bigCover"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
+	CatName  string `json:"catName"`
 	File     string `json:"file"`
 	Files    []File `json:"files"`
 }
@@ -141,7 +143,8 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 
 	var response *Response
 	var lista []*entity.Download
-	var files []*entity.Music
+	var lista_albuns []*Album
+	//var files []*entity.Music
 
 	var category string
 	var periodo = []string{"dia", "semana", "mes", "geral"}
@@ -149,12 +152,15 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 	for _, item := range list_downloads {
 
 		for _, prd := range periodo {
+
 			url := strings.Replace(item, "dia", prd, -1)
 
-			partes := strings.Split(item, "=")
+			if !strings.Contains(url, "recomendados") && !strings.Contains(url, "estourados") {
+				partes := strings.Split(item, "=")
 
-			if partes[1] != "" {
-				category = partes[4]
+				if partes[1] != "" {
+					category = partes[4]
+				}
 			}
 
 			// Fazendo a requisição GET
@@ -176,7 +182,13 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 				fmt.Println("Erro ao decodificar o JSON:", err)
 			}
 
-			for _, album := range response.PageProps.Top {
+			if strings.Contains(url, "recomendados") {
+				lista_albuns = response.PageProps.RecommendedCds
+			} else {
+				lista_albuns = response.PageProps.Top
+			}
+
+			for _, album := range lista_albuns {
 
 				done := make(chan *AlbumChan)
 				go s.GetDataAlbum(album.Username, album.Slug, done)
@@ -187,19 +199,23 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 					fmt.Println("Erro ao obter dados completos do album:", err)
 				}
 
-				for _, f := range album_data.Album.Files {
-					files = append(files, &entity.Music{
-						File: f.File,
-						Path: f.Path,
-					})
+				// for _, f := range album_data.Album.Files {
+				// 	files = append(files, &entity.Music{
+				// 		File: f.File,
+				// 		Path: f.Path,
+				// 	})
+				// }
+
+				if category == "" {
+					category = album_data.Album.CatName
 				}
 
 				download := &entity.Download{
 					Category: category,
 					Title:    album.Title,
 					Link:     urlSite + "/" + album.Username + "/" + album.Slug,
-					Image:    album.BigCover,
-					Musics:   files,
+					Image:    album_data.Album.BigCover,
+					//Musics:   files,
 				}
 
 				lista = append(lista, download)
