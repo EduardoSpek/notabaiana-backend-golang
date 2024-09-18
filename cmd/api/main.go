@@ -98,7 +98,7 @@ func main() {
 	crawler_controller := controllers.NewCrawlerController(copier_service)
 
 	download_repository := database.NewDownloadPostgresRepository(postgres)
-	copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
+	//copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
 	download_controller := controllers.NewDownloadController(download_repository, imagedownloader)
 
 	news_controller := controllers.NewNewsController(news_service)
@@ -136,7 +136,7 @@ func main() {
 	server.DownloadController(download_controller)
 
 	go copier_service.Start(list_pages, 3)
-	go copier_downloads.Start(list_downloads, 30)
+	//go copier_downloads.Start(list_downloads, 30)
 
 	//Função para gerar as top notícias a cada 60 minutos
 	go top_service.Start(60)
