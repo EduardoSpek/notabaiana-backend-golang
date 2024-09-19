@@ -252,7 +252,7 @@ func (s *CopierDownloadService) GetDataAlbum(username, slug string, done chan<- 
 	var response Response
 	var album *Album
 
-	url := "https://suamusica.com.br/_next/data/webid-1017/pt-BR/" + username + "/" + slug + ".json?slug=" + username
+	url := "https://suamusica.com.br/_next/data/webid-1018/pt-BR/" + username + "/" + slug + ".json?slug=" + username
 
 	// Fazendo a requisição GET
 	resp, err := http.Get(url)
