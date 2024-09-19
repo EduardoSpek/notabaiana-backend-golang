@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
 )
@@ -20,11 +20,11 @@ var (
 )
 
 type DownloadController struct {
-	DownloadRepository *postgres.DownloadPostgresRepository
+	DownloadRepository port.DownloadRepository
 	ImageDownloader    *utils.ImgDownloader
 }
 
-func NewDownloadController(repository *postgres.DownloadPostgresRepository, imagedownloader *utils.ImgDownloader) *DownloadController {
+func NewDownloadController(repository port.DownloadRepository, imagedownloader *utils.ImgDownloader) *DownloadController {
 	return &DownloadController{DownloadRepository: repository, ImageDownloader: imagedownloader}
 }
 

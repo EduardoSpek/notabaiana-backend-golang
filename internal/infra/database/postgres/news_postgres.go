@@ -318,9 +318,9 @@ func (repo *NewsPostgresRepository) FindRecent() (*entity.News, error) {
 	defer tx.Rollback()
 
 	var news *entity.News
-	repo.db.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").First(&news)
+	tx.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").First(&news)
 
-	if repo.db.Error != nil {
+	if tx.Error != nil {
 		return &entity.News{}, repo.db.Error
 	}
 

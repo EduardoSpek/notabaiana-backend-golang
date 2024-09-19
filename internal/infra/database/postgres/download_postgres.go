@@ -97,12 +97,9 @@ func (repo *DownloadPostgresRepository) GetByLink(link string) (*entity.Download
 	defer repo.mutex.RUnlock()
 
 	var download entity.Download
-	result := repo.db.Where("link = ?", link).First(&download)
+	result := repo.db.Model(&entity.Download{}).Where("link = ?", link).First(&download)
 
 	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			return nil, nil
-		}
 		return nil, result.Error
 	}
 

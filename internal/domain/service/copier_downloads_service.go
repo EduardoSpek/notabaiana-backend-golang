@@ -24,9 +24,14 @@ type Response struct {
 }
 
 type PageProps struct {
-	Top            []*Album `json:"top"`
-	Album          *Album   `json:"album"`
-	RecommendedCds []*Album `json:"recommendedCds"`
+	Top            []*Album       `json:"top"`
+	Album          *Album         `json:"album"`
+	RecommendedCds []*Album       `json:"recommendedCds"`
+	AlbumsResponse AlbumsResponse `json:"albumsResponse"`
+}
+
+type AlbumsResponse struct {
+	Albums []*Album `json:"albums"`
 }
 
 type Album struct {
@@ -90,13 +95,9 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 		go func() {
 
 			getByLinkDownloadUsecase := usecase.NewGetByLinkDownloadUsecase(c.DownloadRepository)
-			downloadGet, err := getByLinkDownloadUsecase.GetByLink(n.Link)
+			downloadGet, _ := getByLinkDownloadUsecase.GetByLink(n.Link)
 
-			if err != nil {
-				return
-			}
-
-			if downloadGet != nil {
+			if downloadGet.ID != "" {
 				return
 			}
 
@@ -144,6 +145,7 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 	var response *Response
 	var lista []*entity.Download
 	var lista_albuns []*Album
+	var item_atual string
 	//var files []*entity.Music
 
 	var cover, category string
@@ -161,14 +163,18 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 
 		for _, prd := range periodo {
 
+			if item_atual == item {
+				continue
+			}
+
 			url := strings.Replace(item, "dia", prd, -1)
 
 			//fmt.Printf("%d - %s\n", iii, url)
 
-			if !strings.Contains(url, "recomendados") && !strings.Contains(url, "estourados") {
+			if !strings.Contains(url, "recomendados") && !strings.Contains(url, "estourados") && !strings.Contains(url, "recentes") {
 				partes := strings.Split(item, "=")
 
-				if partes[1] != "" {
+				if partes[4] != "" {
 					category = partes[4]
 				}
 			}
@@ -197,6 +203,8 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 
 			if strings.Contains(url, "recomendados") {
 				lista_albuns = response.PageProps.RecommendedCds
+			} else if strings.Contains(url, "recentes") {
+				lista_albuns = response.PageProps.AlbumsResponse.Albums
 			} else {
 				lista_albuns = response.PageProps.Top
 			}
@@ -240,6 +248,8 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 				lista = append(lista, download)
 
 			}
+
+			item_atual = item
 		}
 
 	}
