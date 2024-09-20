@@ -59,6 +59,9 @@ var (
 
 	list_downloads = []string{
 		"https://suamusica.com.br/_next/data/webid-1018/pt-BR/categorias/pagode/recentes.json?category=pagode&category=recentes",
+		"https://suamusica.com.br/_next/data/webid-1018/pt-BR/categorias/swingueira/recentes.json?category=swingueira&category=recentes",
+		"https://suamusica.com.br/_next/data/webid-1018/pt-BR/categorias/arrocha/recentes.json?category=arrocha&category=recentes",
+		"https://suamusica.com.br/_next/data/webid-1018/pt-BR/categorias/samba/recentes.json?category=samba&category=recentes",
 		"https://suamusica.com.br/_next/data/webid-1018/pt-BR/top/cds/ouvidas/dia/pagode.json?slug=cds&slug=ouvidas&slug=dia&slug=pagode",
 		"https://suamusica.com.br/_next/data/webid-1018/pt-BR/top/cds/ouvidas/dia/swingueira.json?slug=cds&slug=ouvidas&slug=dia&slug=swingueira",
 		"https://suamusica.com.br/_next/data/webid-1018/pt-BR/top/cds/ouvidas/dia/samba.json?slug=cds&slug=ouvidas&slug=dia&slug=samba",
