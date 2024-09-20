@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase"
@@ -16,8 +17,7 @@ import (
 )
 
 var (
-	urlSite               = "https://suamusica.com.br"
-	suamusica_api_version = "1020"
+	urlSite = "https://suamusica.com.br"
 )
 
 type Response struct {
@@ -263,7 +263,7 @@ func (s *CopierDownloadService) GetDataAlbum(username, slug string, done chan<- 
 	var response Response
 	var album *Album
 
-	url := "https://suamusica.com.br/_next/data/webid-" + suamusica_api_version + "/pt-BR/" + username + "/" + slug + ".json?slug=" + username
+	url := "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/" + username + "/" + slug + ".json?slug=" + username
 
 	// Fazendo a requisição GET
 	resp, err := http.Get(url)
