@@ -16,7 +16,8 @@ import (
 )
 
 var (
-	urlSite = "https://suamusica.com.br"
+	urlSite               = "https://suamusica.com.br"
+	suamusica_api_version = "1020"
 )
 
 type Response struct {
@@ -262,7 +263,7 @@ func (s *CopierDownloadService) GetDataAlbum(username, slug string, done chan<- 
 	var response Response
 	var album *Album
 
-	url := "https://suamusica.com.br/_next/data/webid-1018/pt-BR/" + username + "/" + slug + ".json?slug=" + username
+	url := "https://suamusica.com.br/_next/data/webid-" + suamusica_api_version + "/pt-BR/" + username + "/" + slug + ".json?slug=" + username
 
 	// Fazendo a requisição GET
 	resp, err := http.Get(url)
