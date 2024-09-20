@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -24,6 +25,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 		}
 
 		if !allowed {
+			fmt.Println(origin)
 			http.Error(w, "Origem não permitida", http.StatusForbidden)
 			return
 		}
