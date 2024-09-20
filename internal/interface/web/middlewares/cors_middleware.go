@@ -13,6 +13,9 @@ func CorsMiddleware(next http.Handler) http.Handler {
 			"https://notabaiana.com.br",
 			"https://www.notabaiana.com.br",
 		}
+
+		fmt.Println("ORIGIN: ", r.Header.Get("Origin"))
+
 		origin := r.Header.Get("Origin")
 
 		allowed := false
