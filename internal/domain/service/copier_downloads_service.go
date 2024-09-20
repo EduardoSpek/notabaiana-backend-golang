@@ -67,7 +67,7 @@ func NewCopierDownload(DownloadRepository port.DownloadRepository, ImgDownloader
 	return &CopierDownloadService{DownloadRepository: DownloadRepository, ImgDownloader: ImgDownloader}
 }
 
-func (c *CopierDownloadService) Start(rss []string, minutes time.Duration) {
+func (c *CopierDownloadService) Start(rss *[]string, minutes time.Duration) {
 
 	go c.Run(rss)
 
@@ -79,7 +79,7 @@ func (c *CopierDownloadService) Start(rss []string, minutes time.Duration) {
 	}
 }
 
-func (c *CopierDownloadService) Run(list_downloads []string) {
+func (c *CopierDownloadService) Run(list_downloads *[]string) {
 
 	cwd, err := os.Getwd()
 
@@ -141,7 +141,7 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 	}
 }
 
-func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Download {
+func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Download {
 
 	if list_downloads != nil {
 
@@ -154,7 +154,7 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 		var cover, category string
 		var periodo = []string{"dia", "semana", "mes", "geral"}
 
-		for _, item := range list_downloads {
+		for _, item := range *list_downloads {
 
 			//fmt.Printf("%d - %s\n", ii, item)
 
@@ -181,6 +181,8 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 						category = partes[4]
 					}
 				}
+
+				fmt.Println("URL: ", url)
 
 				// Fazendo a requisição GET
 				resp, err := http.Get(url)
@@ -227,8 +229,11 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 							fmt.Println("Erro ao obter dados completos do album:", err)
 							continue
 						}
-						category = strings.ToLower(album_data.Album.CatName)
-						cover = album_data.Album.BigCover
+
+						if album_data.Album != nil {
+							category = strings.ToLower(album_data.Album.CatName)
+							cover = album_data.Album.BigCover
+						}
 					} else {
 						cover = album.Cover
 					}
@@ -257,6 +262,7 @@ func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Downlo
 
 		}
 
+		fmt.Println("Lista montada com sucesso!")
 		return lista
 
 	} else {
