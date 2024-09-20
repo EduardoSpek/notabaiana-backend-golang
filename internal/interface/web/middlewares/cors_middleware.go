@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -14,9 +13,11 @@ func CorsMiddleware(next http.Handler) http.Handler {
 			"https://www.notabaiana.com.br",
 		}
 
-		fmt.Println("ORIGIN: ", r.Header.Get("Origin"))
-
 		origin := r.Header.Get("Origin")
+
+		if origin == "" {
+			origin = r.Header.Get("Referer")
+		}
 
 		allowed := false
 		for _, allowedOrigin := range allowedOrigins {
@@ -28,7 +29,6 @@ func CorsMiddleware(next http.Handler) http.Handler {
 		}
 
 		if !allowed {
-			fmt.Println(origin)
 			http.Error(w, "Origem não permitida", http.StatusForbidden)
 			return
 		}
