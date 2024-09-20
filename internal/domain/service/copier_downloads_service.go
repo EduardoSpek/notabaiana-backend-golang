@@ -143,119 +143,126 @@ func (c *CopierDownloadService) Run(list_downloads []string) {
 
 func (s *CopierDownloadService) Copier(list_downloads []string) []*entity.Download {
 
-	var response *Response
-	var lista []*entity.Download
-	var lista_albuns []*Album
-	var item_atual string
-	//var files []*entity.Music
+	if list_downloads != nil {
 
-	var cover, category string
-	var periodo = []string{"dia", "semana", "mes", "geral"}
+		var response *Response
+		var lista []*entity.Download
+		var lista_albuns []*Album
+		var item_atual string
+		//var files []*entity.Music
 
-	for _, item := range list_downloads {
+		var cover, category string
+		var periodo = []string{"dia", "semana", "mes", "geral"}
 
-		//fmt.Printf("%d - %s\n", ii, item)
+		for _, item := range list_downloads {
 
-		if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
-			periodo = []string{"dia", "semana", "mes", "geral"}
-		} else {
-			periodo = []string{"dia"}
-		}
+			//fmt.Printf("%d - %s\n", ii, item)
 
-		for _, prd := range periodo {
-
-			if item_atual == item {
-				continue
-			}
-
-			url := strings.Replace(item, "dia", prd, -1)
-
-			//fmt.Printf("%d - %s\n", iii, url)
-
-			if !strings.Contains(url, "recomendados") && !strings.Contains(url, "estourados") && !strings.Contains(url, "recentes") {
-				partes := strings.Split(item, "=")
-
-				if partes[4] != "" {
-					category = partes[4]
-				}
-			}
-
-			// Fazendo a requisição GET
-			resp, err := http.Get(url)
-			if err != nil {
-				fmt.Println("Erro ao fazer a requisição:", err)
-			}
-			defer resp.Body.Close()
-
-			// Lendo o corpo da resposta
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				fmt.Println("Erro ao ler o corpo da resposta:", err)
-			}
-
-			//body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
-
-			// Decodificando o JSON
-			err = json.Unmarshal(body, &response)
-			if err != nil {
-				fmt.Println("Erro ao decodificar o JSON:", err)
-				continue
-			}
-
-			if strings.Contains(url, "recomendados") {
-				lista_albuns = response.PageProps.RecommendedCds
-			} else if strings.Contains(url, "recentes") {
-				lista_albuns = response.PageProps.AlbumsResponse.Albums
+			if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
+				periodo = []string{"dia", "semana", "mes", "geral"}
 			} else {
-				lista_albuns = response.PageProps.Top
+				periodo = []string{"dia"}
 			}
 
-			for _, album := range lista_albuns {
+			for _, prd := range periodo {
 
-				//fmt.Printf("%d - %s\n", i, album.Title)
+				if item_atual == item {
+					continue
+				}
 
-				if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
+				url := strings.Replace(item, "dia", prd, -1)
 
-					done := make(chan *AlbumChan)
-					go s.GetDataAlbum(album.Username, album.Slug, done)
-					album_data := <-done
-					//close(done)
+				//fmt.Printf("%d - %s\n", iii, url)
 
-					if album_data.Error != nil {
-						fmt.Println("Erro ao obter dados completos do album:", err)
-						continue
+				if !strings.Contains(url, "recomendados") && !strings.Contains(url, "estourados") && !strings.Contains(url, "recentes") {
+					partes := strings.Split(item, "=")
+
+					if partes[4] != "" {
+						category = partes[4]
 					}
-					category = strings.ToLower(album_data.Album.CatName)
-					cover = album_data.Album.BigCover
+				}
+
+				// Fazendo a requisição GET
+				resp, err := http.Get(url)
+				if err != nil {
+					fmt.Println("Erro ao fazer a requisição:", err)
+				}
+				defer resp.Body.Close()
+
+				// Lendo o corpo da resposta
+				body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					fmt.Println("Erro ao ler o corpo da resposta:", err)
+				}
+
+				//body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
+
+				// Decodificando o JSON
+				err = json.Unmarshal(body, &response)
+				if err != nil {
+					fmt.Println("Erro ao decodificar o JSON:", err)
+					continue
+				}
+
+				if strings.Contains(url, "recomendados") {
+					lista_albuns = response.PageProps.RecommendedCds
+				} else if strings.Contains(url, "recentes") {
+					lista_albuns = response.PageProps.AlbumsResponse.Albums
 				} else {
-					cover = album.Cover
+					lista_albuns = response.PageProps.Top
 				}
 
-				// for _, f := range album_data.Album.Files {
-				// 	files = append(files, &entity.Music{
-				// 		File: f.File,
-				// 		Path: f.Path,
-				// 	})
-				// }
+				for _, album := range lista_albuns {
 
-				download := &entity.Download{
-					Category: category,
-					Title:    album.Title,
-					Link:     urlSite + "/" + album.Username + "/" + album.Slug,
-					Image:    cover,
-					//Musics:   files,
+					//fmt.Printf("%d - %s\n", i, album.Title)
+
+					if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
+
+						done := make(chan *AlbumChan)
+						go s.GetDataAlbum(album.Username, album.Slug, done)
+						album_data := <-done
+						//close(done)
+
+						if album_data.Error != nil {
+							fmt.Println("Erro ao obter dados completos do album:", err)
+							continue
+						}
+						category = strings.ToLower(album_data.Album.CatName)
+						cover = album_data.Album.BigCover
+					} else {
+						cover = album.Cover
+					}
+
+					// for _, f := range album_data.Album.Files {
+					// 	files = append(files, &entity.Music{
+					// 		File: f.File,
+					// 		Path: f.Path,
+					// 	})
+					// }
+
+					download := &entity.Download{
+						Category: category,
+						Title:    album.Title,
+						Link:     urlSite + "/" + album.Username + "/" + album.Slug,
+						Image:    cover,
+						//Musics:   files,
+					}
+
+					lista = append(lista, download)
+
 				}
 
-				lista = append(lista, download)
-
+				item_atual = item
 			}
 
-			item_atual = item
 		}
 
+		return lista
+
+	} else {
+		return nil
 	}
 
-	return lista
 }
 
 func (s *CopierDownloadService) GetDataAlbum(username, slug string, done chan<- *AlbumChan) {
