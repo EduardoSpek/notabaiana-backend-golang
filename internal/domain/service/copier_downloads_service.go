@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -201,9 +202,17 @@ func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Downl
 
 				// Decodificando o JSON
 				err = json.Unmarshal(body, &response)
+
 				if err != nil {
-					fmt.Println("Erro ao decodificar o JSON:", err)
-					continue
+
+					version, err := strconv.Atoi(config.Suamusica_api_version)
+
+					if err != nil {
+						fmt.Println("Erro ao converter version", err)
+					}
+					version++
+					config.Suamusica_api_version = strconv.Itoa(version)
+					return nil
 				}
 
 				if strings.Contains(url, "recomendados") {
