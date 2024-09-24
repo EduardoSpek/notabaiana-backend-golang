@@ -16,7 +16,7 @@ import (
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase"
+	usecase "github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase/download"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"

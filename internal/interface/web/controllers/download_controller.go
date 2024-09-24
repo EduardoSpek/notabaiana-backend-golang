@@ -10,7 +10,7 @@ import (
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase"
+	usecase "github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase/download"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
 )
