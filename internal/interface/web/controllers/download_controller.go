@@ -11,7 +11,6 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	usecase "github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase/download"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -21,10 +20,10 @@ var (
 
 type DownloadController struct {
 	DownloadRepository port.DownloadRepository
-	ImageDownloader    *utils.ImgDownloader
+	ImageDownloader    port.ImageDownloader
 }
 
-func NewDownloadController(repository port.DownloadRepository, imagedownloader *utils.ImgDownloader) *DownloadController {
+func NewDownloadController(repository port.DownloadRepository, imagedownloader port.ImageDownloader) *DownloadController {
 	return &DownloadController{DownloadRepository: repository, ImageDownloader: imagedownloader}
 }
 
