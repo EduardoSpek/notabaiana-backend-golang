@@ -141,7 +141,7 @@ func main() {
 	server.ContactController(contact_controller)
 	server.DownloadController(download_controller)
 
-	go copier_service.Start(list_pages, 3)
+	go copier_service.Start(list_pages, 6)
 	go copier_downloads.Start(&list_downloads, 30)
 
 	//Função para gerar as top notícias a cada 60 minutos
