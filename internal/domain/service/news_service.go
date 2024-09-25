@@ -625,7 +625,6 @@ func ChangeLink(news *entity.News) *entity.News {
 }
 func listOfBlockedText(text string) bool {
 	words := []string{
-		"IMG_OFER_0.jpg",
 		"JusPod",
 	}
 
@@ -708,6 +707,8 @@ func changeWords(text string) string {
 	text = strings.Replace(text, "Assine a newsletter de Esportes do BN e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
 
 	text = strings.Replace(text, "Siga o BN no Google News e veja os conteúdos de maneira ainda mais rápida e ágil pelo celular ou pelo computador!", "", -1)
+
+	text = strings.Replace(text, `<img src="https://www.bahianoticias.com.br/fotos/oferecimentos/30/IMG_OFER_0.jpg" width="100%">`, "", -1)
 
 	return text
 }
