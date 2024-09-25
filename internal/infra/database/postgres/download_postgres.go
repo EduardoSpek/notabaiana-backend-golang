@@ -206,6 +206,26 @@ func (repo *DownloadPostgresRepository) FindAll(page, limit int) ([]*entity.Down
 	return downloads, nil
 }
 
+func (repo *DownloadPostgresRepository) FindAllTopViews(page, limit int) ([]*entity.Download, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	offset := (page - 1) * limit
+	var downloads []*entity.Download
+
+	err := repo.db.Where("visible = true").
+		Order("views DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&downloads).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return downloads, nil
+}
+
 func (repo *DownloadPostgresRepository) FindCategory(category string, page int) ([]*entity.Download, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
