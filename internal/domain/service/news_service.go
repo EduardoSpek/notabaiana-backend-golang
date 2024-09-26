@@ -625,6 +625,7 @@ func ChangeLink(news *entity.News) *entity.News {
 }
 func listOfBlockedText(text string) bool {
 	words := []string{
+		"IMG_OFER_0.jpg",
 		"JusPod",
 	}
 
