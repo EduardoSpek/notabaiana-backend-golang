@@ -59,7 +59,7 @@ var (
 	}
 
 	list_downloads = []string{
-		// "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/pagode/recentes.json?category=pagode&category=recentes",
+		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/pagode/recentes.json?category=pagode&category=recentes",
 		// // // "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/swingueira/recentes.json?category=swingueira&category=recentes",
 		// // // "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/arrocha/recentes.json?category=arrocha&category=recentes",
 		// // // "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/samba/recentes.json?category=samba&category=recentes",
