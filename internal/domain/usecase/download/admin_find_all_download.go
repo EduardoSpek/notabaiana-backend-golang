@@ -7,10 +7,10 @@ import (
 )
 
 type AdminFindAllDownloadUsecase struct {
-	DownloadRepository port.DownloadRepository
+	DownloadRepository port.AdminFindAllDownloadRepository
 }
 
-func NewAdminFindAllDownloadUsecase(repository port.DownloadRepository) *AdminFindAllDownloadUsecase {
+func NewAdminFindAllDownloadUsecase(repository port.AdminFindAllDownloadRepository) *AdminFindAllDownloadUsecase {
 	return &AdminFindAllDownloadUsecase{
 		DownloadRepository: repository,
 	}

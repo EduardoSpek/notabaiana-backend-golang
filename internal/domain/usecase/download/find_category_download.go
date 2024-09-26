@@ -7,10 +7,10 @@ import (
 )
 
 type FindCategoryDownloadUsecase struct {
-	DownloadRepository port.DownloadRepository
+	DownloadRepository port.FindCategoryDownloadRepository
 }
 
-func NewFindCategoryDownloadUsecase(repository port.DownloadRepository) *FindCategoryDownloadUsecase {
+func NewFindCategoryDownloadUsecase(repository port.FindCategoryDownloadRepository) *FindCategoryDownloadUsecase {
 	return &FindCategoryDownloadUsecase{
 		DownloadRepository: repository,
 	}

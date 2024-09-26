@@ -9,10 +9,10 @@ import (
 )
 
 type SearchDownloadUsecase struct {
-	DownloadRepository port.DownloadRepository
+	DownloadRepository port.SearchDownloadRepository
 }
 
-func NewSearchDownloadUsecase(repository port.DownloadRepository) *SearchDownloadUsecase {
+func NewSearchDownloadUsecase(repository port.SearchDownloadRepository) *SearchDownloadUsecase {
 	return &SearchDownloadUsecase{
 		DownloadRepository: repository,
 	}

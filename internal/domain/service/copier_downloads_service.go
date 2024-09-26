@@ -60,11 +60,11 @@ type AlbumChan struct {
 }
 
 type CopierDownloadService struct {
-	DownloadRepository port.DownloadRepository
+	DownloadRepository port.CopierDownload
 	ImgDownloader      port.ImageDownloader
 }
 
-func NewCopierDownload(DownloadRepository port.DownloadRepository, ImgDownloader port.ImageDownloader) *CopierDownloadService {
+func NewCopierDownload(DownloadRepository port.CopierDownload, ImgDownloader port.ImageDownloader) *CopierDownloadService {
 	return &CopierDownloadService{DownloadRepository: DownloadRepository, ImgDownloader: ImgDownloader}
 }
 

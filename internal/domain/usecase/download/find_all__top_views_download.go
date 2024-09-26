@@ -5,10 +5,10 @@ import (
 )
 
 type FindAllTopViewsDownloadUsecase struct {
-	DownloadRepository port.DownloadRepository
+	DownloadRepository port.FindAllTopViewsDownloadRepository
 }
 
-func NewFindAllTopViewsDownloadUsecase(repository port.DownloadRepository) *FindAllTopViewsDownloadUsecase {
+func NewFindAllTopViewsDownloadUsecase(repository port.FindAllTopViewsDownloadRepository) *FindAllTopViewsDownloadUsecase {
 	return &FindAllTopViewsDownloadUsecase{
 		DownloadRepository: repository,
 	}

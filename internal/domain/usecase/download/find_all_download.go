@@ -9,10 +9,10 @@ import (
 var perPage = 1000
 
 type FindAllDownloadUsecase struct {
-	DownloadRepository port.DownloadRepository
+	DownloadRepository port.FindAllDownloadRepository
 }
 
-func NewFindAllDownloadUsecase(repository port.DownloadRepository) *FindAllDownloadUsecase {
+func NewFindAllDownloadUsecase(repository port.FindAllDownloadRepository) *FindAllDownloadUsecase {
 	return &FindAllDownloadUsecase{
 		DownloadRepository: repository,
 	}

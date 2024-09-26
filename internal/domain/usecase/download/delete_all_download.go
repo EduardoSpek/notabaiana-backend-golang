@@ -9,10 +9,10 @@ import (
 )
 
 type DeleteAllDownloadUsecase struct {
-	DownloadRepository port.DownloadRepository
+	DownloadRepository port.DeleteAllDownloadRepository
 }
 
-func NewDeleteAllDownloadUsecase(repository port.DownloadRepository) *DeleteAllDownloadUsecase {
+func NewDeleteAllDownloadUsecase(repository port.DeleteAllDownloadRepository) *DeleteAllDownloadUsecase {
 	return &DeleteAllDownloadUsecase{
 		DownloadRepository: repository,
 	}

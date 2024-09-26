@@ -22,6 +22,12 @@ type DownloadRepository interface {
 	DeleteAll(downloads []*entity.Download) error
 }
 
+type CopierDownload interface {
+	Create(download *entity.Download) (*entity.Download, error)
+	Update(download *entity.Download) (*entity.Download, error)
+	GetByLink(link string) (*entity.Download, error)
+}
+
 type CreateDownloadRepository interface {
 	Create(download *entity.Download) (*entity.Download, error)
 }
@@ -48,10 +54,12 @@ type AdminGetBySlugDownloadRepository interface {
 
 type FindAllDownloadRepository interface {
 	FindAll(page, limit int) ([]*entity.Download, error)
+	GetTotalVisible() (int, error)
 }
 
 type AdminFindAllDownloadRepository interface {
-	FindAll(page, limit int) ([]*entity.Download, error)
+	AdminFindAll(page, limit int) ([]*entity.Download, error)
+	GetTotal() (int, error)
 }
 
 type FindAllTopViewsDownloadRepository interface {
@@ -60,10 +68,11 @@ type FindAllTopViewsDownloadRepository interface {
 
 type FindCategoryDownloadRepository interface {
 	FindCategory(category string, page int) ([]*entity.Download, error)
+	GetTotalFindCategory(category string) (int, error)
 }
 
 type GetTotalDownloadRepository interface {
-	GetTotalVisible() (int, error)
+	GetTotal() (int, error)
 }
 
 type GetTotalVisibleDownloadRepository interface {
@@ -80,12 +89,15 @@ type GetTotalSearchDownloadRepository interface {
 
 type SearchDownloadRepository interface {
 	Search(page int, str_search string) ([]*entity.Download, error)
+	GetTotalSearch(str_search string) (int, error)
 }
 
 type DeleteDownloadRepository interface {
 	Delete(id string) error
+	GetByID(id string) (*entity.Download, error)
 }
 
 type DeleteAllDownloadRepository interface {
 	DeleteAll(downloads []*entity.Download) error
+	GetByID(id string) (*entity.Download, error)
 }
