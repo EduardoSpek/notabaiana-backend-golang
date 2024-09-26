@@ -230,6 +230,8 @@ func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Downl
 					if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
 
 						done := make(chan *AlbumChan)
+						defer close(done)
+
 						go s.GetDataAlbum(album.Username, album.Slug, done)
 						album_data := <-done
 						//close(done)
