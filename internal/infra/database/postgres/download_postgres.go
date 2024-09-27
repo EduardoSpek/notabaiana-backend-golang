@@ -117,7 +117,7 @@ func (repo *DownloadPostgresRepository) GetBySlug(slug string) (*entity.Download
 	defer tx.Rollback()
 
 	var download entity.Download
-	if err := tx.Where("visible = true AND slug = ?", slug).First(&download).Error; err != nil {
+	if err := tx.Where("visible = true AND slug = ?", slug).Preload("Musics").First(&download).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
@@ -197,6 +197,7 @@ func (repo *DownloadPostgresRepository) FindAll(page, limit int) ([]*entity.Down
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
+		Preload("Musics").
 		Find(&downloads).Error
 
 	if err != nil {

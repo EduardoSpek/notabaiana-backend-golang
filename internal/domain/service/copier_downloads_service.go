@@ -50,8 +50,9 @@ type Album struct {
 }
 
 type File struct {
-	File string `json:"file"`
-	Path string `json:"path"`
+	File     string `json:"file"`
+	Path     string `json:"path"`
+	Position int    `json:"position"`
 }
 
 type AlbumChan struct {
@@ -103,6 +104,9 @@ func (c *CopierDownloadService) Run(list_downloads *[]string) {
 				return
 			}
 
+			fmt.Println("INSERINDO: ", n)
+			fmt.Println("=========================================")
+
 			createDownloadUsecase := usecase.NewCreateDownloadUsecase(c.DownloadRepository)
 			downloadCreated, err := createDownloadUsecase.Create(n)
 
@@ -150,7 +154,7 @@ func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Downl
 		var lista []*entity.Download
 		var lista_albuns []*Album
 		var item_atual string
-		//var files []*entity.Music
+		var files []*entity.Music
 
 		var cover, category string
 		var periodo = []string{"dia", "semana", "mes", "geral"}
@@ -225,43 +229,47 @@ func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Downl
 
 				for _, album := range lista_albuns {
 
-					//fmt.Printf("%d - %s\n", i, album.Title)
+					done := make(chan *AlbumChan)
+					defer close(done)
 
-					if !strings.Contains(item, "recomendados") && !strings.Contains(item, "estourados") {
+					go s.GetDataAlbum(album.Username, album.Slug, done)
+					album_data := <-done
+					//close(done)
 
-						done := make(chan *AlbumChan)
-						defer close(done)
-
-						go s.GetDataAlbum(album.Username, album.Slug, done)
-						album_data := <-done
-						//close(done)
-
-						if album_data.Error != nil {
-							fmt.Println("Erro ao obter dados completos do album:", err)
-							continue
-						}
-
-						if album_data.Album != nil {
-							category = strings.ToLower(album_data.Album.CatName)
-							cover = album_data.Album.BigCover
-						}
-					} else {
-						cover = album.Cover
+					if album_data.Error != nil {
+						fmt.Println("Erro ao obter dados completos do album:", err)
+						continue
 					}
 
-					// for _, f := range album_data.Album.Files {
-					// 	files = append(files, &entity.Music{
-					// 		File: f.File,
-					// 		Path: f.Path,
-					// 	})
-					// }
+					if album_data.Album != nil {
+						category = strings.ToLower(album_data.Album.CatName)
+
+						if album_data.Album.BigCover != "" {
+							cover = album_data.Album.BigCover
+						} else if album_data.Album.Cover != "" {
+							cover = album_data.Album.Cover
+						} else {
+							cover = album.Cover
+						}
+					}
+
+					if album_data.Album.Files != nil {
+						files = nil
+						for _, f := range album_data.Album.Files {
+							files = append(files, &entity.Music{
+								File:     f.File,
+								Path:     f.Path,
+								Position: f.Position,
+							})
+						}
+					}
 
 					download := &entity.Download{
 						Category: category,
 						Title:    album.Title,
 						Link:     urlSite + "/" + album.Username + "/" + album.Slug,
 						Image:    cover,
-						//Musics:   files,
+						Musics:   files,
 					}
 
 					lista = append(lista, download)

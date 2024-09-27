@@ -30,16 +30,17 @@ type Download struct {
 	Make      bool      `gorm:"column:make;default:false" json:"make"`
 	CreatedAt time.Time `gorm:"column:created_at;index:,sort:desc" json:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
-	//Musics    []*Music  `gorm:"column:musics" json:"musics"`
+	Musics    []*Music  `gorm:"foreignKey:DownloadID" json:"musics"`
 }
 
-// type Music struct {
-// 	gorm.Model
+type Music struct {
+	gorm.Model
 
-// 	File       string `json:"file"`
-// 	Path       string `json:"path"`
-// 	DownloadID uint
-// }
+	File       string `json:"file"`
+	Path       string `gorm:"column:path;unique" json:"path"`
+	Position   int    `json:"position"`
+	DownloadID string `gorm:"type:string"`
+}
 
 func NewDownload(download Download) *Download {
 
@@ -55,6 +56,7 @@ func NewDownload(download Download) *Download {
 		Slug:      slug,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+		Musics:    download.Musics,
 	}
 }
 
