@@ -11,45 +11,45 @@ import (
 var jwtKey = []byte(os.Getenv("KEY_JWT"))
 
 type Claims struct {
-    ID string
-    Email string
-    Admin bool
-    jwt.StandardClaims
+	ID    string
+	Email string
+	Admin bool
+	jwt.StandardClaims
 }
 
 func GenerateJWT(id string, email string, admin bool) (string, error) {
-    expirationTime := time.Now().Add(3 * time.Hour)
-    claims := &Claims{
-        ID: id,
-        Email: email,
-        Admin: admin,
-        StandardClaims: jwt.StandardClaims{
-            ExpiresAt: expirationTime.Unix(),
-        },
-    }
+	expirationTime := time.Now().Add(7 * 24 * time.Hour)
+	claims := &Claims{
+		ID:    id,
+		Email: email,
+		Admin: admin,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
 
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    tokenString, err := token.SignedString(jwtKey)
-    if err != nil {
-        return "", err
-    }
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		return "", err
+	}
 
-    return tokenString, nil
+	return tokenString, nil
 }
 
 func ValidateJWT(tokenStr string) (*Claims, error) {
-    claims := &Claims{}
-    token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-        return jwtKey, nil
-    })
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
 
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
-    if !token.Valid {
-        return nil, fmt.Errorf("invalid token")
-    }
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
 
-    return claims, nil
+	return claims, nil
 }
