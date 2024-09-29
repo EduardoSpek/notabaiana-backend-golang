@@ -240,48 +240,43 @@ func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Downl
 						continue
 					}
 
-					if album_data != nil {
+					if album_data.Album != nil {
+						category = strings.ToLower(album_data.Album.CatName)
 
-						if album_data.Album != nil {
-							category = strings.ToLower(album_data.Album.CatName)
+						if album_data.Album.BigCover != "" {
+							cover = album_data.Album.BigCover
+						} else if album_data.Album.Cover != "" {
+							cover = album_data.Album.Cover
+						} else {
+							cover = album.Cover
+						}
 
-							if album_data.Album.BigCover != "" {
-								cover = album_data.Album.BigCover
-							} else if album_data.Album.Cover != "" {
-								cover = album_data.Album.Cover
-							} else {
-								cover = album.Cover
+						if album_data.Album.Files != nil {
+							files = nil
+							for _, f := range album_data.Album.Files {
+								files = append(files, &entity.Music{
+									File:     f.File,
+									Path:     f.Path,
+									Position: f.Position,
+								})
 							}
 						}
-
-						if album_data.Album != nil {
-
-							if album_data.Album.Files != nil {
-								files = nil
-								for _, f := range album_data.Album.Files {
-									files = append(files, &entity.Music{
-										File:     f.File,
-										Path:     f.Path,
-										Position: f.Position,
-									})
-								}
-							}
-						}
-
-						download := &entity.Download{
-							Category: category,
-							Title:    album.Title,
-							Link:     urlSite + "/" + album.Username + "/" + album.Slug,
-							Image:    cover,
-							Musics:   files,
-						}
-
-						lista = append(lista, download)
-
 					}
 
-					item_atual = item
+					download := &entity.Download{
+						Category: category,
+						Title:    album.Title,
+						Link:     urlSite + "/" + album.Username + "/" + album.Slug,
+						Image:    cover,
+						Musics:   files,
+					}
+
+					lista = append(lista, download)
+
 				}
+
+				item_atual = item
+
 			}
 
 		}
