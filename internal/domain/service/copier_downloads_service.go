@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -202,7 +203,7 @@ func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Downl
 					fmt.Println("Erro ao ler o corpo da resposta:", err)
 				}
 
-				//body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
+				body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
 
 				// Decodificando o JSON
 				err = json.Unmarshal(body, &response)
@@ -230,58 +231,61 @@ func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Downl
 				for _, album := range lista_albuns {
 
 					done := make(chan *AlbumChan)
-					defer close(done)
 
 					go s.GetDataAlbum(album.Username, album.Slug, done)
 					album_data := <-done
-					//close(done)
 
 					if album_data.Error != nil {
 						fmt.Println("Erro ao obter dados completos do album:", err)
 						continue
 					}
 
-					if album_data.Album != nil {
-						category = strings.ToLower(album_data.Album.CatName)
+					if album_data != nil {
 
-						if album_data.Album.BigCover != "" {
-							cover = album_data.Album.BigCover
-						} else if album_data.Album.Cover != "" {
-							cover = album_data.Album.Cover
-						} else {
-							cover = album.Cover
+						if album_data.Album != nil {
+							category = strings.ToLower(album_data.Album.CatName)
+
+							if album_data.Album.BigCover != "" {
+								cover = album_data.Album.BigCover
+							} else if album_data.Album.Cover != "" {
+								cover = album_data.Album.Cover
+							} else {
+								cover = album.Cover
+							}
 						}
-					}
 
-					if album_data.Album.Files != nil {
-						files = nil
-						for _, f := range album_data.Album.Files {
-							files = append(files, &entity.Music{
-								File:     f.File,
-								Path:     f.Path,
-								Position: f.Position,
-							})
+						if album_data.Album != nil {
+
+							if album_data.Album.Files != nil {
+								files = nil
+								for _, f := range album_data.Album.Files {
+									files = append(files, &entity.Music{
+										File:     f.File,
+										Path:     f.Path,
+										Position: f.Position,
+									})
+								}
+							}
 						}
+
+						download := &entity.Download{
+							Category: category,
+							Title:    album.Title,
+							Link:     urlSite + "/" + album.Username + "/" + album.Slug,
+							Image:    cover,
+							Musics:   files,
+						}
+
+						lista = append(lista, download)
+
 					}
 
-					download := &entity.Download{
-						Category: category,
-						Title:    album.Title,
-						Link:     urlSite + "/" + album.Username + "/" + album.Slug,
-						Image:    cover,
-						Musics:   files,
-					}
-
-					lista = append(lista, download)
-
+					item_atual = item
 				}
-
-				item_atual = item
 			}
 
 		}
 
-		fmt.Println("Lista montada com sucesso!")
 		return lista
 
 	} else {
@@ -318,6 +322,8 @@ func (s *CopierDownloadService) GetDataAlbum(username, slug string, done chan<- 
 		}
 	}
 
+	body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
+
 	// Decodificando o JSON
 	err = json.Unmarshal(body, &response)
 	if err != nil {
@@ -329,6 +335,13 @@ func (s *CopierDownloadService) GetDataAlbum(username, slug string, done chan<- 
 	}
 
 	album = response.PageProps.Album
+
+	if album == nil {
+		done <- &AlbumChan{
+			Album: nil,
+			Error: err,
+		}
+	}
 
 	done <- &AlbumChan{
 		Album: album,
