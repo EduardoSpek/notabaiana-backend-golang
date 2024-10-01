@@ -583,7 +583,7 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 			return
 		}
 
-		if strings.Contains(script_decoded, "instagram") || strings.Contains(script_decoded, "twitter") || strings.Contains(script_decoded, "youtube") || strings.Contains(script_decoded, "flickr") || strings.Contains(script_decoded, "tiktok") || strings.Contains(script_decoded, "bsky") {
+		if strings.Contains(script_decoded, "youtube") || strings.Contains(script_decoded, "flickr") || strings.Contains(script_decoded, "tiktok") || strings.Contains(script_decoded, "bsky") {
 
 			if !strings.Contains(html, script_decoded) {
 				html += script_decoded
