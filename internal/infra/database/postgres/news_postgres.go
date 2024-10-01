@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
@@ -18,8 +19,6 @@ var (
 	ErrNewsExists          = errors.New("notícia já cadastrada com este título")
 	ErrNewsNotExistsWithID = errors.New("não existe notícia com este ID")
 	ErrNewsNotFound        = errors.New("notícia não encontrada")
-
-	PerPage = 24
 )
 
 type NewsPostgresRepository struct {
@@ -212,7 +211,7 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) ([]*
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
-	limit := PerPage
+	limit := config.News_PerPage
 	offset := (page - 1) * limit
 
 	var news []*entity.News
@@ -333,7 +332,7 @@ func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]*
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
-	limit := PerPage
+	limit := config.News_PerPage
 	offset := (page - 1) * limit
 
 	tx := repo.db.Begin()

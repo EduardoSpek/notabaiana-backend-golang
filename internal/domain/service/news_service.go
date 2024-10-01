@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
@@ -28,10 +29,6 @@ var (
 	ErrWordsBlackList = errors.New("o título ou texto contém palavras bloqueadas")
 	ErrNoCategory     = errors.New("nenhuma categoria no rss")
 	ErrSimilarTitle   = errors.New("título similar ao recente adicionado detectado")
-	AllowedDomains    = "www.bahianoticias.com.br"
-
-	LimitPerPage = 1000
-	perPage      = 24
 )
 
 type NewsService struct {
@@ -353,7 +350,7 @@ func (s *NewsService) SearchNews(page int, str_search string) (interface{}, erro
 
 	total := s.newsrepository.GetTotalNewsBySearch(str_search)
 
-	pagination := utils.Pagination(page, perPage, total)
+	pagination := utils.Pagination(page, config.News_PerPage, total)
 
 	result := struct {
 		List_news  []*entity.NewsFindAllOutput `json:"news"`
@@ -374,8 +371,8 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 	var newsOutput []*entity.NewsFindAllOutput
 
 	//Limita o total de registros que deve ser retornado
-	if limit > LimitPerPage {
-		limit = LimitPerPage
+	if limit > config.News_LimitPerPage {
+		limit = config.News_LimitPerPage
 	}
 
 	news, _ := s.newsrepository.AdminFindAll(page, limit)
@@ -384,7 +381,7 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
 	total := s.newsrepository.GetTotalNews()
 
-	pagination := utils.Pagination(page, perPage, total)
+	pagination := utils.Pagination(page, config.News_PerPage, total)
 
 	result := struct {
 		List_news  []*entity.NewsFindAllOutput `json:"news"`
@@ -403,8 +400,8 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 	var newsOutput []*entity.NewsFindAllOutput
 
 	//Limita o total de registros que deve ser retornado
-	if limit > LimitPerPage {
-		limit = LimitPerPage
+	if limit > config.News_LimitPerPage {
+		limit = config.News_LimitPerPage
 	}
 
 	news, _ := s.newsrepository.FindAll(page, limit)
@@ -413,7 +410,7 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 	total := s.newsrepository.GetTotalNewsVisible()
 
-	pagination := utils.Pagination(page, perPage, total)
+	pagination := utils.Pagination(page, config.News_PerPage, total)
 
 	result := struct {
 		List_news  []*entity.NewsFindAllOutput `json:"news"`
@@ -449,7 +446,7 @@ func (s *NewsService) FindNewsCategory(category string, page int) interface{} {
 
 	total := s.newsrepository.GetTotalNewsByCategory(category)
 
-	pagination := utils.Pagination(page, perPage, total)
+	pagination := utils.Pagination(page, config.News_PerPage, total)
 
 	result := struct {
 		List_news  []*entity.NewsFindAllOutput `json:"news"`
@@ -546,7 +543,7 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 	//var err error
 
 	collector := colly.NewCollector(
-		colly.AllowedDomains(AllowedDomains),
+		colly.AllowedDomains(config.News_AllowedDomains),
 	)
 
 	//Obtém o texto da notícia
@@ -737,7 +734,7 @@ func (s *NewsService) GetNewsFromPage(link string) []*entity.News {
 	//var err error
 
 	collector := colly.NewCollector(
-		colly.AllowedDomains(AllowedDomains),
+		colly.AllowedDomains(config.News_AllowedDomains),
 	)
 
 	var titulos []string

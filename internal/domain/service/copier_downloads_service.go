@@ -18,10 +18,6 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 )
 
-var (
-	urlSite = "https://suamusica.com.br"
-)
-
 type Response struct {
 	PageProps PageProps `json:"pageProps"`
 }
@@ -105,9 +101,6 @@ func (c *CopierDownloadService) Run(list_downloads *[]string) {
 				return
 			}
 
-			fmt.Println("INSERINDO: ", n)
-			fmt.Println("=========================================")
-
 			createDownloadUsecase := usecase.NewCreateDownloadUsecase(c.DownloadRepository)
 			downloadCreated, err := createDownloadUsecase.Create(n)
 
@@ -188,8 +181,6 @@ func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Downl
 					}
 				}
 
-				fmt.Println("URL: ", url)
-
 				// Fazendo a requisição GET
 				resp, err := http.Get(url)
 				if err != nil {
@@ -266,7 +257,7 @@ func (s *CopierDownloadService) Copier(list_downloads *[]string) []*entity.Downl
 					download := &entity.Download{
 						Category: category,
 						Title:    album.Title,
-						Link:     urlSite + "/" + album.Username + "/" + album.Slug,
+						Link:     config.Suamusica_UrlSite + "/" + album.Username + "/" + album.Slug,
 						Image:    cover,
 						Musics:   files,
 					}
@@ -294,7 +285,7 @@ func (s *CopierDownloadService) GetDataAlbum(username, slug string, done chan<- 
 	var response Response
 	var album *Album
 
-	url := "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/" + username + "/" + slug + ".json?slug=" + username
+	url := config.Suamusica_UrlSite + "/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/" + username + "/" + slug + ".json?slug=" + username
 
 	// Fazendo a requisição GET
 	resp, err := http.Get(url)

@@ -9,12 +9,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
-)
-
-var (
-	image_dimensions = [2]int{1280, 1280}
 )
 
 type ContactService struct {
@@ -127,7 +124,7 @@ func (cs *ContactService) SaveImages(image multipart.File, contact entity.Contac
 	file = contact.ID + ".jpg"
 	pathFile := diretorio + file
 
-	err = cs.SaveImageForm(image, diretorio, file, image_dimensions[0], image_dimensions[1])
+	err = cs.SaveImageForm(image, diretorio, file, config.Contact_ImageDimensions[0], config.Contact_ImageDimensions[1])
 
 	if err != nil {
 		pathFile = ""

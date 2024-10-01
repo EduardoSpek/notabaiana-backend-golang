@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"gorm.io/gorm"
@@ -231,7 +232,7 @@ func (repo *DownloadPostgresRepository) FindCategory(category string, page int) 
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
-	limit := PerPage
+	limit := config.Downloads_PerPage
 	offset := (page - 1) * limit
 	var downloads []*entity.Download
 
@@ -290,7 +291,7 @@ func (repo *DownloadPostgresRepository) Search(page int, strSearch string) ([]*e
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
-	limit := PerPage
+	limit := config.Downloads_PerPage
 	offset := (page - 1) * limit
 	var downloads []*entity.Download
 

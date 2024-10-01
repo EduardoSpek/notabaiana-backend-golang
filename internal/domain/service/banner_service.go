@@ -9,14 +9,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
-)
-
-var (
-	banner_pc_dimensions     = [2]int{1300, 190}
-	banner_tablet_dimensions = [2]int{726, 106}
-	banner_mobile_dimensions = [2]int{386, 386}
 )
 
 type BannerService struct {
@@ -158,7 +153,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 		pathFile := diretorio + file
 
 		if i == 0 {
-			err = bs.SaveImageForm(image, diretorio, file, banner_pc_dimensions[0], banner_pc_dimensions[1])
+			err = bs.SaveImageForm(image, diretorio, file, config.Banner_pc_dimensions[0], config.Banner_pc_dimensions[1])
 
 			if err != nil {
 				pathFile = ""
@@ -169,7 +164,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 				banner.Image1 = pathFile
 			}
 		} else if i == 1 {
-			err = bs.SaveImageForm(image, diretorio, file, banner_tablet_dimensions[0], banner_tablet_dimensions[1])
+			err = bs.SaveImageForm(image, diretorio, file, config.Banner_tablet_dimensions[0], config.Banner_tablet_dimensions[1])
 
 			if err != nil {
 				pathFile = ""
@@ -180,7 +175,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 				banner.Image2 = pathFile
 			}
 		} else if i == 2 {
-			err = bs.SaveImageForm(image, diretorio, file, banner_mobile_dimensions[0], banner_mobile_dimensions[1])
+			err = bs.SaveImageForm(image, diretorio, file, config.Banner_mobile_dimensions[0], config.Banner_mobile_dimensions[1])
 
 			if err != nil {
 				pathFile = ""
