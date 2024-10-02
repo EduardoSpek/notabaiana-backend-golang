@@ -87,9 +87,29 @@ func (s *NewsService) StartCleanNews(minutes time.Duration) {
 	}
 }
 
-func (s *NewsService) CleanNews() {
+func (s *NewsService) CleanNews() error {
 
-	s.newsrepository.CleanNews()
+	news, err := s.newsrepository.CleanNews()
+
+	if err != nil {
+		return err
+	}
+
+	for _, n := range news {
+
+		if n.Image != "" {
+			image := "./images/" + n.Image
+			utils.RemoveImage(image)
+		}
+	}
+
+	err = s.newsrepository.DeleteAll(news)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 
 }
 

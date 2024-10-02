@@ -20,6 +20,7 @@ type DownloadRepository interface {
 	FindCategory(category string, page int) ([]*entity.Download, error)
 	Delete(id string) error
 	DeleteAll(downloads []*entity.Download) error
+	Clean() ([]*entity.Download, error)
 }
 
 type CopierDownload interface {
@@ -100,4 +101,9 @@ type DeleteDownloadRepository interface {
 type DeleteAllDownloadRepository interface {
 	DeleteAll(downloads []*entity.Download) error
 	GetByID(id string) (*entity.Download, error)
+}
+
+type CleanDownloadRepository interface {
+	Clean() ([]*entity.Download, error)
+	DeleteAll(downloads []*entity.Download) error
 }

@@ -3,6 +3,7 @@ package postgres
 import (
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
@@ -349,4 +350,23 @@ func (repo *DownloadPostgresRepository) DeleteAll(downloads []*entity.Download) 
 		}
 		return nil
 	})
+}
+
+func (repo *DownloadPostgresRepository) Clean() ([]*entity.Download, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var downloads []*entity.Download
+
+	result := repo.db.Model(&entity.Download{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&downloads)
+
+	if result.Error != nil {
+		return []*entity.Download{}, result.Error
+	}
+
+	return downloads, nil
+
 }

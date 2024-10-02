@@ -21,7 +21,9 @@ func NewNewsMemoryRepository() *NewsMemoryRepository {
 	return &NewsMemoryRepository{Newsdb: make(map[string]*entity.News)}
 }
 
-func (r *NewsMemoryRepository) CleanNews() {
+func (r *NewsMemoryRepository) CleanNews() ([]*entity.News, error) {
+
+	return nil, nil
 
 }
 

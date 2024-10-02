@@ -8,6 +8,7 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
+	usecase "github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase/download"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/notifications"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web"
@@ -106,6 +107,7 @@ func main() {
 	download_repository := database.NewDownloadPostgresRepository(postgres)
 	copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
 	download_controller := controllers.NewDownloadController(download_repository, imagedownloader)
+	downloadCleanUsecase := usecase.NewCleanDownloadUsecase(download_repository)
 
 	news_controller := controllers.NewNewsController(news_service)
 
@@ -149,6 +151,9 @@ func main() {
 
 	//Função para limpar as notícias inativas
 	go news_service.StartCleanNews(60 * 24)
+
+	//Função para limpar as downloads inativos
+	go downloadCleanUsecase.StartCleanDownloads(60 * 24)
 
 	server.Start()
 

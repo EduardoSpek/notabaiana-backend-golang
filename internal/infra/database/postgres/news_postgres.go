@@ -31,26 +31,23 @@ func NewNewsPostgresRepository(db_adapter port.DBAdapter) *NewsPostgresRepositor
 	return &NewsPostgresRepository{db: db}
 }
 
-func (repo *NewsPostgresRepository) CleanNews() {
+func (repo *NewsPostgresRepository) CleanNews() ([]*entity.News, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
 
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	var news []entity.News
+	var news []*entity.News
 
-	repo.db.Model(&entity.News{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&news)
+	result := repo.db.Model(&entity.News{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&news)
 
-	for _, n := range news {
-
-		if n.Image != "" {
-			image := "./images/" + n.Image
-			utils.RemoveImage(image)
-		}
-
-		repo.db.Unscoped().Delete(n)
+	if result.Error != nil {
+		return []*entity.News{}, result.Error
 	}
+
+	return news, nil
+
 }
 
 func (repo *NewsPostgresRepository) NewsMake() (*entity.News, error) {
