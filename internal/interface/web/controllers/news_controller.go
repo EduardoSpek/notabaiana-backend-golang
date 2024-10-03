@@ -302,6 +302,20 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	newsOld, err := c.news_service.GetNewsBySlug(newsInput.Slug)
+
+	if err != nil {
+		msg := map[string]any{
+			"ok":      false,
+			"message": "A notícia não pode ser atualizada!",
+			"erro":    err,
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	cacheString := fmt.Sprintf("getNewsBySlug:%s", newsOld.Slug)
+
 	new, err := c.news_service.UpdateNewsUsingTheForm(file, newsInput)
 
 	if err != nil {
@@ -314,7 +328,6 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	cacheString := fmt.Sprintf("getNewsBySlug:%s", new.Slug)
 	c.Cache.Delete(cacheString)
 
 	ResponseJson(w, new, http.StatusOK)
