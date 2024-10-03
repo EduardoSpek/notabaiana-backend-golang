@@ -126,8 +126,8 @@ func (bc *DownloadController) UpdateDownloadUsingTheForm(w http.ResponseWriter, 
 		return
 	}
 
-	getSlugUsecase := usecase.NewGetBySlugDownloadUsecase(bc.DownloadRepository)
-	selectedDownload, err := getSlugUsecase.GetBySlug(downloadInput.Slug)
+	getSlugUsecase := usecase.NewGetByLinkDownloadUsecase(bc.DownloadRepository)
+	selectedDownload, err := getSlugUsecase.GetByLink(downloadInput.Link)
 
 	if err != nil {
 		msg = map[string]any{
