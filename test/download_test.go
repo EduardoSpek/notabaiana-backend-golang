@@ -13,9 +13,11 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	usecase "github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase/download"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/controllers"
@@ -134,7 +136,8 @@ func TestDownloadController(t *testing.T) {
 			Text:     "Loren ipsun dolor sit iamet",
 		}
 
-		controller := controllers.NewDownloadController(repo, imagedownloader)
+		cache := service.NewCache(5 * time.Second)
+		controller := controllers.NewDownloadController(repo, imagedownloader, cache)
 
 		formData := url.Values{}
 		formData.Set("category", dto.Category)
@@ -182,7 +185,8 @@ func TestDownloadController(t *testing.T) {
 			Text:     "Loren ipsun dolor sit iamet",
 		}
 
-		controller := controllers.NewDownloadController(repo, imagedownloader)
+		cache := service.NewCache(5 * time.Second)
+		controller := controllers.NewDownloadController(repo, imagedownloader, cache)
 
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
