@@ -139,7 +139,7 @@ func (bc *DownloadController) UpdateDownloadUsingTheForm(w http.ResponseWriter, 
 		return
 	}
 
-	cacheString := fmt.Sprintf("getDownloadBySlug:%s", selectedDownload.Slug)
+	cacheString := fmt.Sprintf("downloadsGetBySlug:%s", selectedDownload.Slug)
 	bc.Cache.Delete(cacheString)
 
 	updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
