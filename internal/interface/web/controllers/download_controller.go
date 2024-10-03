@@ -21,10 +21,11 @@ var (
 type DownloadController struct {
 	DownloadRepository port.DownloadRepository
 	ImageDownloader    port.ImageDownloader
+	Cache              port.CachePort
 }
 
-func NewDownloadController(repository port.DownloadRepository, imagedownloader port.ImageDownloader) *DownloadController {
-	return &DownloadController{DownloadRepository: repository, ImageDownloader: imagedownloader}
+func NewDownloadController(repository port.DownloadRepository, imagedownloader port.ImageDownloader, cache port.CachePort) *DownloadController {
+	return &DownloadController{DownloadRepository: repository, ImageDownloader: imagedownloader, Cache: cache}
 }
 
 func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, r *http.Request) {
@@ -125,14 +126,30 @@ func (bc *DownloadController) UpdateDownloadUsingTheForm(w http.ResponseWriter, 
 		return
 	}
 
+	getSlugUsecase := usecase.NewGetBySlugDownloadUsecase(bc.DownloadRepository)
+	selectedDownload, err := getSlugUsecase.GetBySlug(downloadInput.Slug)
+
+	if err != nil {
+		msg = map[string]any{
+			"ok":      false,
+			"message": "problema ao atualizar os dados no banco",
+			"erro":    "não foi possível atualizar os dados corretamente",
+		}
+		ResponseJson(w, msg, http.StatusNotFound)
+		return
+	}
+
+	cacheString := fmt.Sprintf("getDownloadBySlug:%s", selectedDownload.Slug)
+	bc.Cache.Delete(cacheString)
+
 	updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
 	downloadUpdated, err = updateDownloadUsecase.Update(downloadInput)
 
 	if err != nil {
 		msg = map[string]any{
 			"ok":      false,
-			"message": "problema ao cadastrar os dados no banco",
-			"erro":    "não foi possível cadatrar os dados corretamente",
+			"message": "problema ao atualizar os dados no banco",
+			"erro":    "não foi possível atualizar os dados corretamente",
 		}
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
@@ -244,6 +261,13 @@ func (bc *DownloadController) FindAll(w http.ResponseWriter, r *http.Request) {
 		limit = 24
 	}
 
+	cacheString := fmt.Sprintf("downloads:%d:%d", page, limit)
+
+	if valor, existe := bc.Cache.Get(cacheString); existe {
+		ResponseJson(w, valor, http.StatusOK)
+		return
+	}
+
 	downloadFindAll := usecase.NewFindAllDownloadUsecase(bc.DownloadRepository)
 	downloads, err := downloadFindAll.FindAll(page, limit)
 
@@ -256,6 +280,8 @@ func (bc *DownloadController) FindAll(w http.ResponseWriter, r *http.Request) {
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
+
+	bc.Cache.Set(cacheString, downloads)
 
 	ResponseJson(w, downloads, http.StatusOK)
 
@@ -277,6 +303,13 @@ func (bc *DownloadController) FindAllTopViews(w http.ResponseWriter, r *http.Req
 		limit = 24
 	}
 
+	cacheString := fmt.Sprintf("downloadsTopViews:%d:%d", page, limit)
+
+	if valor, existe := bc.Cache.Get(cacheString); existe {
+		ResponseJson(w, valor, http.StatusOK)
+		return
+	}
+
 	downloadFindAllTopViews := usecase.NewFindAllTopViewsDownloadUsecase(bc.DownloadRepository)
 	downloads, err := downloadFindAllTopViews.FindAllTopViews(page, limit)
 
@@ -290,6 +323,8 @@ func (bc *DownloadController) FindAllTopViews(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	bc.Cache.Set(cacheString, downloads)
+
 	ResponseJson(w, downloads, http.StatusOK)
 
 }
@@ -298,6 +333,13 @@ func (bc *DownloadController) GetBySlug(w http.ResponseWriter, r *http.Request) 
 
 	vars := mux.Vars(r)
 	slug := vars["slug"]
+
+	cacheString := fmt.Sprintf("downloadsGetBySlug:%s", slug)
+
+	if valor, existe := bc.Cache.Get(cacheString); existe {
+		ResponseJson(w, valor, http.StatusOK)
+		return
+	}
 
 	downloadUsecase := usecase.NewGetBySlugDownloadUsecase(bc.DownloadRepository)
 	download, err := downloadUsecase.GetBySlug(slug)
@@ -311,6 +353,8 @@ func (bc *DownloadController) GetBySlug(w http.ResponseWriter, r *http.Request) 
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
+
+	bc.Cache.Set(cacheString, download)
 
 	ResponseJson(w, download, http.StatusOK)
 
@@ -377,6 +421,13 @@ func (bc *DownloadController) FindCategory(w http.ResponseWriter, r *http.Reques
 		page = 1
 	}
 
+	cacheString := fmt.Sprintf("downloadFindCategory:%s:%d", category, page)
+
+	if valor, existe := bc.Cache.Get(cacheString); existe {
+		ResponseJson(w, valor, http.StatusOK)
+		return
+	}
+
 	downloadUsecase := usecase.NewFindCategoryDownloadUsecase(bc.DownloadRepository)
 	downloads, err := downloadUsecase.FindCategory(category, page)
 
@@ -389,6 +440,8 @@ func (bc *DownloadController) FindCategory(w http.ResponseWriter, r *http.Reques
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
+
+	bc.Cache.Set(cacheString, downloads)
 
 	ResponseJson(w, downloads, http.StatusOK)
 

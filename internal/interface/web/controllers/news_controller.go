@@ -315,6 +315,7 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 	}
 
 	cacheString := fmt.Sprintf("getNewsBySlug:%s", newsOld.Slug)
+	c.Cache.Delete(cacheString)
 
 	new, err := c.news_service.UpdateNewsUsingTheForm(file, newsInput)
 
@@ -327,8 +328,6 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
-
-	c.Cache.Delete(cacheString)
 
 	ResponseJson(w, new, http.StatusOK)
 

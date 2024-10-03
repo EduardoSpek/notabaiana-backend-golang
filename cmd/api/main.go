@@ -109,7 +109,7 @@ func main() {
 
 	download_repository := database.NewDownloadPostgresRepository(postgres)
 	copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
-	download_controller := controllers.NewDownloadController(download_repository, imagedownloader)
+	download_controller := controllers.NewDownloadController(download_repository, imagedownloader, cache)
 	downloadCleanUsecase := usecase.NewCleanDownloadUsecase(download_repository)
 
 	news_controller := controllers.NewNewsController(news_service, cache)
