@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
@@ -188,11 +189,12 @@ func TestNewsController(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		cache := service.NewCache(5 * time.Second)
 		repo := database.NewNewsMemoryRepository()
 		imagedownloader := utils.NewImgDownloader()
 		hits := database.NewHitsMemoryRepository()
 		news_service := service.NewNewsService(repo, imagedownloader, hits)
-		controller := controllers.NewNewsController(news_service)
+		controller := controllers.NewNewsController(news_service, cache)
 
 		news := &entity.News{
 			Title:   "Eduardo Spek",

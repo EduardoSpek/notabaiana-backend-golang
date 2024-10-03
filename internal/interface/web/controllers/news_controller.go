@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	"github.com/gorilla/mux"
@@ -23,10 +24,11 @@ var (
 
 type NewsController struct {
 	news_service *service.NewsService
+	Cache        port.CachePort
 }
 
-func NewNewsController(newsservice *service.NewsService) *NewsController {
-	return &NewsController{news_service: newsservice}
+func NewNewsController(newsservice *service.NewsService, cache port.CachePort) *NewsController {
+	return &NewsController{news_service: newsservice, Cache: cache}
 }
 
 func (c *NewsController) AdminDeleteAllNews(w http.ResponseWriter, r *http.Request) {
@@ -406,6 +408,13 @@ func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	slug := vars["slug"]
 
+	cacheString := fmt.Sprintf("getNewsBySlug:%s", slug)
+
+	if valor, existe := c.Cache.Get(cacheString); existe {
+		ResponseJson(w, valor, http.StatusOK)
+		return
+	}
+
 	new, err := c.news_service.GetNewsBySlug(slug)
 
 	if err != nil {
@@ -416,6 +425,8 @@ func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
+
+	c.Cache.Set(cacheString, new)
 
 	ResponseJson(w, new, http.StatusOK)
 
@@ -437,7 +448,16 @@ func (c *NewsController) News(w http.ResponseWriter, r *http.Request) {
 		limit = 10
 	}
 
+	cacheString := fmt.Sprintf("news:%d:%d", page, limit)
+
+	if valor, existe := c.Cache.Get(cacheString); existe {
+		ResponseJson(w, valor, http.StatusOK)
+		return
+	}
+
 	listnews := c.news_service.FindAllNews(page, limit)
+
+	c.Cache.Set(cacheString, listnews)
 
 	ResponseJson(w, listnews, http.StatusOK)
 
@@ -454,7 +474,16 @@ func (c *NewsController) NewsCategory(w http.ResponseWriter, r *http.Request) {
 		page = 1
 	}
 
+	cacheString := fmt.Sprintf("newsCategory:%d:%s", page, category)
+
+	if valor, existe := c.Cache.Get(cacheString); existe {
+		ResponseJson(w, valor, http.StatusOK)
+		return
+	}
+
 	listnews := c.news_service.FindNewsCategory(category, page)
+
+	c.Cache.Set(cacheString, listnews)
 
 	ResponseJson(w, listnews, http.StatusOK)
 

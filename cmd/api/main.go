@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
@@ -92,6 +93,8 @@ var (
 
 func main() {
 
+	cache := service.NewCache(10 * time.Minute)
+
 	//newsrepo := database.NewNewsSQLiteRepository()
 	//newsrepo := database.NewNewsMemoryRepository()
 	postgres := adapter.NewPostgresAdapter()
@@ -109,7 +112,7 @@ func main() {
 	download_controller := controllers.NewDownloadController(download_repository, imagedownloader)
 	downloadCleanUsecase := usecase.NewCleanDownloadUsecase(download_repository)
 
-	news_controller := controllers.NewNewsController(news_service)
+	news_controller := controllers.NewNewsController(news_service, cache)
 
 	toprepo := database.NewTopPostgresRepository(postgres)
 	top_service := service.NewTopService(toprepo, newsrepo, hitrepo, news_service)
