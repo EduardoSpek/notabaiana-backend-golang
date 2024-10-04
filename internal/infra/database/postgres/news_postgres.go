@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -10,7 +9,6 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
-	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 )
@@ -468,12 +466,6 @@ func (repo *NewsPostgresRepository) DeleteAll(news []*entity.News) error {
 
 		if newsSelected.Error != nil {
 			return ErrNewsNotFound
-		}
-
-		del1 := utils.RemoveImage("." + news.Image)
-
-		if !del1 {
-			fmt.Println("Imagem da notícia não deletada")
 		}
 
 		repo.db.Unscoped().Delete(news)

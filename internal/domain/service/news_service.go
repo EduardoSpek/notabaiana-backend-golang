@@ -41,8 +41,22 @@ func NewNewsService(repository port.NewsRepository, downloader port.ImageDownloa
 	return &NewsService{newsrepository: repository, imagedownloader: downloader, hitsrepository: hits}
 }
 
-func (s *NewsService) AdminDeleteAll(banners []*entity.News) error {
-	err := s.newsrepository.DeleteAll(banners)
+func (s *NewsService) AdminDeleteAll(news []*entity.News) error {
+
+	var listNews []*entity.News
+	for _, n := range news {
+		new, err := s.newsrepository.GetByID(n.ID)
+
+		if err != nil {
+			return err
+		}
+
+		listNews = append(listNews, new)
+	}
+
+	s.RemoveImages(listNews)
+
+	err := s.newsrepository.DeleteAll(news)
 
 	if err != nil {
 		return err
@@ -95,13 +109,7 @@ func (s *NewsService) CleanNews() error {
 		return err
 	}
 
-	for _, n := range news {
-
-		if n.Image != "" {
-			image := "./images/" + n.Image
-			utils.RemoveImage(image)
-		}
-	}
+	s.RemoveImages(news)
 
 	err = s.newsrepository.DeleteAll(news)
 
@@ -111,6 +119,17 @@ func (s *NewsService) CleanNews() error {
 
 	return nil
 
+}
+
+func (s *NewsService) RemoveImages(news []*entity.News) {
+
+	for _, n := range news {
+
+		if n.Image != "" {
+			image := "./images/" + n.Image
+			utils.RemoveImage(image)
+		}
+	}
 }
 
 func (s *NewsService) NewsMake() (interface{}, error) {
