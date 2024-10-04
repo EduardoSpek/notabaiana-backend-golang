@@ -37,6 +37,8 @@ func (c *NewsController) AdminDeleteAllNews(w http.ResponseWriter, r *http.Reque
 	var ids []string
 	var news []*entity.News
 
+	c.Cache.Cleanup()
+
 	err := json.NewDecoder(r.Body).Decode(&ids)
 	if err != nil {
 		ResponseJson(w, err.Error(), http.StatusNotFound)
@@ -75,6 +77,8 @@ func (c *NewsController) DeleteNews(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	err := TokenVerifyByHeader(w, r)
+
+	c.Cache.Cleanup()
 
 	if err != nil {
 		msg = map[string]any{
@@ -329,6 +333,8 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	c.Cache.Cleanup()
+
 	ResponseJson(w, new, http.StatusOK)
 
 }
@@ -393,6 +399,8 @@ func (c *NewsController) CreateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
+
+	c.Cache.Cleanup()
 
 	ResponseJson(w, new, http.StatusOK)
 

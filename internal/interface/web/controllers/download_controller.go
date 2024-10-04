@@ -92,6 +92,8 @@ func (bc *DownloadController) CreateDownloadUsingTheForm(w http.ResponseWriter, 
 		updateDownloadUsecase.Update(downloadCreated)
 	}
 
+	bc.Cache.Cleanup()
+
 	ResponseJson(w, downloadCreated, http.StatusOK)
 
 }
@@ -126,9 +128,6 @@ func (bc *DownloadController) UpdateDownloadUsingTheForm(w http.ResponseWriter, 
 		return
 	}
 
-	getSlugUsecase := usecase.NewGetByLinkDownloadUsecase(bc.DownloadRepository)
-	selectedDownload, err := getSlugUsecase.GetByLink(downloadInput.Link)
-
 	if err != nil {
 		msg = map[string]any{
 			"ok":      false,
@@ -139,8 +138,7 @@ func (bc *DownloadController) UpdateDownloadUsingTheForm(w http.ResponseWriter, 
 		return
 	}
 
-	cacheString := fmt.Sprintf("downloadsGetBySlug:%s", selectedDownload.Slug)
-	bc.Cache.Delete(cacheString)
+	bc.Cache.Cleanup()
 
 	updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
 	downloadUpdated, err = updateDownloadUsecase.Update(downloadInput)
@@ -452,6 +450,8 @@ func (bc *DownloadController) Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
+	bc.Cache.Cleanup()
+
 	downloadUsecase := usecase.NewDeleteDownloadUsecase(bc.DownloadRepository)
 	err := downloadUsecase.Delete(id)
 
@@ -480,6 +480,8 @@ func (bc *DownloadController) DeleteAll(w http.ResponseWriter, r *http.Request) 
 	var msg map[string]any
 	var ids []string
 	var downloads []*entity.Download
+
+	bc.Cache.Cleanup()
 
 	err := json.NewDecoder(r.Body).Decode(&ids)
 	if err != nil {

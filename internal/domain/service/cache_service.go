@@ -42,11 +42,11 @@ func (c *Cache) Delete(key string) {
 func (c *Cache) cleanupLoop() {
 	ticker := time.NewTicker(c.Expiration)
 	for range ticker.C {
-		c.cleanup()
+		c.Cleanup()
 	}
 }
 
-func (c *Cache) cleanup() {
+func (c *Cache) Cleanup() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.DB = make(map[string]interface{})
