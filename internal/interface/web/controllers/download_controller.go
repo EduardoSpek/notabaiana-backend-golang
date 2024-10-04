@@ -128,18 +128,6 @@ func (bc *DownloadController) UpdateDownloadUsingTheForm(w http.ResponseWriter, 
 		return
 	}
 
-	if err != nil {
-		msg = map[string]any{
-			"ok":      false,
-			"message": "problema ao atualizar os dados no banco",
-			"erro":    "não foi possível atualizar os dados corretamente",
-		}
-		ResponseJson(w, msg, http.StatusNotFound)
-		return
-	}
-
-	bc.Cache.Cleanup()
-
 	updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
 	downloadUpdated, err = updateDownloadUsecase.Update(downloadInput)
 
@@ -173,6 +161,8 @@ func (bc *DownloadController) UpdateDownloadUsingTheForm(w http.ResponseWriter, 
 		updateDownloadUsecase := usecase.NewUpdateDownloadUsecase(bc.DownloadRepository)
 		updateDownloadUsecase.Update(downloadUpdated)
 	}
+
+	bc.Cache.Cleanup()
 
 	ResponseJson(w, downloadUpdated, http.StatusOK)
 
