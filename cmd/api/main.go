@@ -93,7 +93,7 @@ var (
 
 func main() {
 
-	cache := service.NewCache(10 * time.Minute)
+	cache := service.NewCache(30 * time.Minute)
 
 	//newsrepo := database.NewNewsSQLiteRepository()
 	//newsrepo := database.NewNewsMemoryRepository()
