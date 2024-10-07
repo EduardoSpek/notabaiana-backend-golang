@@ -322,13 +322,6 @@ func (bc *DownloadController) GetBySlug(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	slug := vars["slug"]
 
-	cacheString := fmt.Sprintf("downloadsGetBySlug:%s", slug)
-
-	if valor, existe := bc.Cache.Get(cacheString); existe {
-		ResponseJson(w, valor, http.StatusOK)
-		return
-	}
-
 	downloadUsecase := usecase.NewGetBySlugDownloadUsecase(bc.DownloadRepository)
 	download, err := downloadUsecase.GetBySlug(slug)
 
@@ -341,8 +334,6 @@ func (bc *DownloadController) GetBySlug(w http.ResponseWriter, r *http.Request) 
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
-
-	bc.Cache.Set(cacheString, download)
 
 	ResponseJson(w, download, http.StatusOK)
 

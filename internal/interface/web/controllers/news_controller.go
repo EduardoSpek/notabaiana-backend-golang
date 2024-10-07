@@ -431,13 +431,6 @@ func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	slug := vars["slug"]
 
-	cacheString := fmt.Sprintf("getNewsBySlug:%s", slug)
-
-	if valor, existe := c.Cache.Get(cacheString); existe {
-		ResponseJson(w, valor, http.StatusOK)
-		return
-	}
-
 	new, err := c.news_service.GetNewsBySlug(slug)
 
 	if err != nil {
@@ -448,8 +441,6 @@ func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
 		ResponseJson(w, msg, http.StatusNotFound)
 		return
 	}
-
-	c.Cache.Set(cacheString, new)
 
 	ResponseJson(w, new, http.StatusOK)
 
