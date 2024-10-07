@@ -79,6 +79,8 @@ func (c *CopierService) Run(list_pages []string) {
 
 			if new.ID != "" {
 
+				fmt.Println("NEWID: ", new.ID)
+
 				outputPath, err := c.news_service.SaveImage(new.ID, n.Image, diretorio)
 
 				if err != nil {

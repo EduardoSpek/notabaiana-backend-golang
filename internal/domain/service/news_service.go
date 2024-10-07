@@ -552,6 +552,8 @@ func (s *NewsService) SaveImage(id, url, diretorio string) (string, error) {
 
 	url = strings.Replace(url, "_original.jpg", "_5.jpg", -1)
 
+	fmt.Println("URLIMG: ", url)
+
 	img, err := s.imagedownloader.DownloadImage(url)
 
 	if err != nil {
