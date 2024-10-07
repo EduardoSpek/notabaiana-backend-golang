@@ -85,11 +85,6 @@ func (c *CopierService) Run(list_pages []string) {
 
 					if err != nil {
 
-						err := c.news_service.ClearImagePath(new.ID)
-
-						if err != nil {
-							fmt.Println("não foi possível atualizar o caminho da imagem")
-						}
 						fmt.Println("Erro ao Salvar Image: ", err)
 					}
 
