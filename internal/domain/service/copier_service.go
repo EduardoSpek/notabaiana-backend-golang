@@ -79,19 +79,22 @@ func (c *CopierService) Run(list_pages []string) {
 
 			if err == nil {
 
-				outputPath, err := c.news_service.SaveImage(new.ID, n.Image, diretorio)
+				if new.ID != "" {
 
-				if err != nil {
-					fmt.Println("Erro ao Salvar Image: ", err)
-				}
-
-				fileExists := utils.FileExsists(outputPath)
-
-				if !fileExists {
-					err := c.news_service.ClearImagePath(new.ID)
+					outputPath, err := c.news_service.SaveImage(new.ID, n.Image, diretorio)
 
 					if err != nil {
-						fmt.Println("não foi possível atualizar o caminho da imagem")
+						fmt.Println("Erro ao Salvar Image: ", err)
+					}
+
+					fileExists := utils.FileExsists(outputPath)
+
+					if !fileExists {
+						err := c.news_service.ClearImagePath(new.ID)
+
+						if err != nil {
+							fmt.Println("não foi possível atualizar o caminho da imagem")
+						}
 					}
 				}
 			}
