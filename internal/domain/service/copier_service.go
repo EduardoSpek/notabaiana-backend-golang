@@ -62,42 +62,43 @@ func (c *CopierService) Run(list_pages []string) {
 
 	for _, n := range lista {
 
-		embed, text := c.news_service.GetEmded(n.Link)
+		go func() {
 
-		if text != "" {
-			n.Text = text
-		}
+			embed, text := c.news_service.GetEmded(n.Link)
 
-		if embed != "" {
-			n.Text += "<br><br>"
-			n.Text += embed
-		}
+			if text != "" {
+				n.Text = text
+			}
 
-		new, err := c.news_service.CreateNews(n)
+			if embed != "" {
+				n.Text += "<br><br>"
+				n.Text += embed
+			}
 
-		if err == nil {
+			new, err := c.news_service.CreateNews(n)
 
-			if new.ID != "" {
+			if err == nil {
 
-				fmt.Println("NEWID: ", new.ID)
+				if new.ID != "" {
 
-				outputPath, err := c.news_service.SaveImage(new.ID, n.Image, diretorio)
-
-				if err != nil {
-					fmt.Println("Erro ao Salvar Image: ", err)
-				}
-
-				fileExists := utils.FileExsists(outputPath)
-
-				if !fileExists {
-					err := c.news_service.ClearImagePath(new.ID)
+					outputPath, err := c.news_service.SaveImage(new.ID, n.Image, diretorio)
 
 					if err != nil {
-						fmt.Println("não foi possível atualizar o caminho da imagem")
+						fmt.Println("Erro ao Salvar Image: ", err)
+					}
+
+					fileExists := utils.FileExsists(outputPath)
+
+					if !fileExists {
+						err := c.news_service.ClearImagePath(new.ID)
+
+						if err != nil {
+							fmt.Println("não foi possível atualizar o caminho da imagem")
+						}
 					}
 				}
 			}
-		}
+		}()
 
 	}
 }
