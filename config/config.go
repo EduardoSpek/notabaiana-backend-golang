@@ -3,7 +3,7 @@ package config
 var (
 	// Suamusica_api_version is the version of the Suamusica API
 	Suamusica_UrlSite            = "https://suamusica.com.br"
-	Suamusica_api_version string = "1023"
+	Suamusica_api_version string = "1025"
 
 	//Dimensions of the banners
 	Banner_pc_dimensions     = [2]int{1300, 190}
