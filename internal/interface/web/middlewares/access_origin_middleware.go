@@ -11,7 +11,6 @@ func AccessOriginMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		allowedOrigins := []string{
-			"http://localhost:8080",
 			"https://notabaiana.com.br",
 			"https://www.notabaiana.com.br",
 		}
