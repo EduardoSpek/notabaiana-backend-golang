@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
@@ -156,6 +157,10 @@ func (u *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&userInput)
 	if err != nil {
 		ResponseJson(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if userInput.Key != os.Getenv("KEY") {
 		return
 	}
 

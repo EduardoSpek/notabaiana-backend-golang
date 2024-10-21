@@ -30,6 +30,7 @@ type UserInput struct {
 	Email    string
 	Password string
 	Admin    bool
+	Key      string
 }
 
 func NewUser(user UserInput) *User {
