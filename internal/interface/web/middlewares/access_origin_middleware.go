@@ -18,6 +18,7 @@ func AccessOriginMiddleware(next http.Handler) http.Handler {
 			origin = r.Header.Get("Referer")
 		}
 
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		allowed := true
 		if origin != "" {
 			for _, allowedOrigin := range allowedOrigins {
