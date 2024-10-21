@@ -19,7 +19,7 @@ func AccessOriginMiddleware(next http.Handler) http.Handler {
 			origin = r.Header.Get("Referer")
 		}
 
-		fmt.Println(origin)
+		fmt.Println("ORIGEM: ", origin)
 
 		allowed := false
 		if origin != "" {
