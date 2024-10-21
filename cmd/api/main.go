@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -16,16 +15,15 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
-	"github.com/joho/godotenv"
 )
 
 func init() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
-	}
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
+	// }
 
-	err = os.MkdirAll("files", os.ModePerm)
+	err := os.MkdirAll("files", os.ModePerm)
 	if err != nil {
 		fmt.Println("Erro ao criar pasta:", err)
 		return

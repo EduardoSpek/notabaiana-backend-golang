@@ -25,7 +25,5 @@ WORKDIR /root/
 # Copiar o executável do estágio de construção
 COPY --from=builder /app/main .
 
-COPY .env .
-
 # Comando para executar a aplicação
 CMD ["./main"]
