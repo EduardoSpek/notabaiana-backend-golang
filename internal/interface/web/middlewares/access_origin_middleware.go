@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -19,9 +18,7 @@ func AccessOriginMiddleware(next http.Handler) http.Handler {
 			origin = r.Header.Get("Referer")
 		}
 
-		fmt.Println("ORIGEM: ", origin)
-
-		allowed := false
+		allowed := true
 		if origin != "" {
 			for _, allowedOrigin := range allowedOrigins {
 				if strings.HasPrefix(origin, allowedOrigin) {
