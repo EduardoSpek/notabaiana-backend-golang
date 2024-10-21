@@ -18,10 +18,6 @@ import (
 )
 
 func init() {
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	// 	log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
-	// }
 
 	err := os.MkdirAll("files", os.ModePerm)
 	if err != nil {
