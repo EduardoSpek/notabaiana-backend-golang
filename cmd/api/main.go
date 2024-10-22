@@ -5,11 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/adapter"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
-	usecase "github.com/eduardospek/notabaiana-backend-golang/internal/domain/usecase/download"
 	database "github.com/eduardospek/notabaiana-backend-golang/internal/infra/database/postgres"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/infra/notifications"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web"
@@ -56,40 +54,40 @@ var (
 		"https://www.bahianoticias.com.br/municipios",
 	}
 
-	list_downloads = []string{
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/pagode/recentes.json?category=pagode&category=recentes",
-		// // // "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/swingueira/recentes.json?category=swingueira&category=recentes",
-		// // // "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/arrocha/recentes.json?category=arrocha&category=recentes",
-		// // // "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/samba/recentes.json?category=samba&category=recentes",
-		// // // "https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/sertanejo/recentes.json?category=sertanejo&category=recentes",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/pagode.json?slug=cds&slug=ouvidas&slug=dia&slug=pagode",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/swingueira.json?slug=cds&slug=ouvidas&slug=dia&slug=swingueira",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/samba.json?slug=cds&slug=ouvidas&slug=dia&slug=samba",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/forro.json?slug=cds&slug=ouvidas&slug=dia&slug=forro",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/axe.json?slug=cds&slug=ouvidas&slug=dia&slug=axe",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/arrocha.json?slug=cds&slug=ouvidas&slug=dia&slug=arrocha",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/piseiro.json?slug=cds&slug=ouvidas&slug=dia&slug=piseiro",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/arrochadeira.json?slug=cds&slug=ouvidas&slug=dia&slug=arrochadeira",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/funk.json?slug=cds&slug=ouvidas&slug=dia&slug=funk",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/reggae.json?slug=cds&slug=ouvidas&slug=dia&slug=reggae",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/pop.json?slug=cds&slug=ouvidas&slug=dia&slug=pop",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/eletronica.json?slug=cds&slug=ouvidas&slug=dia&slug=eletronica",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/mpb.json?slug=cds&slug=ouvidas&slug=dia&slug=mpb",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/sertanejo.json?slug=cds&slug=ouvidas&slug=dia&slug=sertanejo",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/rap-hip-hop.json?slug=cds&slug=ouvidas&slug=dia&slug=rap-hip-hop",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/rock.json?slug=cds&slug=ouvidas&slug=dia&slug=rock",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/brega.json?slug=cds&slug=ouvidas&slug=dia&slug=brega",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/gospel.json?slug=cds&slug=ouvidas&slug=dia&slug=gospel",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/brega-funk.json?slug=cds&slug=ouvidas&slug=dia&slug=brega-funk",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/variados.json?slug=cds&slug=ouvidas&slug=dia&slug=variados",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/estourados.json?slug=estourados",
-		"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/cds-recomendados.json",
-	}
+	// list_downloads = []string{
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/pagode/recentes.json?category=pagode&category=recentes",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/swingueira/recentes.json?category=swingueira&category=recentes",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/arrocha/recentes.json?category=arrocha&category=recentes",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/samba/recentes.json?category=samba&category=recentes",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/categorias/sertanejo/recentes.json?category=sertanejo&category=recentes",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/pagode.json?slug=cds&slug=ouvidas&slug=dia&slug=pagode",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/swingueira.json?slug=cds&slug=ouvidas&slug=dia&slug=swingueira",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/samba.json?slug=cds&slug=ouvidas&slug=dia&slug=samba",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/forro.json?slug=cds&slug=ouvidas&slug=dia&slug=forro",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/axe.json?slug=cds&slug=ouvidas&slug=dia&slug=axe",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/arrocha.json?slug=cds&slug=ouvidas&slug=dia&slug=arrocha",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/piseiro.json?slug=cds&slug=ouvidas&slug=dia&slug=piseiro",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/arrochadeira.json?slug=cds&slug=ouvidas&slug=dia&slug=arrochadeira",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/funk.json?slug=cds&slug=ouvidas&slug=dia&slug=funk",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/reggae.json?slug=cds&slug=ouvidas&slug=dia&slug=reggae",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/pop.json?slug=cds&slug=ouvidas&slug=dia&slug=pop",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/eletronica.json?slug=cds&slug=ouvidas&slug=dia&slug=eletronica",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/mpb.json?slug=cds&slug=ouvidas&slug=dia&slug=mpb",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/sertanejo.json?slug=cds&slug=ouvidas&slug=dia&slug=sertanejo",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/rap-hip-hop.json?slug=cds&slug=ouvidas&slug=dia&slug=rap-hip-hop",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/rock.json?slug=cds&slug=ouvidas&slug=dia&slug=rock",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/brega.json?slug=cds&slug=ouvidas&slug=dia&slug=brega",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/gospel.json?slug=cds&slug=ouvidas&slug=dia&slug=gospel",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/brega-funk.json?slug=cds&slug=ouvidas&slug=dia&slug=brega-funk",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/cds/ouvidas/dia/variados.json?slug=cds&slug=ouvidas&slug=dia&slug=variados",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/top/estourados.json?slug=estourados",
+	// 	"https://suamusica.com.br/_next/data/webid-" + config.Suamusica_api_version + "/pt-BR/cds-recomendados.json",
+	// }
 )
 
 func main() {
 
-	cache := service.NewCache(30 * time.Minute)
+	cache := service.NewCache(5 * time.Minute)
 
 	//newsrepo := database.NewNewsSQLiteRepository()
 	//newsrepo := database.NewNewsMemoryRepository()
@@ -103,10 +101,10 @@ func main() {
 	copier_service := service.NewCopier(news_service, crawler_service)
 	crawler_controller := controllers.NewCrawlerController(copier_service)
 
-	download_repository := database.NewDownloadPostgresRepository(postgres)
-	copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
-	download_controller := controllers.NewDownloadController(download_repository, imagedownloader, cache)
-	downloadCleanUsecase := usecase.NewCleanDownloadUsecase(download_repository)
+	//download_repository := database.NewDownloadPostgresRepository(postgres)
+	//copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
+	//download_controller := controllers.NewDownloadController(download_repository, imagedownloader, cache)
+	//downloadCleanUsecase := usecase.NewCleanDownloadUsecase(download_repository)
 
 	news_controller := controllers.NewNewsController(news_service, cache)
 
@@ -140,10 +138,10 @@ func main() {
 	server.NewsController(news_controller)
 	server.BannerController(banner_controller)
 	server.ContactController(contact_controller)
-	server.DownloadController(download_controller)
+	//server.DownloadController(download_controller)
 
 	go copier_service.Start(list_pages, 6)
-	go copier_downloads.Start(&list_downloads, 30)
+	//go copier_downloads.Start(&list_downloads, 30)
 
 	//Função para gerar as top notícias a cada 60 minutos
 	go top_service.Start(60)
@@ -152,7 +150,7 @@ func main() {
 	go news_service.StartCleanNews(60 * 24)
 
 	//Função para limpar as downloads inativos
-	go downloadCleanUsecase.StartCleanDownloads(60 * 24)
+	//go downloadCleanUsecase.StartCleanDownloads(60 * 24)
 
 	server.Start()
 
