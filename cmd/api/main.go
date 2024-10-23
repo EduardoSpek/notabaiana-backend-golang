@@ -89,8 +89,6 @@ func main() {
 
 	cache := service.NewCache(5 * time.Minute)
 
-	//newsrepo := database.NewNewsSQLiteRepository()
-	//newsrepo := database.NewNewsMemoryRepository()
 	postgres := adapter.NewPostgresAdapter()
 	newsrepo := database.NewNewsPostgresRepository(postgres)
 	imagedownloader := utils.NewImgDownloader()
