@@ -44,5 +44,16 @@ func (repo *PostgresAdapter) Connect() (*gorm.DB, error) {
 
 	db.AutoMigrate(&entity.News{}, &entity.Top{}, &entity.Hits{}, &entity.User{}, &entity.Banner{}, &entity.Contact{}, &entity.Download{}, &entity.Music{})
 
+	sqlDB, err := db.DB()
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	sqlDB.SetMaxOpenConns(10) // número máximo de conexões abertas
+	sqlDB.SetMaxIdleConns(5)  // número máximo de conexões ociosas
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
 	return db, nil
 }
