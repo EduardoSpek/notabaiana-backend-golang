@@ -32,7 +32,10 @@ func (repo *PostgresAdapter) Connect() (*gorm.DB, error) {
 		},
 	)
 
-	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{Logger: newLogger})
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{
+		Logger:      newLogger,
+		PrepareStmt: false,
+	})
 
 	if err != nil {
 		fmt.Println(err)
