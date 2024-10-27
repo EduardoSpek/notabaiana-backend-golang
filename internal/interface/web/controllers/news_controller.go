@@ -462,16 +462,16 @@ func (c *NewsController) News(w http.ResponseWriter, r *http.Request) {
 		limit = 10
 	}
 
-	cacheString := fmt.Sprintf("news:%d:%d", page, limit)
+	// cacheString := fmt.Sprintf("news:%d:%d", page, limit)
 
-	if valor, existe := c.Cache.Get(cacheString); existe {
-		ResponseJson(w, valor, http.StatusOK)
-		return
-	}
+	// if valor, existe := c.Cache.Get(cacheString); existe {
+	// 	ResponseJson(w, valor, http.StatusOK)
+	// 	return
+	// }
 
 	listnews := c.news_service.FindAllNews(page, limit)
 
-	c.Cache.Set(cacheString, listnews)
+	// c.Cache.Set(cacheString, listnews)
 
 	ResponseJson(w, listnews, http.StatusOK)
 
@@ -488,16 +488,16 @@ func (c *NewsController) NewsCategory(w http.ResponseWriter, r *http.Request) {
 		page = 1
 	}
 
-	cacheString := fmt.Sprintf("newsCategory:%d:%s", page, category)
+	// cacheString := fmt.Sprintf("newsCategory:%d:%s", page, category)
 
-	if valor, existe := c.Cache.Get(cacheString); existe {
-		ResponseJson(w, valor, http.StatusOK)
-		return
-	}
+	// if valor, existe := c.Cache.Get(cacheString); existe {
+	// 	ResponseJson(w, valor, http.StatusOK)
+	// 	return
+	// }
 
 	listnews := c.news_service.FindNewsCategory(category, page)
 
-	c.Cache.Set(cacheString, listnews)
+	// c.Cache.Set(cacheString, listnews)
 
 	ResponseJson(w, listnews, http.StatusOK)
 
