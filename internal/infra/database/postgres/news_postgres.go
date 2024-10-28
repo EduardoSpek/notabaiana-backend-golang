@@ -57,7 +57,7 @@ func (repo *NewsPostgresRepository) NewsMake() (*entity.News, error) {
 
 	var news *entity.News
 
-	result := repo.db.Model(&entity.News{}).Where("((visible = true AND category='famosos' AND topstory = false) OR (topstory = true AND visible = true)) AND Make = false AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("created_at DESC").Limit(1).First(&news)
+	result := tx.Model(&entity.News{}).Where("((visible = true AND category='famosos' AND topstory = false) OR (topstory = true AND visible = true)) AND Make = false AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("created_at DESC").Limit(1).First(&news)
 
 	if result.Error != nil {
 		return &entity.News{}, result.Error
@@ -83,11 +83,11 @@ func (repo *NewsPostgresRepository) Create(news *entity.News) (*entity.News, err
 	defer tx.Rollback()
 
 	var n *entity.News
-	nresult := repo.db.Model(&entity.News{}).Where("visible = true AND title = ?", news.Title).First(&n)
+	nresult := tx.Model(&entity.News{}).Where("visible = true AND title = ?", news.Title).First(&n)
 
 	if nresult.Error != nil {
 
-		result := repo.db.Create(&news)
+		result := tx.Create(&news)
 
 		if result.Error != nil {
 			tx.Rollback()
@@ -108,7 +108,7 @@ func (repo *NewsPostgresRepository) Update(news *entity.News) (*entity.News, err
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	result := repo.db.Model(&news).Updates(map[string]interface{}{
+	result := tx.Model(&news).Updates(map[string]interface{}{
 		"title":      news.Title,
 		"title_ai":   news.TitleAi,
 		"text":       news.Text,
@@ -156,7 +156,7 @@ func (repo *NewsPostgresRepository) AdminGetBySlug(slug string) (*entity.News, e
 	defer tx.Rollback()
 
 	var news *entity.News
-	result := repo.db.Model(&entity.News{}).Where("slug = ?", slug).First(&news)
+	result := tx.Model(&entity.News{}).Where("slug = ?", slug).First(&news)
 
 	if result.Error != nil {
 		return &entity.News{}, result.Error
@@ -164,7 +164,7 @@ func (repo *NewsPostgresRepository) AdminGetBySlug(slug string) (*entity.News, e
 
 	news.Views += 1
 
-	result = repo.db.Save(&news)
+	result = tx.Save(&news)
 
 	if result.Error != nil {
 		return &entity.News{}, result.Error
@@ -183,7 +183,7 @@ func (repo *NewsPostgresRepository) GetBySlug(slug string) (*entity.News, error)
 	defer tx.Rollback()
 
 	var news *entity.News
-	result := repo.db.Model(&entity.News{}).Where("visible = true AND slug = ?", slug).First(&news)
+	result := tx.Model(&entity.News{}).Where("visible = true AND slug = ?", slug).First(&news)
 
 	if result.Error != nil {
 		return &entity.News{}, result.Error
@@ -191,7 +191,7 @@ func (repo *NewsPostgresRepository) GetBySlug(slug string) (*entity.News, error)
 
 	news.Views += 1
 
-	result = repo.db.Save(&news)
+	result = tx.Save(&news)
 
 	if result.Error != nil {
 		return &entity.News{}, result.Error
@@ -271,10 +271,10 @@ func (repo *NewsPostgresRepository) AdminFindAll(page, limit int) ([]*entity.New
 	defer tx.Rollback()
 
 	var news []*entity.News
-	repo.db.Model(&entity.News{}).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+	tx.Model(&entity.News{}).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
-	if repo.db.Error != nil {
-		return []*entity.News{}, repo.db.Error
+	if tx.Error != nil {
+		return []*entity.News{}, tx.Error
 	}
 
 	tx.Commit()
@@ -292,10 +292,10 @@ func (repo *NewsPostgresRepository) FindAll(page, limit int) ([]*entity.News, er
 	defer tx.Rollback()
 
 	var news []*entity.News
-	repo.db.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+	tx.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
-	if repo.db.Error != nil {
-		return []*entity.News{}, repo.db.Error
+	if tx.Error != nil {
+		return []*entity.News{}, tx.Error
 	}
 
 	tx.Commit()
@@ -380,10 +380,10 @@ func (repo *NewsPostgresRepository) ClearImagePath(id string) error {
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	repo.db.Model(&entity.News{}).Where("id = ?", id).Update("image", "")
+	tx.Model(&entity.News{}).Where("id = ?", id).Update("image", "")
 
-	if repo.db.Error != nil {
-		return repo.db.Error
+	if tx.Error != nil {
+		return tx.Error
 	}
 
 	tx.Commit()
@@ -398,9 +398,9 @@ func (repo *NewsPostgresRepository) NewsTruncateTable() error {
 	tx := repo.db.Begin()
 	defer tx.Rollback()
 
-	repo.db.Exec("TRUNCATE TABLE news")
+	tx.Exec("TRUNCATE TABLE news")
 
-	if repo.db.Error != nil {
+	if tx.Error != nil {
 		return nil
 	}
 
@@ -435,13 +435,13 @@ func (repo *NewsPostgresRepository) Delete(id string) error {
 	defer tx.Rollback()
 
 	var news *entity.News
-	newsSelected := repo.db.Model(&entity.News{}).Where("id = ?", id).First(&news)
+	newsSelected := tx.Model(&entity.News{}).Where("id = ?", id).First(&news)
 
 	if newsSelected.Error != nil {
 		return ErrNewsNotFound
 	}
 
-	repo.db.Unscoped().Delete(news)
+	tx.Unscoped().Delete(news)
 
 	tx.Commit()
 
@@ -459,13 +459,13 @@ func (repo *NewsPostgresRepository) DeleteAll(news []*entity.News) error {
 	for _, b := range news {
 
 		var news *entity.News
-		newsSelected := repo.db.Model(&entity.News{}).Where("id = ?", b.ID).First(&news)
+		newsSelected := tx.Model(&entity.News{}).Where("id = ?", b.ID).First(&news)
 
 		if newsSelected.Error != nil {
 			return ErrNewsNotFound
 		}
 
-		repo.db.Unscoped().Delete(news)
+		tx.Unscoped().Delete(news)
 
 	}
 
