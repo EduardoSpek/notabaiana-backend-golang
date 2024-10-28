@@ -93,7 +93,12 @@ func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
-	postgres := adapter.NewPostgresAdapter()
+	postgres, err := adapter.NewPostgresAdapter()
+
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+
 	newsrepo := database.NewNewsPostgresRepository(postgres)
 	imagedownloader := utils.NewImgDownloader()
 	hitrepo := database.NewHitsPostgresRepository(postgres)
