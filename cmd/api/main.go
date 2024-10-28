@@ -99,6 +99,8 @@ func main() {
 		logger.Fatal(err.Error())
 	}
 
+	defer postgres.CloseDB()
+
 	newsrepo := database.NewNewsPostgresRepository(postgres)
 	imagedownloader := utils.NewImgDownloader()
 	hitrepo := database.NewHitsPostgresRepository(postgres)

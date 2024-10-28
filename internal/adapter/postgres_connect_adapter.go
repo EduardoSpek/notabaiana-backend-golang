@@ -25,6 +25,16 @@ func NewPostgresAdapter() (*PostgresAdapter, error) {
 	return adapter, nil
 }
 
+func (repo *PostgresAdapter) CloseDB() {
+	db, err := repo.db.DB()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	db.Close()
+}
+
 func (repo *PostgresAdapter) GetDB() *gorm.DB {
 	return repo.db
 }
