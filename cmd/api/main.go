@@ -13,6 +13,7 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/controllers"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
+	"go.uber.org/zap"
 )
 
 func init() {
@@ -89,6 +90,9 @@ func main() {
 
 	cache := service.NewCache(5 * time.Minute)
 
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
 	postgres := adapter.NewPostgresAdapter()
 	newsrepo := database.NewNewsPostgresRepository(postgres)
 	imagedownloader := utils.NewImgDownloader()
@@ -114,7 +118,7 @@ func main() {
 	user_service := service.NewUserService(user_repo)
 	user_controller := controllers.NewUserController(user_service)
 
-	banner_repo := database.NewBannerPostgresRepository(postgres)
+	banner_repo, _ := database.NewBannerPostgresRepository(postgres, logger)
 	banner_service := service.NewBannerService(banner_repo, imagedownloader)
 	banner_controller := controllers.NewBannerController(banner_service)
 

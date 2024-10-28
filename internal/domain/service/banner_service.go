@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"io"
@@ -23,8 +24,8 @@ func NewBannerService(banner_repository port.BannerRepository, downloader port.I
 	return &BannerService{BannerRepository: banner_repository, imagedownloader: downloader}
 }
 
-func (bs *BannerService) FindBanner(id string) (entity.BannerDTO, error) {
-	banner, err := bs.BannerRepository.GetByID(id)
+func (bs *BannerService) FindBanner(ctx context.Context, id string) (entity.BannerDTO, error) {
+	banner, err := bs.BannerRepository.GetByID(ctx, id)
 
 	if err != nil {
 		return entity.BannerDTO{}, err
@@ -32,8 +33,8 @@ func (bs *BannerService) FindBanner(id string) (entity.BannerDTO, error) {
 	return banner, nil
 }
 
-func (bs *BannerService) AdminDeleteAll(banners []entity.BannerDTO) error {
-	err := bs.BannerRepository.DeleteAll(banners)
+func (bs *BannerService) AdminDeleteAll(ctx context.Context, banners []entity.BannerDTO) error {
+	err := bs.BannerRepository.DeleteAll(ctx, banners)
 
 	if err != nil {
 		return err
@@ -42,8 +43,8 @@ func (bs *BannerService) AdminDeleteAll(banners []entity.BannerDTO) error {
 	return nil
 }
 
-func (bs *BannerService) Delete(id string) error {
-	err := bs.BannerRepository.Delete(id)
+func (bs *BannerService) Delete(ctx context.Context, id string) error {
+	err := bs.BannerRepository.Delete(ctx, id)
 
 	if err != nil {
 		return err
@@ -51,9 +52,9 @@ func (bs *BannerService) Delete(id string) error {
 	return nil
 }
 
-func (bs *BannerService) AdminFindAll() (interface{}, error) {
+func (bs *BannerService) AdminFindAll(ctx context.Context) (interface{}, error) {
 
-	banners, err := bs.BannerRepository.AdminFindAll()
+	banners, err := bs.BannerRepository.AdminFindAll(ctx)
 
 	if err != nil {
 		return nil, err
@@ -69,9 +70,9 @@ func (bs *BannerService) AdminFindAll() (interface{}, error) {
 
 }
 
-func (bs *BannerService) FindAll() (interface{}, error) {
+func (bs *BannerService) FindAll(ctx context.Context) (interface{}, error) {
 
-	banners, err := bs.BannerRepository.FindAll()
+	banners, err := bs.BannerRepository.FindAll(ctx)
 
 	if err != nil {
 		return nil, err
@@ -87,9 +88,9 @@ func (bs *BannerService) FindAll() (interface{}, error) {
 
 }
 
-func (bs *BannerService) UpdateBannerUsingTheForm(images []multipart.File, banner entity.BannerDTO) (entity.BannerDTO, error) {
+func (bs *BannerService) UpdateBannerUsingTheForm(ctx context.Context, images []multipart.File, banner entity.BannerDTO) (entity.BannerDTO, error) {
 
-	currentBanner, err := bs.BannerRepository.GetByID(banner.ID)
+	currentBanner, err := bs.BannerRepository.GetByID(ctx, banner.ID)
 
 	if err != nil {
 		return entity.BannerDTO{}, err
@@ -113,7 +114,7 @@ func (bs *BannerService) UpdateBannerUsingTheForm(images []multipart.File, banne
 
 	bannerWithImages := bs.SaveImages(images, *newbanner)
 
-	bannerCreated, err := bs.BannerRepository.Update(bannerWithImages)
+	bannerCreated, err := bs.BannerRepository.Update(ctx, bannerWithImages)
 
 	if err != nil {
 		return entity.BannerDTO{}, err
@@ -122,7 +123,7 @@ func (bs *BannerService) UpdateBannerUsingTheForm(images []multipart.File, banne
 	return bannerCreated, nil
 }
 
-func (bs *BannerService) CreateBannerUsingTheForm(images []multipart.File, banner entity.BannerDTO) (entity.BannerDTO, error) {
+func (bs *BannerService) CreateBannerUsingTheForm(ctx context.Context, images []multipart.File, banner entity.BannerDTO) (entity.BannerDTO, error) {
 	newbanner := entity.NewBanner(banner)
 	_, err := newbanner.Validations()
 
@@ -132,7 +133,7 @@ func (bs *BannerService) CreateBannerUsingTheForm(images []multipart.File, banne
 
 	bannerWithImages := bs.SaveImages(images, *newbanner)
 
-	bannerCreated, err := bs.BannerRepository.Create(bannerWithImages)
+	bannerCreated, err := bs.BannerRepository.Create(ctx, bannerWithImages)
 
 	if err != nil {
 		return entity.BannerDTO{}, err

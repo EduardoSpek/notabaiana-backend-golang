@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -8,165 +9,254 @@ import (
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/port"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/utils"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 var (
-	ErrBannerNotFound = errors.New("banner não encontrado")
+	ErrBannerNotFound    = errors.New("banner não encontrado")
+	ErrTransactionFailed = errors.New("falha na transação")
+	ErrDatabaseOperation = errors.New("falha na operação do banco de dados")
 )
 
+// BannerPostgresRepository implementa as operações de banco de dados para Banner
 type BannerPostgresRepository struct {
-	db    *gorm.DB
-	mutex sync.RWMutex
+	db     *gorm.DB
+	mutex  sync.RWMutex
+	logger *zap.Logger
 }
 
-func NewBannerPostgresRepository(db_adapter port.DBAdapter) *BannerPostgresRepository {
-	db, _ := db_adapter.Connect()
-	return &BannerPostgresRepository{db: db}
+// NewBannerPostgresRepository cria uma nova instância do repositório
+func NewBannerPostgresRepository(db_adapter port.DBAdapter, logger *zap.Logger) (*BannerPostgresRepository, error) {
+	db, err := db_adapter.Connect()
+	if err != nil {
+		return nil, fmt.Errorf("falha ao conectar ao banco de dados: %w", err)
+	}
+
+	return &BannerPostgresRepository{
+		db:     db,
+		logger: logger,
+	}, nil
 }
 
-func (repo *BannerPostgresRepository) AdminFindAll() ([]entity.BannerDTO, error) {
+// beginTx inicia uma nova transação com tratamento de erro apropriado
+func (repo *BannerPostgresRepository) beginTx() (*gorm.DB, error) {
+	tx := repo.db.Begin()
+	if tx.Error != nil {
+		return nil, fmt.Errorf("%w: %v", ErrTransactionFailed, tx.Error)
+	}
+	return tx, nil
+}
+
+// deleteImages remove as imagens associadas a um banner
+func (repo *BannerPostgresRepository) deleteImages(banner entity.Banner) {
+	images := map[string]string{
+		"Image1": banner.Image1,
+		"Image2": banner.Image2,
+		"Image3": banner.Image3,
+	}
+
+	for name, path := range images {
+		if path != "" {
+			if !utils.RemoveImage("." + path) {
+				repo.logger.Warn("falha ao deletar imagem",
+					zap.String("image", name),
+					zap.String("path", path))
+			}
+		}
+	}
+}
+
+// AdminFindAll retorna todos os banners para administração
+func (repo *BannerPostgresRepository) AdminFindAll(ctx context.Context) ([]entity.BannerDTO, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 
-	tx := repo.db.Begin()
-	defer tx.Rollback()
-
-	var banners []entity.BannerDTO
-	list := repo.db.Model(&entity.Banner{}).Order("created_at DESC").Find(&banners)
-
-	if list.Error != nil {
-		return []entity.BannerDTO{}, list.Error
+	tx, err := repo.beginTx()
+	if err != nil {
+		return nil, err
 	}
 
-	tx.Commit()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
-	return banners, nil
-}
-
-func (repo *BannerPostgresRepository) FindAll() ([]entity.BannerDTO, error) {
-	repo.mutex.RLock()
-	defer repo.mutex.RUnlock()
-
-	tx := repo.db.Begin()
-	defer tx.Rollback()
-
-	var banners []entity.BannerDTO
-	list := repo.db.Model(&entity.Banner{}).Where("visible = true").Order("RANDOM()").Find(&banners)
-
-	if list.Error != nil {
-		return []entity.BannerDTO{}, list.Error
-	}
-
-	tx.Commit()
-
-	return banners, nil
-}
-
-func (repo *BannerPostgresRepository) GetByID(id string) (entity.BannerDTO, error) {
-
-	repo.mutex.RLock()
-	defer repo.mutex.RUnlock()
-
-	tx := repo.db.Begin()
-	defer tx.Rollback()
-
-	var banner entity.Banner
-	bannerSelected := repo.db.Model(&entity.Banner{}).Where("id = ?", id).First(&banner)
-
-	if bannerSelected.Error != nil {
-		return entity.BannerDTO{}, ErrBannerNotFound
-	}
-
-	tx.Commit()
-
-	dto := entity.BannerDTO{
-		ID:            banner.ID,
-		Title:         banner.Title,
-		Link:          banner.Link,
-		Html:          banner.Html,
-		Image1:        banner.Image1,
-		Image2:        banner.Image2,
-		Image3:        banner.Image3,
-		Tag:           banner.Tag,
-		Visible:       banner.Visible,
-		VisibleImage1: banner.VisibleImage1,
-		VisibleImage2: banner.VisibleImage2,
-		VisibleImage3: banner.VisibleImage3,
-	}
-
-	return dto, nil
-}
-
-func (repo *BannerPostgresRepository) GetByTag(tag string) (entity.BannerDTO, error) {
-
-	repo.mutex.RLock()
-	defer repo.mutex.RUnlock()
-
-	tx := repo.db.Begin()
-	defer tx.Rollback()
-
-	var banner entity.Banner
-	repo.db.Model(&entity.Banner{}).Where("tag = ?", tag).First(&banner)
-
-	if repo.db.Error != nil {
-		return entity.BannerDTO{}, ErrBannerNotFound
-	}
-
-	tx.Commit()
-
-	dto := entity.BannerDTO{
-		ID:     banner.ID,
-		Title:  banner.Title,
-		Link:   banner.Link,
-		Html:   banner.Html,
-		Image1: banner.Image1,
-		Image2: banner.Image2,
-		Image3: banner.Image3,
-		Tag:    banner.Tag,
-	}
-
-	return dto, nil
-}
-
-func (repo *BannerPostgresRepository) Create(banner entity.Banner) (entity.BannerDTO, error) {
-	repo.mutex.Lock()
-	defer repo.mutex.Unlock()
-
-	tx := repo.db.Begin()
-	defer tx.Rollback()
-
-	result := repo.db.Create(&banner)
-
-	if result.Error != nil {
+	var banners []entity.Banner
+	if err := tx.WithContext(ctx).
+		Model(&entity.Banner{}).
+		Order("created_at DESC").
+		Find(&banners).Error; err != nil {
 		tx.Rollback()
-		return entity.BannerDTO{}, result.Error
+		return nil, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
 	}
 
-	tx.Commit()
-
-	dto := entity.BannerDTO{
-		ID:     banner.ID,
-		Title:  banner.Title,
-		Link:   banner.Link,
-		Html:   banner.Html,
-		Image1: banner.Image1,
-		Image2: banner.Image2,
-		Image3: banner.Image3,
-		Tag:    banner.Tag,
+	if err := tx.Commit().Error; err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrTransactionFailed, err)
 	}
 
-	return dto, nil
+	dtos := make([]entity.BannerDTO, len(banners))
+	for i, banner := range banners {
+		dtos[i] = banner.ToDTO()
+	}
+
+	return dtos, nil
 }
 
-func (repo *BannerPostgresRepository) Update(banner entity.Banner) (entity.BannerDTO, error) {
+// FindAll retorna todos os banners visíveis em ordem aleatória
+func (repo *BannerPostgresRepository) FindAll(ctx context.Context) ([]entity.BannerDTO, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	tx, err := repo.beginTx()
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var banners []entity.Banner
+	if err := tx.WithContext(ctx).
+		Model(&entity.Banner{}).
+		Where("visible = true").
+		Order("RANDOM()").
+		Find(&banners).Error; err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrTransactionFailed, err)
+	}
+
+	dtos := make([]entity.BannerDTO, len(banners))
+	for i, banner := range banners {
+		dtos[i] = banner.ToDTO()
+	}
+
+	return dtos, nil
+}
+
+// GetByID retorna um banner específico por ID
+func (repo *BannerPostgresRepository) GetByID(ctx context.Context, id string) (entity.BannerDTO, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	tx, err := repo.beginTx()
+	if err != nil {
+		return entity.BannerDTO{}, err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var banner entity.Banner
+	if err := tx.WithContext(ctx).
+		Model(&entity.Banner{}).
+		Where("id = ?", id).
+		First(&banner).Error; err != nil {
+		tx.Rollback()
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return entity.BannerDTO{}, ErrBannerNotFound
+		}
+		return entity.BannerDTO{}, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return entity.BannerDTO{}, fmt.Errorf("%w: %v", ErrTransactionFailed, err)
+	}
+
+	return banner.ToDTO(), nil
+}
+
+// GetByTag retorna um banner específico por tag
+func (repo *BannerPostgresRepository) GetByTag(ctx context.Context, tag string) (entity.BannerDTO, error) {
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
+
+	tx, err := repo.beginTx()
+	if err != nil {
+		return entity.BannerDTO{}, err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var banner entity.Banner
+	if err := tx.WithContext(ctx).
+		Model(&entity.Banner{}).
+		Where("tag = ?", tag).
+		First(&banner).Error; err != nil {
+		tx.Rollback()
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return entity.BannerDTO{}, ErrBannerNotFound
+		}
+		return entity.BannerDTO{}, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return entity.BannerDTO{}, fmt.Errorf("%w: %v", ErrTransactionFailed, err)
+	}
+
+	return banner.ToDTO(), nil
+}
+
+// Create cria um novo banner
+func (repo *BannerPostgresRepository) Create(ctx context.Context, banner entity.Banner) (entity.BannerDTO, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
 
-	tx := repo.db.Begin()
-	defer tx.Rollback()
+	tx, err := repo.beginTx()
+	if err != nil {
+		return entity.BannerDTO{}, err
+	}
 
-	result := repo.db.Model(&banner).Updates(map[string]interface{}{
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.WithContext(ctx).Create(&banner).Error; err != nil {
+		tx.Rollback()
+		return entity.BannerDTO{}, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return entity.BannerDTO{}, fmt.Errorf("%w: %v", ErrTransactionFailed, err)
+	}
+
+	return banner.ToDTO(), nil
+}
+
+// Update atualiza um banner existente
+func (repo *BannerPostgresRepository) Update(ctx context.Context, banner entity.Banner) (entity.BannerDTO, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx, err := repo.beginTx()
+	if err != nil {
+		return entity.BannerDTO{}, err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	updates := map[string]interface{}{
 		"title":          banner.Title,
 		"link":           banner.Link,
 		"html":           banner.Html,
@@ -179,108 +269,96 @@ func (repo *BannerPostgresRepository) Update(banner entity.Banner) (entity.Banne
 		"visible_image2": banner.VisibleImage2,
 		"visible_image3": banner.VisibleImage3,
 		"updated_at":     banner.UpdatedAt,
-	})
+	}
 
-	if result.Error != nil {
+	if err := tx.WithContext(ctx).
+		Model(&banner).
+		Updates(updates).Error; err != nil {
 		tx.Rollback()
-		return entity.BannerDTO{}, result.Error
+		return entity.BannerDTO{}, fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
 	}
 
-	tx.Commit()
-
-	dto := entity.BannerDTO{
-		ID:     banner.ID,
-		Title:  banner.Title,
-		Link:   banner.Link,
-		Html:   banner.Html,
-		Image1: banner.Image1,
-		Image2: banner.Image2,
-		Image3: banner.Image3,
-		Tag:    banner.Tag,
+	if err := tx.Commit().Error; err != nil {
+		return entity.BannerDTO{}, fmt.Errorf("%w: %v", ErrTransactionFailed, err)
 	}
 
-	return dto, nil
+	return banner.ToDTO(), nil
 }
 
-func (repo *BannerPostgresRepository) Delete(id string) error {
+// Delete remove um banner específico
+func (repo *BannerPostgresRepository) Delete(ctx context.Context, id string) error {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
 
-	repo.mutex.RLock()
-	defer repo.mutex.RUnlock()
+	tx, err := repo.beginTx()
+	if err != nil {
+		return err
+	}
 
-	tx := repo.db.Begin()
-	defer tx.Rollback()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	var banner entity.Banner
-	bannerSelected := repo.db.Model(&entity.Banner{}).Where("id = ?", id).First(&banner)
-
-	if bannerSelected.Error != nil {
-		return ErrBannerNotFound
-	}
-
-	del1 := utils.RemoveImage("." + banner.Image1)
-
-	if !del1 {
-		fmt.Println("Imagem 1 não deletada")
-	}
-
-	del2 := utils.RemoveImage("." + banner.Image2)
-
-	if !del2 {
-		fmt.Println("Imagem 2 não deletada")
-	}
-
-	del3 := utils.RemoveImage("." + banner.Image3)
-
-	if !del3 {
-		fmt.Println("Imagem 3 não deletada")
-	}
-	repo.db.Unscoped().Delete(banner)
-
-	tx.Commit()
-
-	return nil
-}
-
-func (repo *BannerPostgresRepository) DeleteAll(banners []entity.BannerDTO) error {
-
-	repo.mutex.RLock()
-	defer repo.mutex.RUnlock()
-
-	tx := repo.db.Begin()
-	defer tx.Rollback()
-
-	for _, b := range banners {
-
-		var banner entity.Banner
-		bannerSelected := repo.db.Model(&entity.Banner{}).Where("id = ?", b.ID).First(&banner)
-
-		if bannerSelected.Error != nil {
+	if err := tx.WithContext(ctx).
+		Model(&entity.Banner{}).
+		Where("id = ?", id).
+		First(&banner).Error; err != nil {
+		tx.Rollback()
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ErrBannerNotFound
 		}
-
-		del1 := utils.RemoveImage("." + banner.Image1)
-
-		if !del1 {
-			fmt.Println("Imagem 1 não deletada")
-		}
-
-		del2 := utils.RemoveImage("." + banner.Image2)
-
-		if !del2 {
-			fmt.Println("Imagem 2 não deletada")
-		}
-
-		del3 := utils.RemoveImage("." + banner.Image3)
-
-		if !del3 {
-			fmt.Println("Imagem 3 não deletada")
-		}
-
-		repo.db.Unscoped().Delete(banner)
-
+		return fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
 	}
 
-	tx.Commit()
+	repo.deleteImages(banner)
 
-	return nil
+	if err := tx.WithContext(ctx).Unscoped().Delete(&banner).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+	}
+
+	return tx.Commit().Error
+}
+
+// DeleteAll remove múltiplos banners
+func (repo *BannerPostgresRepository) DeleteAll(ctx context.Context, banners []entity.BannerDTO) error {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx, err := repo.beginTx()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for _, bannerDTO := range banners {
+		var banner entity.Banner
+		if err := tx.WithContext(ctx).
+			Model(&entity.Banner{}).
+			Where("id = ?", bannerDTO.ID).
+			First(&banner).Error; err != nil {
+			tx.Rollback()
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrBannerNotFound
+			}
+			return fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+		}
+
+		repo.deleteImages(banner)
+
+		if err := tx.WithContext(ctx).Unscoped().Delete(&banner).Error; err != nil {
+			tx.Rollback()
+			return fmt.Errorf("%w: %v", ErrDatabaseOperation, err)
+		}
+	}
+
+	return tx.Commit().Error
 }

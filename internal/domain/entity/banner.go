@@ -65,6 +65,23 @@ func NewBanner(banner BannerDTO) *Banner {
 	}
 }
 
+func (b *Banner) ToDTO() BannerDTO {
+	return BannerDTO{
+		ID:            b.ID,
+		Title:         b.Title,
+		Link:          b.Link,
+		Html:          b.Html,
+		Image1:        b.Image1,
+		Image2:        b.Image2,
+		Image3:        b.Image3,
+		Tag:           b.Tag,
+		Visible:       b.Visible,
+		VisibleImage1: b.VisibleImage1,
+		VisibleImage2: b.VisibleImage2,
+		VisibleImage3: b.VisibleImage3,
+	}
+}
+
 func UpdateBanner(banner BannerDTO) *Banner {
 
 	return &Banner{

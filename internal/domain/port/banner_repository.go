@@ -1,14 +1,18 @@
 package port
 
-import "github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+import (
+	"context"
+
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+)
 
 type BannerRepository interface {
-	Create(banner entity.Banner) (entity.BannerDTO, error)
-	Update(banner entity.Banner) (entity.BannerDTO, error)
-	GetByID(id string) (entity.BannerDTO, error)
-	GetByTag(tag string) (entity.BannerDTO, error)
-	FindAll() ([]entity.BannerDTO, error)
-	AdminFindAll() ([]entity.BannerDTO, error)
-	Delete(id string) error
-	DeleteAll(banners []entity.BannerDTO) error
+	Create(ctx context.Context, banner entity.Banner) (entity.BannerDTO, error)
+	Update(ctx context.Context, banner entity.Banner) (entity.BannerDTO, error)
+	GetByID(ctx context.Context, id string) (entity.BannerDTO, error)
+	GetByTag(ctx context.Context, tag string) (entity.BannerDTO, error)
+	FindAll(ctx context.Context) ([]entity.BannerDTO, error)
+	AdminFindAll(ctx context.Context) ([]entity.BannerDTO, error)
+	Delete(ctx context.Context, id string) error
+	DeleteAll(ctx context.Context, banners []entity.BannerDTO) error
 }

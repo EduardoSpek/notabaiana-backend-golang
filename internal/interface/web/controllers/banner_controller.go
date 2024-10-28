@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"mime/multipart"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/service"
@@ -37,7 +39,10 @@ func (bc *BannerController) AdminDeleteAllBanner(w http.ResponseWriter, r *http.
 		})
 	}
 
-	err = bc.banner_service.AdminDeleteAll(banners)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	err = bc.banner_service.AdminDeleteAll(ctx, banners)
 
 	if err != nil {
 		ResponseJson(w, err.Error(), http.StatusNotFound)
@@ -58,7 +63,10 @@ func (bc *BannerController) AdminBannerList(w http.ResponseWriter, r *http.Reque
 
 	var msg map[string]any
 
-	banners, err := bc.banner_service.AdminFindAll()
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	banners, err := bc.banner_service.AdminFindAll(ctx)
 
 	if err != nil {
 		msg = map[string]any{
@@ -78,7 +86,10 @@ func (bc *BannerController) BannerList(w http.ResponseWriter, r *http.Request) {
 
 	var msg map[string]any
 
-	banners, err := bc.banner_service.FindAll()
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	banners, err := bc.banner_service.FindAll(ctx)
 
 	if err != nil {
 		msg = map[string]any{
@@ -102,7 +113,10 @@ func (bc *BannerController) FindBanner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	banner, err := bc.banner_service.FindBanner(id)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	banner, err := bc.banner_service.FindBanner(ctx, id)
 
 	if err != nil {
 		msg = map[string]any{
@@ -138,7 +152,10 @@ func (bc *BannerController) DeleteBanner(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err = bc.banner_service.Delete(id)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	err = bc.banner_service.Delete(ctx, id)
 
 	if err != nil {
 		msg = map[string]any{
@@ -188,7 +205,10 @@ func (bc *BannerController) UpdateBannerUsingTheForm(w http.ResponseWriter, r *h
 		return
 	}
 
-	new, err := bc.banner_service.UpdateBannerUsingTheForm(images, bannerInput)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	new, err := bc.banner_service.UpdateBannerUsingTheForm(ctx, images, bannerInput)
 
 	if err != nil {
 		msg = map[string]any{
@@ -222,7 +242,10 @@ func (bc *BannerController) CreateBannerUsingTheForm(w http.ResponseWriter, r *h
 		return
 	}
 
-	new, err := bc.banner_service.CreateBannerUsingTheForm(images, bannerInput)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	new, err := bc.banner_service.CreateBannerUsingTheForm(ctx, images, bannerInput)
 
 	if err != nil {
 		msg = map[string]any{
