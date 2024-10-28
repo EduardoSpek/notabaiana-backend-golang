@@ -92,7 +92,10 @@ func TestContactService(t *testing.T) {
 		log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
 	}
 
-	postgres := adapter.NewPostgresAdapter()
+	postgres, err := adapter.NewPostgresAdapter()
+	if err != nil {
+		log.Fatalf("Erro ao conectar ao banco de dados: %v", err)
+	}
 	repo := database.NewContactPostgresRepository(postgres)
 	imagedownloader := utils.NewImgDownloader()
 	notifications := notifications.NewMailtrapEmailServer()

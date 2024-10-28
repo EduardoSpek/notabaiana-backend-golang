@@ -82,7 +82,10 @@ func TestDownloadUsecase(t *testing.T) {
 		log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
 	}
 
-	postgres := adapter.NewPostgresAdapter()
+	postgres, err := adapter.NewPostgresAdapter()
+	if err != nil {
+		log.Fatalf("Erro ao conectar ao banco de dados: %v", err)
+	}
 	repo := database.NewDownloadPostgresRepository(postgres)
 	//imagedownloader := utils.NewImgDownloader()
 
@@ -121,7 +124,10 @@ func TestDownloadController(t *testing.T) {
 		log.Fatalf("Erro ao carregar o arquivo .env: %v", err)
 	}
 
-	postgres := adapter.NewPostgresAdapter()
+	postgres, err := adapter.NewPostgresAdapter()
+	if err != nil {
+		log.Fatalf("Erro ao conectar ao banco de dados: %v", err)
+	}
 	repo := database.NewDownloadPostgresRepository(postgres)
 	imagedownloader := utils.NewImgDownloader()
 
