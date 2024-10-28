@@ -315,7 +315,7 @@ func (repo *NewsPostgresRepository) FindRecent() (*entity.News, error) {
 	tx.Model(&entity.News{}).Where("visible = true").Order("created_at DESC").First(&news)
 
 	if tx.Error != nil {
-		return &entity.News{}, repo.db.Error
+		return &entity.News{}, tx.Error
 	}
 
 	tx.Commit()
@@ -334,10 +334,10 @@ func (repo *NewsPostgresRepository) FindCategory(category string, page int) ([]*
 	defer tx.Rollback()
 
 	var news []*entity.News
-	repo.db.Model(&entity.News{}).Where("visible = true AND category=?", category).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+	tx.Model(&entity.News{}).Where("visible = true AND category=?", category).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
-	if repo.db.Error != nil {
-		return []*entity.News{}, repo.db.Error
+	if tx.Error != nil {
+		return []*entity.News{}, tx.Error
 	}
 
 	tx.Commit()
