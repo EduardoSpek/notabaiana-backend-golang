@@ -22,7 +22,7 @@ type ContactPostgresRepository struct {
 }
 
 func NewContactPostgresRepository(db_adapter port.DBAdapter) *ContactPostgresRepository {
-	db, _ := db_adapter.Connect()
+	db := db_adapter.GetDB()
 	return &ContactPostgresRepository{db: db}
 }
 

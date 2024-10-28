@@ -9,67 +9,66 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type TopPostgresRepository struct {
-    db *gorm.DB
-    mutex sync.RWMutex
+	db    *gorm.DB
+	mutex sync.RWMutex
 }
 
 func NewTopPostgresRepository(db_adapter port.DBAdapter) *TopPostgresRepository {
-    db, _ := db_adapter.Connect()
-	return &TopPostgresRepository{ db: db }
+	db := db_adapter.GetDB()
+	return &TopPostgresRepository{db: db}
 }
 
-func (repo *TopPostgresRepository) Create(tops []entity.Top)  error {    
-    repo.mutex.Lock() 
-    defer repo.mutex.Unlock()
-    
-    tx := repo.db.Begin()
-    defer tx.Rollback()    
-	
-    result := repo.db.Create(&tops)
-    
-    if result.Error != nil {
-        tx.Rollback() 
-        return result.Error
-    }    
+func (repo *TopPostgresRepository) Create(tops []entity.Top) error {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
 
-    tx.Commit()
+	tx := repo.db.Begin()
+	defer tx.Rollback()
 
-    return nil
-    
+	result := repo.db.Create(&tops)
+
+	if result.Error != nil {
+		tx.Rollback()
+		return result.Error
+	}
+
+	tx.Commit()
+
+	return nil
+
 }
 
 func (repo *TopPostgresRepository) FindAll() ([]entity.Top, error) {
-    repo.mutex.RLock() 
-    defer repo.mutex.RUnlock()
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
 
 	var tops []entity.Top
-    
-    result := repo.db.Model(&entity.Top{}).Order("views DESC").Limit(10).Find(&tops)
 
-    if result.Error != nil {
-        return []entity.Top{}, result.Error
-    }
+	result := repo.db.Model(&entity.Top{}).Order("views DESC").Limit(10).Find(&tops)
 
-    return tops, nil
+	if result.Error != nil {
+		return []entity.Top{}, result.Error
+	}
+
+	return tops, nil
 
 }
 
 func (repo *TopPostgresRepository) TopTruncateTable() error {
-    repo.mutex.Lock() 
-    defer repo.mutex.Unlock()
-    
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
 	tx := repo.db.Begin()
-    defer tx.Rollback() 
+	defer tx.Rollback()
 
-    repo.db.Exec("TRUNCATE TABLE tops")
-    
-    if repo.db.Error != nil {
-        return repo.db.Error
-    }
+	repo.db.Exec("TRUNCATE TABLE tops")
 
-    tx.Commit()
+	if repo.db.Error != nil {
+		return repo.db.Error
+	}
 
-    return nil
+	tx.Commit()
+
+	return nil
 }

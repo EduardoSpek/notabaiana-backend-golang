@@ -25,7 +25,7 @@ type NewsPostgresRepository struct {
 }
 
 func NewNewsPostgresRepository(db_adapter port.DBAdapter) *NewsPostgresRepository {
-	db, _ := db_adapter.Connect()
+	db := db_adapter.GetDB()
 	return &NewsPostgresRepository{db: db}
 }
 

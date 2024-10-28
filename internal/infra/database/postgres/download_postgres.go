@@ -21,7 +21,7 @@ type DownloadPostgresRepository struct {
 }
 
 func NewDownloadPostgresRepository(db_adapter port.DBAdapter) *DownloadPostgresRepository {
-	db, _ := db_adapter.Connect()
+	db := db_adapter.GetDB()
 	return &DownloadPostgresRepository{db: db}
 }
 

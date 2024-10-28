@@ -12,86 +12,86 @@ import (
 )
 
 type HitsPostgresRepository struct {
-	db *gorm.DB
-    mutex sync.RWMutex
+	db    *gorm.DB
+	mutex sync.RWMutex
 }
 
 func NewHitsPostgresRepository(db_adapter port.DBAdapter) *HitsPostgresRepository {
-	db, _ := db_adapter.Connect()
-	return &HitsPostgresRepository{ db: db }
+	db := db_adapter.GetDB()
+	return &HitsPostgresRepository{db: db}
 }
 
 func (repo *HitsPostgresRepository) Save(hit entity.Hits) error {
-	repo.mutex.Lock() 
-    defer repo.mutex.Unlock()
-    
-    tx := repo.db.Begin()
-    defer tx.Rollback()    
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
 
-    result := repo.db.Create(&hit)
-    
-    if result.Error != nil {
-        tx.Rollback() 
-        fmt.Println(result.Error)
-        return result.Error
-    }
+	tx := repo.db.Begin()
+	defer tx.Rollback()
 
-    tx.Commit()
+	result := repo.db.Create(&hit)
 
-    return nil
+	if result.Error != nil {
+		tx.Rollback()
+		fmt.Println(result.Error)
+		return result.Error
+	}
+
+	tx.Commit()
+
+	return nil
 }
 
 func (repo *HitsPostgresRepository) Update(hit entity.Hits) error {
-	repo.mutex.Lock() 
-    defer repo.mutex.Unlock()
-    
-    tx := repo.db.Begin()
-    defer tx.Rollback()
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
 
-    result := repo.db.Model(&hit).Update("views", hit.Views)
-    
-    if result.Error != nil {
-        tx.Rollback() 
-        fmt.Println(result.Error)
-        return result.Error
-    }
+	tx := repo.db.Begin()
+	defer tx.Rollback()
 
-    tx.Commit()
+	result := repo.db.Model(&hit).Update("views", hit.Views)
 
-    return nil
+	if result.Error != nil {
+		tx.Rollback()
+		fmt.Println(result.Error)
+		return result.Error
+	}
+
+	tx.Commit()
+
+	return nil
 }
 
 func (repo *HitsPostgresRepository) Get(ip string, session string) (entity.Hits, error) {
-	repo.mutex.RLock() 
-    defer repo.mutex.RUnlock()
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
 
-    tx := repo.db.Begin()
-    defer tx.Rollback()    
+	tx := repo.db.Begin()
+	defer tx.Rollback()
 
-    var hit entity.Hits
-    repo.db.Model(&entity.Hits{}).Where("ip = ? AND session = ?", ip, session).First(&hit)
+	var hit entity.Hits
+	repo.db.Model(&entity.Hits{}).Where("ip = ? AND session = ?", ip, session).First(&hit)
 
-    if hit.IP == "" {
-        fmt.Println("=== Nenhum hit encontrado ===")
-        return entity.Hits{}, errors.New("=== Nenhum hit encontrado ===")
-    }
+	if hit.IP == "" {
+		fmt.Println("=== Nenhum hit encontrado ===")
+		return entity.Hits{}, errors.New("=== Nenhum hit encontrado ===")
+	}
 
-    tx.Commit()
+	tx.Commit()
 
-    return hit, nil
+	return hit, nil
 }
 
 func (repo *HitsPostgresRepository) TopHits() ([]entity.Hits, error) {
-	repo.mutex.RLock() 
-    defer repo.mutex.RUnlock()
+	repo.mutex.RLock()
+	defer repo.mutex.RUnlock()
 
-    tx := repo.db.Begin()
-    defer tx.Rollback()    
+	tx := repo.db.Begin()
+	defer tx.Rollback()
 
-    var hits []entity.Hits
-    repo.db.Model(&entity.Hits{}).Select("session, sum(views) as total").Where("created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("total DESC").Group("session").Limit(10).Find(&hits)
+	var hits []entity.Hits
+	repo.db.Model(&entity.Hits{}).Select("session, sum(views) as total").Where("created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("total DESC").Group("session").Limit(10).Find(&hits)
 
-    tx.Commit()
+	tx.Commit()
 
-    return hits, nil
+	return hits, nil
 }

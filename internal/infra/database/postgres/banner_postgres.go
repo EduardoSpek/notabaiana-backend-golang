@@ -28,11 +28,7 @@ type BannerPostgresRepository struct {
 
 // NewBannerPostgresRepository cria uma nova instância do repositório
 func NewBannerPostgresRepository(db_adapter port.DBAdapter, logger *zap.Logger) (*BannerPostgresRepository, error) {
-	db, err := db_adapter.Connect()
-	if err != nil {
-		return nil, fmt.Errorf("falha ao conectar ao banco de dados: %w", err)
-	}
-
+	db := db_adapter.GetDB()
 	return &BannerPostgresRepository{
 		db:     db,
 		logger: logger,

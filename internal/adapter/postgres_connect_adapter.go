@@ -12,13 +12,24 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type PostgresAdapter struct{}
-
-func NewPostgresAdapter() *PostgresAdapter {
-	return &PostgresAdapter{}
+type PostgresAdapter struct {
+	db *gorm.DB
 }
 
-func (repo *PostgresAdapter) Connect() (*gorm.DB, error) {
+func NewPostgresAdapter() (*PostgresAdapter, error) {
+	adapter := &PostgresAdapter{}
+	err := adapter.Connect()
+	if err != nil {
+		return nil, err
+	}
+	return adapter, nil
+}
+
+func (repo *PostgresAdapter) GetDB() *gorm.DB {
+	return repo.db
+}
+
+func (repo *PostgresAdapter) Connect() error {
 
 	connStr := "user=" + os.Getenv("POSTGRES_USERNAME") + " password=" + os.Getenv("POSTGRES_PASSWORD") + " host=" + os.Getenv("POSTGRES_HOST") + " port=" + os.Getenv("POSTGRES_PORT") + " dbname=" + os.Getenv("POSTGRES_DB") + ""
 
@@ -39,8 +50,10 @@ func (repo *PostgresAdapter) Connect() (*gorm.DB, error) {
 
 	if err != nil {
 		fmt.Println(err)
-		return nil, err
+		return err
 	}
+
+	repo.db = db
 
 	db.AutoMigrate(&entity.News{}, &entity.Top{}, &entity.Hits{}, &entity.User{}, &entity.Banner{}, &entity.Contact{}, &entity.Download{}, &entity.Music{})
 
@@ -48,12 +61,12 @@ func (repo *PostgresAdapter) Connect() (*gorm.DB, error) {
 
 	if err != nil {
 		fmt.Println(err)
-		return nil, err
+		return err
 	}
 
 	sqlDB.SetMaxOpenConns(10) // número máximo de conexões abertas
 	sqlDB.SetMaxIdleConns(5)  // número máximo de conexões ociosas
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	return db, nil
+	return nil
 }
