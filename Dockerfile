@@ -3,13 +3,6 @@ FROM golang:1.23 AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libsqlite3-dev
-
-# Configure o ambiente para o CGO
-ENV CGO_ENABLED=1
-
 # Copiar os arquivos de dependências
 COPY go.mod go.sum ./
 
