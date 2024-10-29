@@ -38,7 +38,7 @@ func (repo *NewsPostgresRepository) CleanNews() ([]*entity.News, error) {
 
 	var news []*entity.News
 
-	result := repo.db.Model(&entity.News{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&news)
+	result := tx.Model(&entity.News{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&news)
 
 	if result.Error != nil {
 		return []*entity.News{}, result.Error
