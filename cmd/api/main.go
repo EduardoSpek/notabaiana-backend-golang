@@ -93,7 +93,7 @@ func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
-	conn_adapter, err := adapter.NewSQLiteAdapter()
+	conn_adapter, err := adapter.NewPostgresAdapter()
 
 	if err != nil {
 		logger.Fatal(err.Error())
