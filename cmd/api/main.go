@@ -20,7 +20,7 @@ func init() {
 
 	err := os.MkdirAll("files", os.ModePerm)
 	if err != nil {
-		fmt.Println("Erro ao criar pasta:", err)
+		fmt.Println("Erro ao criar pasta: ", err)
 		return
 	}
 
