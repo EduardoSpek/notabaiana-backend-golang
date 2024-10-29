@@ -20,7 +20,7 @@ func init() {
 
 	err := os.MkdirAll("files", os.ModePerm)
 	if err != nil {
-		fmt.Println("Erro ao criar pasta:", err)
+		fmt.Println("Erro ao criar pasta: ", err)
 		return
 	}
 
@@ -93,39 +93,39 @@ func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
-	postgres, err := adapter.NewPostgresAdapter()
+	conn_adapter, err := adapter.NewSQLiteAdapter()
 
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
 
-	defer postgres.CloseDB()
+	defer conn_adapter.CloseDB()
 
-	newsrepo := database.NewNewsPostgresRepository(postgres)
+	newsrepo := database.NewNewsPostgresRepository(conn_adapter)
 	imagedownloader := utils.NewImgDownloader()
-	hitrepo := database.NewHitsPostgresRepository(postgres)
+	hitrepo := database.NewHitsPostgresRepository(conn_adapter)
 	news_service := service.NewNewsService(newsrepo, imagedownloader, hitrepo)
 
 	crawler_service := service.NewCrawler()
 	copier_service := service.NewCopier(news_service, crawler_service)
 	crawler_controller := controllers.NewCrawlerController(copier_service)
 
-	//download_repository := database.NewDownloadPostgresRepository(postgres)
+	//download_repository := database.NewDownloadPostgresRepository(conn_adapter)
 	//copier_downloads := service.NewCopierDownload(download_repository, imagedownloader)
 	//download_controller := controllers.NewDownloadController(download_repository, imagedownloader, cache)
 	//downloadCleanUsecase := usecase.NewCleanDownloadUsecase(download_repository)
 
 	news_controller := controllers.NewNewsController(news_service, cache)
 
-	toprepo := database.NewTopPostgresRepository(postgres)
+	toprepo := database.NewTopPostgresRepository(conn_adapter)
 	top_service := service.NewTopService(toprepo, newsrepo, hitrepo, news_service)
 	top_controller := controllers.NewTopController(top_service)
 
-	user_repo := database.NewUserPostgresRepository(postgres)
+	user_repo := database.NewUserPostgresRepository(conn_adapter)
 	user_service := service.NewUserService(user_repo)
 	user_controller := controllers.NewUserController(user_service)
 
-	banner_repo, _ := database.NewBannerPostgresRepository(postgres, logger)
+	banner_repo, _ := database.NewBannerPostgresRepository(conn_adapter, logger)
 	banner_service := service.NewBannerService(banner_repo, imagedownloader)
 	banner_controller := controllers.NewBannerController(banner_service)
 
@@ -135,7 +135,7 @@ func main() {
 	list_notifications = append(list_notifications, email_notifications, ntfy_notifications)
 	notifications := notifications.NewNotifications(list_notifications)
 
-	contact_repo := database.NewContactPostgresRepository(postgres)
+	contact_repo := database.NewContactPostgresRepository(conn_adapter)
 	contact_service := service.NewContactService(contact_repo, imagedownloader, notifications)
 	contact_controller := controllers.NewContactController(*contact_service)
 

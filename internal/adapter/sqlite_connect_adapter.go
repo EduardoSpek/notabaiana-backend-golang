@@ -7,18 +7,17 @@ import (
 	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
-	_ "github.com/mattn/go-sqlite3"
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-type PostgresAdapter struct {
+type SQLiteAdapter struct {
 	db *gorm.DB
 }
 
-func NewPostgresAdapter() (*PostgresAdapter, error) {
-	adapter := &PostgresAdapter{}
+func NewSQLiteAdapter() (*SQLiteAdapter, error) {
+	adapter := &SQLiteAdapter{}
 	err := adapter.Connect()
 	if err != nil {
 		return nil, err
@@ -26,7 +25,7 @@ func NewPostgresAdapter() (*PostgresAdapter, error) {
 	return adapter, nil
 }
 
-func (repo *PostgresAdapter) CloseDB() {
+func (repo *SQLiteAdapter) CloseDB() {
 	db, err := repo.db.DB()
 
 	if err != nil {
@@ -36,13 +35,13 @@ func (repo *PostgresAdapter) CloseDB() {
 	db.Close()
 }
 
-func (repo *PostgresAdapter) GetDB() *gorm.DB {
+func (repo *SQLiteAdapter) GetDB() *gorm.DB {
 	return repo.db
 }
 
-func (repo *PostgresAdapter) Connect() error {
+func (repo *SQLiteAdapter) Connect() error {
 
-	connStr := "user=" + os.Getenv("POSTGRES_USERNAME") + " password=" + os.Getenv("POSTGRES_PASSWORD") + " host=" + os.Getenv("POSTGRES_HOST") + " port=" + os.Getenv("POSTGRES_PORT") + " dbname=" + os.Getenv("POSTGRES_DB") + ""
+	//connStr := "user=" + os.Getenv("POSTGRES_USERNAME") + " password=" + os.Getenv("POSTGRES_PASSWORD") + " host=" + os.Getenv("POSTGRES_HOST") + " port=" + os.Getenv("POSTGRES_PORT") + " dbname=" + os.Getenv("POSTGRES_DB") + ""
 
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
@@ -54,7 +53,7 @@ func (repo *PostgresAdapter) Connect() error {
 		},
 	)
 
-	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{
+	db, err := gorm.Open(sqlite.Open(os.Getenv("PATCH_DB_SQLITE")), &gorm.Config{
 		Logger:      newLogger,
 		PrepareStmt: false,
 	})
