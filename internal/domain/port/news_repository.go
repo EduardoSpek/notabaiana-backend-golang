@@ -24,6 +24,7 @@ type NewsRepository interface {
 	GetTotalNewsByCategory(category string) int
 	NewsMake() (*entity.News, error)
 	CleanNews() ([]*entity.News, error)
+	CleanNewsOld() ([]*entity.News, error)
 	Delete(id string) error
 	DeleteAll(news []*entity.News) error
 }

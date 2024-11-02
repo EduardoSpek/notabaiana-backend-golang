@@ -101,9 +101,41 @@ func (s *NewsService) StartCleanNews(minutes time.Duration) {
 	}
 }
 
+func (s *NewsService) StartCleanNewsOld(minutes time.Duration) {
+
+	go s.CleanNewsOld()
+
+	ticker := time.NewTicker(minutes * time.Minute)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		go s.CleanNewsOld()
+	}
+}
+
 func (s *NewsService) CleanNews() error {
 
 	news, err := s.newsrepository.CleanNews()
+
+	if err != nil {
+		return err
+	}
+
+	s.RemoveImages(news)
+
+	err = s.newsrepository.DeleteAll(news)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (s *NewsService) CleanNewsOld() error {
+
+	news, err := s.newsrepository.CleanNewsOld()
 
 	if err != nil {
 		return err

@@ -26,7 +26,11 @@ func (r *NewsMemoryRepository) CleanNews() ([]*entity.News, error) {
 	return nil, nil
 
 }
+func (r *NewsMemoryRepository) CleanNewsOld() ([]*entity.News, error) {
 
+	return nil, nil
+
+}
 func (r *NewsMemoryRepository) NewsMake() (*entity.News, error) {
 	return &entity.News{}, nil
 }

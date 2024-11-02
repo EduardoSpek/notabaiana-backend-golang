@@ -157,6 +157,7 @@ func main() {
 
 	//Função para limpar as notícias inativas
 	go news_service.StartCleanNews(60 * 24)
+	go news_service.StartCleanNewsOld(60 * 24)
 
 	//Função para limpar as downloads inativos
 	//go downloadCleanUsecase.StartCleanDownloads(60 * 24)
