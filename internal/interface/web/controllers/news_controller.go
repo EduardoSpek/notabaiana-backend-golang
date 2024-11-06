@@ -184,7 +184,7 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Erro ao obter o caminho do executável:", err)
 	}
 
-	diretorio := strings.Replace(cwd, "test", "", -1) + "/files/"
+	diretorio := strings.Replace(cwd, "test", "", -1) + "./files/"
 
 	baseImgFile, err := os.Open(diretorio + "base_image.jpg")
 	if err != nil {
