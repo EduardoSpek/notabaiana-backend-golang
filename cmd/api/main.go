@@ -88,7 +88,7 @@ var (
 
 func main() {
 
-	cache := service.NewCache(5 * time.Minute)
+	cache := service.NewCache(10 * time.Minute)
 
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
