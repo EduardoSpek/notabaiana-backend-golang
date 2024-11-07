@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"image/jpeg"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -184,11 +185,20 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Erro ao obter o caminho do executável:", err)
 	}
 
-	diretorio := strings.Replace(cwd, "test", "", -1) + "./files/"
+	entries, err := os.ReadDir(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			fmt.Println(entry.Name())
+		}
+	}
+
+	diretorio := strings.Replace(cwd, "test", "", -1) + "/files/"
 
 	baseImgFile, err := os.Open(diretorio + "base_image.jpg")
-
-	fmt.Println("DIRETORIO", diretorio)
 
 	if err != nil {
 		http.Error(w, "Could not open base image", http.StatusInternalServerError)
