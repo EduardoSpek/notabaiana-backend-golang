@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"image/jpeg"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -183,24 +182,6 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println("Erro ao obter o caminho do executável:", err)
-	}
-
-	entries, err := os.ReadDir("./files")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			info, err := entry.Info()
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Printf("Nome: %s\nTamanho: %d bytes\nModificado: %v\n\n",
-				info.Name(),
-				info.Size(),
-				info.ModTime())
-		}
 	}
 
 	diretorio := strings.Replace(cwd, "test", "", -1) + "/files/"
