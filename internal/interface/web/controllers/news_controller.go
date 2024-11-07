@@ -187,6 +187,9 @@ func (c *NewsController) NewsImage(w http.ResponseWriter, r *http.Request) {
 	diretorio := strings.Replace(cwd, "test", "", -1) + "./files/"
 
 	baseImgFile, err := os.Open(diretorio + "base_image.jpg")
+
+	fmt.Println("baseImgFile", baseImgFile)
+
 	if err != nil {
 		http.Error(w, "Could not open base image", http.StatusInternalServerError)
 		return
