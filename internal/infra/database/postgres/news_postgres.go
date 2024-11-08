@@ -57,7 +57,7 @@ func (repo *NewsPostgresRepository) CleanNewsOld() ([]*entity.News, error) {
 
 	var news []*entity.News
 
-	result := tx.Model(&entity.News{}).Where("created_at >= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&news)
+	result := tx.Model(&entity.News{}).Where("created_at <= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&news)
 
 	if result.Error != nil {
 		return []*entity.News{}, result.Error
