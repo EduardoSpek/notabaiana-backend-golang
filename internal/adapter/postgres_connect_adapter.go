@@ -79,5 +79,12 @@ func (repo *PostgresAdapter) Connect() error {
 	sqlDB.SetMaxIdleConns(5)  // número máximo de conexões ociosas
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
+	_, err = sqlDB.Exec("CREATE EXTENSION IF NOT EXISTS unaccent;")
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
 	return nil
 }
