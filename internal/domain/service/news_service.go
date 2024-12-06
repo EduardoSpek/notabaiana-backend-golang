@@ -769,6 +769,8 @@ func changeWords(text string) string {
 
 	text = strings.Replace(text, "@bhall", "@", -1)
 
+	text = strings.Replace(text, "BN", "NB", -1) 
+
 	text = strings.Replace(text, "As informações são do Metrópoles, parceiro do NotaBaiana", ".", -1)
 
 	text = strings.Replace(text, " parceiro do NotaBaiana,", "", -1)
