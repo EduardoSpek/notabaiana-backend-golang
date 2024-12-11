@@ -815,7 +815,6 @@ func (s *NewsService) GetNewsFromPage(link string) []*entity.News {
 
 	//Obtém titulos
 	collector.OnHTML("h3.sc-b4c8ccf3-1.ireAxk", func(e *colly.HTMLElement) {
-
 		conteudo = e.DOM.Text()
 
 		titulos = append(titulos, conteudo)
@@ -842,7 +841,7 @@ func (s *NewsService) GetNewsFromPage(link string) []*entity.News {
 	})
 
 	//Obtém textos
-	collector.OnHTML(".sc-81cf810-3.gCNTHg", func(e *colly.HTMLElement) {
+	collector.OnHTML(".sc-24c322fd-3.giHdVV", func(e *colly.HTMLElement) {
 
 		conteudo = e.DOM.Text()
 
@@ -871,6 +870,8 @@ func (s *NewsService) GetNewsFromPage(link string) []*entity.News {
 	var lista []*entity.News
 
 	for i, item := range titulos {
+
+		fmt.Println("TEXTS: ", texts)
 
 		category, _ := s.GetCategory(links[i])
 
