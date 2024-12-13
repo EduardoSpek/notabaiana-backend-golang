@@ -188,10 +188,15 @@ func (s *NewsService) ScanDuplicateNews() error {
 				continue
 			}
 
+			newsInList := false
 			for _, nd := range listNewsDelete {
 				if n2.ID == nd.ID {
-					continue
+					newsInList = true
 				}
+			}
+
+			if newsInList {
+				continue
 			}
 
 			similarity := utils.Similarity(n.Title, n2.Title)
