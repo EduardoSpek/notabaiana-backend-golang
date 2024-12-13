@@ -31,6 +31,11 @@ var (
 	ErrSimilarTitle   = errors.New("título similar ao recente adicionado detectado")
 )
 
+type FindAllOutput struct {
+	List_news  []*entity.NewsFindAllOutput `json:"news"`
+	Pagination map[string][]int            `json:"pagination"`
+}
+
 type NewsService struct {
 	hitsrepository  port.HitsRepository
 	newsrepository  port.NewsRepository
@@ -101,18 +106,6 @@ func (s *NewsService) StartCleanNews(minutes time.Duration) {
 	}
 }
 
-func (s *NewsService) StartCleanNewsOld(minutes time.Duration) {
-
-	go s.CleanNewsOld()
-
-	ticker := time.NewTicker(minutes * time.Minute)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		go s.CleanNewsOld()
-	}
-}
-
 func (s *NewsService) CleanNews() error {
 
 	news, err := s.newsrepository.CleanNews()
@@ -133,6 +126,18 @@ func (s *NewsService) CleanNews() error {
 
 }
 
+func (s *NewsService) StartCleanNewsOld(minutes time.Duration) {
+
+	go s.CleanNewsOld()
+
+	ticker := time.NewTicker(minutes * time.Minute)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		go s.CleanNewsOld()
+	}
+}
+
 func (s *NewsService) CleanNewsOld() error {
 
 	news, err := s.newsrepository.CleanNewsOld()
@@ -147,6 +152,66 @@ func (s *NewsService) CleanNewsOld() error {
 
 	if err != nil {
 		return err
+	}
+
+	return nil
+
+}
+
+func (s *NewsService) StartScanDuplicateNews(minutes time.Duration) {
+
+	go s.ScanDuplicateNews()
+
+	ticker := time.NewTicker(minutes * time.Minute)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		go s.ScanDuplicateNews()
+	}
+}
+
+func (s *NewsService) ScanDuplicateNews() error {
+
+	var listNewsDelete []*entity.News
+
+	news := s.FindAllNews(1, 100)
+
+	newsList := news.(*FindAllOutput)
+
+	newsCopy := newsList.List_news
+
+	for _, n := range newsList.List_news {
+
+		for _, n2 := range newsCopy {
+
+			if n.ID == n2.ID {
+				continue
+			}
+
+			for _, nd := range listNewsDelete {
+				if n2.ID == nd.ID {
+					continue
+				}
+			}
+
+			similarity := utils.Similarity(n.Title, n2.Title)
+
+			if similarity > 70 {
+				newsInsert := &entity.News{
+					ID: n2.ID,
+				}
+				listNewsDelete = append(listNewsDelete, newsInsert)
+			}
+		}
+
+	}
+
+	if len(listNewsDelete) > 0 {
+		err := s.AdminDeleteAll(listNewsDelete)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -454,10 +519,7 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
 	pagination := utils.Pagination(page, config.News_PerPage, total)
 
-	result := struct {
-		List_news  []*entity.NewsFindAllOutput `json:"news"`
-		Pagination map[string][]int            `json:"pagination"`
-	}{
+	result := &FindAllOutput{
 		List_news:  newsOutput,
 		Pagination: pagination,
 	}
@@ -483,10 +545,7 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 	pagination := utils.Pagination(page, config.News_PerPage, total)
 
-	result := struct {
-		List_news  []*entity.NewsFindAllOutput `json:"news"`
-		Pagination map[string][]int            `json:"pagination"`
-	}{
+	result := &FindAllOutput{
 		List_news:  newsOutput,
 		Pagination: pagination,
 	}
