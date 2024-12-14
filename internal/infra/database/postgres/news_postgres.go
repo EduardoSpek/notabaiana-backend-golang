@@ -290,7 +290,7 @@ func (repo *NewsPostgresRepository) AdminFindAll(page, limit int) ([]*entity.New
 	defer tx.Rollback()
 
 	var news []*entity.News
-	repo.db.Model(&entity.News{}).Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+	repo.db.Model(&entity.News{}).Order("created_at DESC, visible DESC").Limit(limit).Offset(offset).Find(&news)
 
 	if repo.db.Error != nil {
 		return []*entity.News{}, repo.db.Error
