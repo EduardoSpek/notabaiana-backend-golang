@@ -307,16 +307,6 @@ func (c *NewsController) UpdateNewsUsingTheForm(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err != nil {
-		msg := map[string]any{
-			"ok":      false,
-			"message": "A notícia não pode ser atualizada!",
-			"erro":    err,
-		}
-		ResponseJson(w, msg, http.StatusNotFound)
-		return
-	}
-
 	new, err := c.news_service.UpdateNewsUsingTheForm(file, newsInput)
 
 	if err != nil {
