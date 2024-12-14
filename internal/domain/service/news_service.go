@@ -182,6 +182,17 @@ func (s *NewsService) ScanDuplicateNews() error {
 
 	for _, n := range newsList.List_news {
 
+		newsInList := false
+		for _, nd := range listNewsDelete {
+			if n.ID == nd.ID {
+				newsInList = true
+			}
+		}
+
+		if newsInList {
+			continue
+		}
+
 		for _, n2 := range newsCopy {
 
 			if n.ID == n2.ID {
@@ -212,10 +223,8 @@ func (s *NewsService) ScanDuplicateNews() error {
 	}
 
 	if len(listNewsDelete) > 0 {
-		err := s.AdminDeleteAll(listNewsDelete)
-
-		if err != nil {
-			return err
+		for _, n := range listNewsDelete {
+			s.newsrepository.SetVisible(false, n.ID)
 		}
 	}
 

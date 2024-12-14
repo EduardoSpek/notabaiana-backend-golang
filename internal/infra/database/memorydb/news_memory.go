@@ -198,6 +198,9 @@ func (r *NewsMemoryRepository) ClearImagePath(id string) error {
 
 	return errors.New("não foi possível atualizar a Image")
 }
+func (r *NewsMemoryRepository) SetVisible(visible bool, id string) error {
+	return nil
+}
 
 // VALIDATIONS
 func (r *NewsMemoryRepository) NewsExists(title string) error {

@@ -492,3 +492,21 @@ func (repo *NewsPostgresRepository) DeleteAll(news []*entity.News) error {
 
 	return nil
 }
+
+func (repo *NewsPostgresRepository) SetVisible(visible bool, id string) error {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	repo.db.Model(&entity.News{}).Where("id = ?", id).Update("visible", visible)
+
+	if repo.db.Error != nil {
+		return repo.db.Error
+	}
+
+	tx.Commit()
+
+	return nil
+}

@@ -27,4 +27,5 @@ type NewsRepository interface {
 	CleanNewsOld() ([]*entity.News, error)
 	Delete(id string) error
 	DeleteAll(news []*entity.News) error
+	SetVisible(visible bool, id string) error
 }
