@@ -531,7 +531,7 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
 	total := s.newsrepository.GetTotalNews()
 
-	pagination := utils.Pagination(page, config.News_PerPage, total)
+	pagination := utils.Pagination(page, limit, total)
 
 	result := &FindAllOutput{
 		List_news:  newsOutput,
@@ -557,7 +557,7 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 
 	total := s.newsrepository.GetTotalNewsVisible()
 
-	pagination := utils.Pagination(page, config.News_PerPage, total)
+	pagination := utils.Pagination(page, limit, total)
 
 	result := &FindAllOutput{
 		List_news:  newsOutput,
