@@ -212,7 +212,7 @@ func (s *NewsService) ScanDuplicateNews() error {
 
 			similarity := utils.Similarity(n.Title, n2.Title)
 
-			if similarity > 70 {
+			if similarity > 65 {
 				newsInsert := &entity.News{
 					ID: n2.ID,
 				}
