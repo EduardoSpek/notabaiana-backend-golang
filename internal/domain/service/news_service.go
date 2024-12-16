@@ -385,7 +385,7 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 
 	similarity := utils.Similarity(recent.Title, new.Title)
 
-	if similarity > 70 {
+	if similarity > 60 {
 		fmt.Println("***titulo silimar detectado***")
 		return &entity.News{}, ErrSimilarTitle
 	}
