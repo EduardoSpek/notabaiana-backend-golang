@@ -477,14 +477,14 @@ func (repo *NewsPostgresRepository) DeleteAll(news []*entity.News) error {
 
 	for _, b := range news {
 
-		var news *entity.News
-		newsSelected := repo.db.Model(&entity.News{}).Where("id = ?", b.ID).First(&news)
+		var newsUnic *entity.News
+		newsSelected := repo.db.Model(&entity.News{}).Where("id = ?", b.ID).First(&newsUnic)
 
 		if newsSelected.Error != nil {
 			return ErrNewsNotFound
 		}
 
-		repo.db.Unscoped().Delete(news)
+		repo.db.Unscoped().Delete(newsUnic)
 
 	}
 
