@@ -11,9 +11,12 @@ var (
 	Banner_mobile_dimensions = [2]int{386, 386}
 
 	//News limit per page
-	News_AllowedDomains = "www.bahianoticias.com.br"
-	News_LimitPerPage   = 1000
-	News_PerPage        = 24
+	News_AllowedDomains       = "www.bahianoticias.com.br"
+	News_LimitPerPage         = 1000
+	News_PerPage              = 24
+	News_DisabledCleaningDays = -7
+	News_OldCleaningDays      = -7
+	News_MakeDays             = -2
 
 	//Downloads limit
 	Downloads_PerPage = 24

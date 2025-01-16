@@ -38,7 +38,7 @@ func (repo *NewsPostgresRepository) CleanNews() ([]*entity.News, error) {
 
 	var news []*entity.News
 
-	result := tx.Model(&entity.News{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&news)
+	result := tx.Model(&entity.News{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, config.News_DisabledCleaningDays)).Order("created_at DESC").Find(&news)
 
 	if result.Error != nil {
 		return []*entity.News{}, result.Error
@@ -57,7 +57,7 @@ func (repo *NewsPostgresRepository) CleanNewsOld() ([]*entity.News, error) {
 
 	var news []*entity.News
 
-	result := tx.Model(&entity.News{}).Where("created_at <= ?", time.Now().AddDate(0, 0, -35)).Order("created_at DESC").Find(&news)
+	result := tx.Model(&entity.News{}).Where("created_at <= ?", time.Now().AddDate(0, 0, config.News_OldCleaningDays)).Order("created_at DESC").Find(&news)
 
 	if result.Error != nil {
 		return []*entity.News{}, result.Error
@@ -76,7 +76,7 @@ func (repo *NewsPostgresRepository) NewsMake() (*entity.News, error) {
 
 	var news *entity.News
 
-	result := repo.db.Model(&entity.News{}).Where("((visible = true AND category='famosos' AND topstory = false) OR (topstory = true AND visible = true)) AND Make = false AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, -2), time.Now()).Order("created_at DESC").Limit(1).First(&news)
+	result := repo.db.Model(&entity.News{}).Where("((visible = true AND category='famosos' AND topstory = false) OR (topstory = true AND visible = true)) AND Make = false AND created_at >= ? AND created_at <= ?", time.Now().AddDate(0, 0, config.News_MakeDays), time.Now()).Order("created_at DESC").Limit(1).First(&news)
 
 	if result.Error != nil {
 		return &entity.News{}, result.Error
