@@ -15,7 +15,7 @@ var (
 	News_LimitPerPage         = 1000
 	News_PerPage              = 24
 	News_DisabledCleaningDays = -7
-	News_OldCleaningDays      = -7
+	News_OldCleaningDays      = -8
 	News_MakeDays             = -2
 
 	//Downloads limit
