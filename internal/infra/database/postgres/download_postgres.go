@@ -361,7 +361,26 @@ func (repo *DownloadPostgresRepository) Clean() ([]*entity.Download, error) {
 
 	var downloads []*entity.Download
 
-	result := repo.db.Model(&entity.Download{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, -7)).Order("created_at DESC").Find(&downloads)
+	result := repo.db.Model(&entity.Download{}).Where("visible = false AND created_at <= ?", time.Now().AddDate(0, 0, config.Downloads_DisabledCleaningDays)).Order("created_at DESC").Find(&downloads)
+
+	if result.Error != nil {
+		return []*entity.Download{}, result.Error
+	}
+
+	return downloads, nil
+
+}
+
+func (repo *DownloadPostgresRepository) CleanOld() ([]*entity.Download, error) {
+	repo.mutex.Lock()
+	defer repo.mutex.Unlock()
+
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
+	var downloads []*entity.Download
+
+	result := repo.db.Model(&entity.Download{}).Where("created_at <= ?", time.Now().AddDate(0, 0, config.Downloads_OldCleaningDays)).Order("created_at DESC").Find(&downloads)
 
 	if result.Error != nil {
 		return []*entity.Download{}, result.Error

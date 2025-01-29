@@ -21,6 +21,7 @@ type DownloadRepository interface {
 	Delete(id string) error
 	DeleteAll(downloads []*entity.Download) error
 	Clean() ([]*entity.Download, error)
+	CleanOld() ([]*entity.Download, error)
 }
 
 type CopierDownload interface {
@@ -105,5 +106,10 @@ type DeleteAllDownloadRepository interface {
 
 type CleanDownloadRepository interface {
 	Clean() ([]*entity.Download, error)
+	DeleteAll(downloads []*entity.Download) error
+}
+
+type CleanOldDownloadRepository interface {
+	CleanOld() ([]*entity.Download, error)
 	DeleteAll(downloads []*entity.Download) error
 }
