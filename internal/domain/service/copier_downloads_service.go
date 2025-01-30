@@ -302,6 +302,7 @@ func (s *CopierDownloadService) GetDataAlbum(username, slug string, done chan<- 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Erro ao ler o corpo da resposta:", err)
+		fmt.Println("URL:", url)
 		done <- &AlbumChan{
 			Album: nil,
 			Error: err,
