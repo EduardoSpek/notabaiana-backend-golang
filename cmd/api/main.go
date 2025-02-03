@@ -16,26 +16,26 @@ import (
 	"go.uber.org/zap"
 )
 
-func removeDownloadsPath() error {
-	err := os.RemoveAll("files")
-	if err != nil {
-		fmt.Println("Erro ao remover pasta: ", err)
-		return err
-	}
+// func removeDownloadsPath() error {
+// 	err := os.RemoveAll("files")
+// 	if err != nil {
+// 		fmt.Println("Erro ao remover pasta: ", err)
+// 		return err
+// 	}
 
-	fmt.Println("Pasta downloads removida")
-	return nil
-}
+// 	fmt.Println("Pasta downloads removida")
+// 	return nil
+// }
 
 func init() {
 
-	err := removeDownloadsPath()
+	// err := removeDownloadsPath()
 
-	if err != nil {
-		fmt.Println("Erro remover pasta downloads: ", err)
-	}
+	// if err != nil {
+	// 	fmt.Println("Erro remover pasta downloads: ", err)
+	// }
 
-	err = os.MkdirAll("files", os.ModePerm)
+	err := os.MkdirAll("files", os.ModePerm)
 	if err != nil {
 		fmt.Println("Erro ao criar pasta: ", err)
 	}
