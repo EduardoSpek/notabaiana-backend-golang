@@ -844,7 +844,6 @@ func listOfBlockedWords(titulo string) bool {
 		"Fábio Porchat",
 		"Erika Hilton",
 		"Felipe Neto",
-		"Daniela Mercury", 
 	}
 	for _, palavra := range palavras {
 		if strings.Contains(titulo, palavra) {
