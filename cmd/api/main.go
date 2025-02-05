@@ -17,7 +17,7 @@ import (
 )
 
 func removeDownloadsPath() error {
-	err := os.RemoveAll("files")
+	err := os.RemoveAll("downloads")
 	if err != nil {
 		fmt.Println("Erro ao remover pasta: ", err)
 		return err
