@@ -413,12 +413,6 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		return &entity.News{}, err
 	}
 
-	newtitle, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este título matendo o contexto. O texto não deve ultrapassar 127 caracteres. O título é: ", new.Title)
-
-	if err == nil && newtitle != "" {
-		new.TitleAi = strings.TrimSpace(newtitle)
-	}
-
 	newtext, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este texto matendo o contexto. Mantenha os assuntos principais. O texto é: ", new.Text)
 
 	if err == nil && newtext != "" {
