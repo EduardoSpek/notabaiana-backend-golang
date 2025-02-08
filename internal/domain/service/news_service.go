@@ -413,11 +413,19 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		return &entity.News{}, err
 	}
 
-	//newtitle, err := utils.ChangeTitleWithGemini("Refaça este título e mantanha o contexto. Utilize palavras-chave para melhorar o SEO. O texto não deve ultrapassar os 127 caracteres. O título é", new.Title)
+	newtitle, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este título matendo o contexto. O texto não deve ultrapassar 127 caracteres. O título é: ", new.Title)
 
-	//if err == nil && newtitle != "" {
-	//	new.TitleAi = strings.TrimSpace(newtitle)
-	//}
+	if err == nil && newtitle != "" {
+		new.TitleAi = strings.TrimSpace(newtitle)
+	}
+
+	newtext, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este texto matendo o contexto. Mantenha os assuntos principais. O texto é: ", new.Text)
+
+	if err == nil && newtext != "" {
+		new.Text = strings.TrimSpace(newtext)
+	} else {
+		fmt.Println("Erro ao obter o texto do gemini:", err)
+	}
 
 	_, err = s.newsrepository.Create(new)
 
