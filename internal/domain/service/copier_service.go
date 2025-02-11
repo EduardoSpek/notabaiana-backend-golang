@@ -64,17 +64,6 @@ func (c *CopierService) Run(list_pages []string) {
 
 		go func() {
 
-			embed, text := c.news_service.GetEmded(n.Link)
-
-			if text != "" {
-				n.Text = text
-			}
-
-			if embed != "" {
-				n.Text += "<br><br>"
-				n.Text += embed
-			}
-
 			new, err := c.news_service.CreateNews(n)
 
 			if err == nil {
