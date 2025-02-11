@@ -390,6 +390,12 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		return &entity.News{}, ErrSimilarTitle
 	}
 
+	embed, text :=		c.GetEmded(new.Link)
+
+	if text != "" {
+			new.Text = text
+	}
+
 	new = RenamePathImage(new)
 	new = ChangeLink(new)
 
@@ -419,6 +425,11 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		new.Text = strings.TrimSpace(newtext)
 	} else {
 		fmt.Println("Erro ao obter o texto do gemini:", err)
+	}
+
+	if embed != "" {
+			new.Text += "<br><br>"
+			new.Text += embed
 	}
 
 	_, err = s.newsrepository.Create(new)
