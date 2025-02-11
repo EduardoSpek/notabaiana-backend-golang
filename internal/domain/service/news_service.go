@@ -390,10 +390,10 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		return &entity.News{}, ErrSimilarTitle
 	}
 
-	embed, text :=		c.GetEmded(new.Link)
+	embed, text := s.GetEmded(new.Link)
 
 	if text != "" {
-			new.Text = text
+		new.Text = text
 	}
 
 	new = RenamePathImage(new)
@@ -428,8 +428,8 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 	}
 
 	if embed != "" {
-			new.Text += "<br><br>"
-			new.Text += embed
+		new.Text += "<br><br>"
+		new.Text += embed
 	}
 
 	_, err = s.newsrepository.Create(new)
