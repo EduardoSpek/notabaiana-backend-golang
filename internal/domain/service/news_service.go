@@ -859,7 +859,9 @@ func listOfBlockedWords(titulo string) bool {
 		"Felipe Neto",
 		"Mercury",
 		"Gabriela Prioli",
+		"Ludmilla",
 	}
+
 	for _, palavra := range palavras {
 		if strings.Contains(titulo, palavra) {
 			return true
@@ -867,6 +869,7 @@ func listOfBlockedWords(titulo string) bool {
 	}
 	return false
 }
+
 func changeWords(text string) string {
 	text = strings.Replace(text, " ", " ", -1)
 	text = strings.Replace(text, "Siga o @bnhall_ no Instagram e fique de olho nas principais notícias.", "", -1)
