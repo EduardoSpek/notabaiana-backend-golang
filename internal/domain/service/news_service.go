@@ -419,7 +419,7 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		return &entity.News{}, err
 	}
 
-	newtext, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este texto matendo o contexto. Mantenha os assuntos principais. O texto é: ", new.Text)
+	newtext, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este texto matendo o contexto. Mantenha os assuntos principais. Retorne somente o texto, não retorne o título. O texto é: ", new.Text)
 
 	if err == nil && newtext != "" {
 		new.Text = strings.TrimSpace(newtext)
@@ -860,6 +860,8 @@ func listOfBlockedWords(titulo string) bool {
 		"Mercury",
 		"Gabriela Prioli",
 		"Ludmilla",
+		"Thaís Carla",
+		"Thais Carla",
 	}
 
 	for _, palavra := range palavras {
