@@ -704,7 +704,7 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 	)
 
 	//Obtém o texto da notícia
-	collector.OnHTML(".sc-16306eb7-3.lbjQbj", func(e *colly.HTMLElement) {
+	collector.OnHTML(".sc-bcb60b9a-3.jSwwqa", func(e *colly.HTMLElement) {
 
 		str_text = e.DOM.Text()
 
