@@ -40,24 +40,6 @@ func (c *CopierService) Run(list_pages []string) {
 
 	diretorio := strings.Replace(cwd, "test", "", -1) + "/images/"
 
-	// rss := c.crawler_service.GetRSS(rss_url)
-	// category, _ := c.news_service.GetCategory(rss_url)
-
-	//var page string
-
-	// for _, item := range rss.Channel.Items {
-	// 	n := entity.News{
-	// 		Title: item.Title,
-	// 		Text:  item.Description,
-	// 		Link:  item.Link,
-	// 		Image: item.Media.URL,
-	// 		Visible: true,
-	// 		Category: category,
-	// 	}
-
-	// 	lista = append(lista, n)
-	// }
-
 	lista := c.news_service.CopierPage(list_pages)
 
 	for _, n := range lista {
