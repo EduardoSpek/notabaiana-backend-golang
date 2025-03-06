@@ -862,6 +862,8 @@ func listOfBlockedWords(titulo string) bool {
 		"Ludmilla",
 		"Thaís Carla",
 		"Thais Carla",
+		"TheLotter",
+		"Powerball",
 	}
 
 	for _, palavra := range palavras {
