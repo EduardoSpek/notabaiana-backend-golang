@@ -405,12 +405,6 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		return &entity.News{}, ErrWordsBlackList
 	}
 
-	result = listOfBlockedText(new.Text)
-
-	if result {
-		return &entity.News{}, ErrWordsBlackList
-	}
-
 	new.Text = changeWords(new.Text)
 
 	err = s.newsrepository.NewsExists(new.Title)
@@ -430,6 +424,12 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 	if embed != "" {
 		new.Text += "<br><br>"
 		new.Text += embed
+	}
+
+	result = listOfBlockedText(new.Text)
+
+	if result {
+		return &entity.News{}, ErrWordsBlackList
 	}
 
 	_, err = s.newsrepository.Create(new)
