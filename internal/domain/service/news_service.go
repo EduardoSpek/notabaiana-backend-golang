@@ -405,12 +405,6 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		return &entity.News{}, ErrWordsBlackList
 	}
 
-	result = listOfBlockedText(new.Text)
-
-	if result {
-		return &entity.News{}, ErrWordsBlackList
-	}
-
 	new.Text = changeWords(new.Text)
 
 	err = s.newsrepository.NewsExists(new.Title)
@@ -430,6 +424,12 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 	if embed != "" {
 		new.Text += "<br><br>"
 		new.Text += embed
+	}
+
+	result = listOfBlockedText(new.Text)
+
+	if result {
+		return &entity.News{}, ErrWordsBlackList
 	}
 
 	_, err = s.newsrepository.Create(new)
@@ -779,7 +779,7 @@ func ChangeLink(news *entity.News) *entity.News {
 }
 func listOfBlockedText(text string) bool {
 	words := []string{
-		"IMG_OFER_0.jpg",
+		"IMG_OFER_0",
 		"JusPod",
 	}
 
@@ -862,6 +862,12 @@ func listOfBlockedWords(titulo string) bool {
 		"Ludmilla",
 		"Thaís Carla",
 		"Thais Carla",
+		"TheLotter",
+		"Powerball",
+		"Alô Juca",
+		"Linn da Quebrada",
+		"Patrícia Ramos",
+		"Blackjack",
 	}
 
 	for _, palavra := range palavras {
@@ -876,29 +882,31 @@ func changeWords(text string) string {
 	text = strings.Replace(text, " ", " ", -1)
 	text = strings.Replace(text, "Siga o @bnhall_ no Instagram e fique de olho nas principais notícias.", "", -1)
 
-	text = strings.Replace(text, "Bahia Notícias", "BN", -1)
+	text = strings.Replace(text, "BN", "NB", -1)
 
-	text = strings.Replace(text, "Bahia Notícia", "BN", -1)
+	text = strings.Replace(text, "Bahia Notícias", "Nota Baiana", -1)
 
-	text = strings.Replace(text, "Bahia Noticia", "BN", -1)
+	text = strings.Replace(text, "Bahia Notícia", "Nota Baiana", -1)
 
-	text = strings.Replace(text, "Bahia Noticias", "BN", -1)
+	text = strings.Replace(text, "Bahia Noticia", "Nota Baiana", -1)
 
-	text = strings.Replace(text, "@BahiaNoticias", "@", -1)
+	text = strings.Replace(text, "Bahia Noticias", "Nota Baiana", -1)
 
-	text = strings.Replace(text, "@bnholofote", "@", -1)
+	text = strings.Replace(text, "@BahiaNoticias", "@notabaiana", -1)
 
-	text = strings.Replace(text, "BN Holofote", "", -1)
+	text = strings.Replace(text, "@bnholofote", "@notabaiana", -1)
 
-	text = strings.Replace(text, "@bhall", "@", -1)
+	text = strings.Replace(text, "BN Holofote", "NotaBaiana", -1)
 
-	text = strings.Replace(text, "As informações são do Metrópoles, parceiro do BN", ".", -1)
+	text = strings.Replace(text, "@bhall", "@notabaiana", -1)
 
-	text = strings.Replace(text, " parceiro do BN,", "", -1)
+	text = strings.Replace(text, "As informações são do Metrópoles, parceiro do Nota Baiana", ".", -1)
 
-	text = strings.Replace(text, "Assine a newsletter de Esportes do BN e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
+	text = strings.Replace(text, " parceiro do Nota Baiana,", "", -1)
 
-	text = strings.Replace(text, "Siga o BN no Google News e veja os conteúdos de maneira ainda mais rápida e ágil pelo celular ou pelo computador!", "", -1)
+	text = strings.Replace(text, "Assine a newsletter de Esportes do Nota Baiana e fique bem informado sobre o esporte na Bahia, no Brasil e no mundo!", "", -1)
+
+	text = strings.Replace(text, "Siga o Nota Baiana no Google News e veja os conteúdos de maneira ainda mais rápida e ágil pelo celular ou pelo computador!", "", -1)
 
 	text = strings.Replace(text, `<img src="https://www.bahianoticias.com.br/fotos/oferecimentos/30/IMG_OFER_0.jpg" width="100%">`, "", -1)
 

@@ -54,11 +54,15 @@ type Part struct {
 
 func ChangeTitleWithGemini(prompt, title string) (string, error) {
 
+<<<<<<< HEAD
 	if os.Getenv("DEVELOPMENT") == "local" {
 		return title, nil
 	}
 
 	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + os.Getenv("KEY_GEMINI")
+=======
+	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + os.Getenv("KEY_GEMINI")
+>>>>>>> 2cc9d257501917fdeaaaf30b1521525e358cdb4a
 
 	title = strings.ReplaceAll(title, `"`, `\"`)
 	title = strings.ReplaceAll(title, `'`, `\'`)
