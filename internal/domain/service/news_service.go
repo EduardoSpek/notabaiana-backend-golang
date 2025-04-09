@@ -782,7 +782,7 @@ func listOfBlockedText(text string) bool {
 		"IMG_OFER_0",
 		"JusPod",
 		"BN na Bola",
-		"NB na Bola,
+		"NB na Bola",
 	}
 
 	for _, word := range words {
