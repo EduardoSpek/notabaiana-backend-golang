@@ -781,6 +781,8 @@ func listOfBlockedText(text string) bool {
 	words := []string{
 		"IMG_OFER_0",
 		"JusPod",
+		"BN na Bola",
+		"NB na Bola,
 	}
 
 	for _, word := range words {
@@ -868,6 +870,11 @@ func listOfBlockedWords(titulo string) bool {
 		"Linn da Quebrada",
 		"Patrícia Ramos",
 		"Blackjack",
+		"Bruna Louise",
+		"Giovanna Ewbank",
+		"Bruno Gagliasso",
+		"Gkay",
+		"Flora Gil",
 	}
 
 	for _, palavra := range palavras {
