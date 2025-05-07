@@ -756,12 +756,25 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 			e.DOM.SetAttr("width", "100%")
 			e.DOM.SetAttr("height", "320")
 
-			// Obter todos os atributos do iframe
-			attrs := e.DOM.Attr()
+			// Obter o nó HTML do iframe
+			nodes := e.DOM.Nodes
+			if len(nodes) == 0 {
+				fmt.Println("Nenhum nó encontrado para o iframe")
+				return
+			}
+			node := nodes[0]
+
 			// Construir o HTML do iframe manualmente
 			var attrStr strings.Builder
-			for _, attr := range attrs {
-				attrStr.WriteString(fmt.Sprintf(` %s="%s"`, attr.Name, attr.Value))
+			for _, attr := range node.Attr {
+				// Garantir que width e height sejam os valores modificados
+				if attr.Key == "width" {
+					attrStr.WriteString(` width="100%"`)
+				} else if attr.Key == "height" {
+					attrStr.WriteString(` height="320"`)
+				} else {
+					attrStr.WriteString(fmt.Sprintf(` %s="%s"`, attr.Key, html.EscapeString(attr.Val)))
+				}
 			}
 
 			// Montar o HTML completo do iframe
