@@ -723,7 +723,7 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 			return
 		}
 
-		html += "<br><br>" + conteudo_decoded
+		htmlx += "<br><br>" + conteudo_decoded
 
 	})
 
@@ -740,8 +740,8 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 
 		if strings.Contains(script_decoded, "youtube") || strings.Contains(script_decoded, "flickr") || strings.Contains(script_decoded, "tiktok") || strings.Contains(script_decoded, "bsky") {
 
-			if !strings.Contains(html, script_decoded) {
-				html += script_decoded
+			if !strings.Contains(htmlx, script_decoded) {
+				htmlx += script_decoded
 			}
 		}
 
