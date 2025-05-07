@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"html"
 
 	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
@@ -696,7 +697,7 @@ func (s *NewsService) SaveImage(id, url, diretorio string) (string, error) {
 }
 
 func (s *NewsService) GetEmded(link string) (string, string) {
-	var html, conteudo, script, text, str_text string
+	var htmlx, conteudo, script, text, str_text string
 	//var err error
 
 	collector := colly.NewCollector(
@@ -781,7 +782,7 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 			iframeHTML := fmt.Sprintf("<iframe%s></iframe>", attrStr.String())
 
 			// Adicionar o código HTML à lista
-			html += `<div class="imagem_anexada">` + iframeHTML + `</div>`
+			htmlx += `<div class="imagem_anexada">` + iframeHTML + `</div>`
 		}
 	}) 
 
@@ -795,7 +796,7 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 		// Verificar se o valor "src" contém o endereço de destino
 		if strings.Contains(src, "bahianoticias.com.br/fotos/") {
 
-			html += `<div class="imagem_anexada"><img src="` + src + `" width="100%"></div>`
+			htmlx += `<div class="imagem_anexada"><img src="` + src + `" width="100%"></div>`
 
 		}
 	})
@@ -803,9 +804,9 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 	// Visitando a URL inicial
 	collector.Visit(link)
 
-	//html = text + html
+	//html = text + htmlx
 
-	return html, text
+	return htmlx, text
 }
 
 func RenamePathImage(news *entity.News) *entity.News {
