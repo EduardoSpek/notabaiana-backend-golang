@@ -756,12 +756,17 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 			e.DOM.SetAttr("width", "100%")
 			e.DOM.SetAttr("height", "320")
 
-			// Obter o código HTML completo do iframe após as alterações
-			iframeHTML, err := e.DOM.OuterHTML()
-			if err != nil {
-				fmt.Println("Erro ao obter HTML do iframe:", err)
-				return
+			// Obter todos os atributos do iframe
+			attrs := e.DOM.Attr()
+			// Construir o HTML do iframe manualmente
+			var attrStr strings.Builder
+			for _, attr := range attrs {
+				attrStr.WriteString(fmt.Sprintf(` %s="%s"`, attr.Name, attr.Value))
 			}
+
+			// Montar o HTML completo do iframe
+			iframeHTML := fmt.Sprintf("<iframe%s></iframe>", attrStr.String())
+
 			// Adicionar o código HTML à lista
 			html += `<div class="imagem_anexada">` + iframeHTML + `</div>`
 		}
