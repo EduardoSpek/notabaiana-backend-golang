@@ -746,6 +746,27 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 
 	})
 
+	collector.OnHTML("iframe", func(e *colly.HTMLElement) {
+		// Obter o atributo src do iframe
+		src := e.Attr("src")
+
+		// Verificar se o src contém a URL de embed do YouTube
+		if strings.Contains(src, "youtube.com/embed") {
+			// Alterar os atributos width e height
+			e.DOM.SetAttr("width", "100%")
+			e.DOM.SetAttr("height", "320")
+
+			// Obter o código HTML completo do iframe após as alterações
+			iframeHTML, err := e.DOM.OuterHTML()
+			if err != nil {
+				fmt.Println("Erro ao obter HTML do iframe:", err)
+				return
+			}
+			// Adicionar o código HTML à lista
+			html += `<div class="imagem_anexada">` + iframeHTML + `</div>`
+		}
+	}) 
+
 	// Definindo o callback OnHTML
 	collector.OnHTML("img", func(e *colly.HTMLElement) {
 		// Obter o valor do atributo "src" da imagem
