@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"html"
 	"image"
 	"io"
 	"mime/multipart"
@@ -12,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"html"
 
 	"github.com/eduardospek/notabaiana-backend-golang/config"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
@@ -784,7 +784,7 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 			// Adicionar o código HTML à lista
 			htmlx += `<div class="imagem_anexada">` + iframeHTML + `</div>`
 		}
-	}) 
+	})
 
 	// Definindo o callback OnHTML
 	collector.OnHTML("img", func(e *colly.HTMLElement) {
@@ -917,6 +917,13 @@ func listOfBlockedWords(titulo string) bool {
 		"Flora Gil",
 		"Eliezer",
 		"Viih Tube",
+		"Camila Loures",
+		"Luana Piovani",
+		"MC Rebecca",
+		"Brunna Gonçalves",
+		"Ana Paula Renault",
+		"Kart Love",
+		"Juliette",
 	}
 
 	for _, palavra := range palavras {
