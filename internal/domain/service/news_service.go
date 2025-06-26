@@ -924,6 +924,9 @@ func listOfBlockedWords(titulo string) bool {
 		"Ana Paula Renault",
 		"Kart Love",
 		"Juliette",
+		"Oruam",
+		"MC Cabelinho",
+		"Poze",
 	}
 
 	for _, palavra := range palavras {
