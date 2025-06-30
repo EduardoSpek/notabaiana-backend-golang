@@ -770,11 +770,12 @@ func (s *NewsService) GetEmded(link string) (string, string) {
 			var attrStr strings.Builder
 			for _, attr := range node.Attr {
 				// Garantir que width e height sejam os valores modificados
-				if attr.Key == "width" {
+				switch attr.Key {
+				case "width":
 					attrStr.WriteString(` width="100%"`)
-				} else if attr.Key == "height" {
+				case "height":
 					attrStr.WriteString(` height="320"`)
-				} else {
+				default:
 					attrStr.WriteString(fmt.Sprintf(` %s="%s"`, attr.Key, html.EscapeString(attr.Val)))
 				}
 			}
@@ -1090,9 +1091,10 @@ func (s *NewsService) GetIdFromLink(link string) (int, error) {
 
 	var maispartes []string
 
-	if partes_total == 6 {
+	switch partes_total {
+	case 6:
 		maispartes = strings.Split(partes[5], "-")
-	} else if partes_total == 5 {
+	case 5:
 		maispartes = strings.Split(partes[4], "-")
 	}
 
@@ -1145,20 +1147,28 @@ func (s *NewsService) GetImageLink(link string) (string, error) {
 
 	var tag string
 	tag = "NOTICIA"
-	if path == "esportes_bahias" {
+
+	switch path {
+	case "esportes_bahias":
 		tag = "BAHIA"
-	} else if path == "esportes_vitorias" {
+	case "esportes_vitorias":
 		tag = "VITORIA"
-	} else if path == "justica_colunas" || path == "hall_colunas" || path == "holofote_colunas" {
+	case "justica_colunas":
 		tag = "COLUNA"
-	} else if path == "principal_podcasts" {
+	case "hall_colunas":
+		tag = "COLUNA"
+	case "holofote_colunas":
+		tag = "COLUNA"
+	case "principal_podcasts":
 		tag = "PODCAST"
-	} else if path == "hall_enjoy" {
+	case "hall_enjoy":
 		tag = "ENJOY"
-	} else if path == "hall_travellings" {
+	case "hall_travellings":
 		tag = "TRAVELLING"
-	} else if path == "hall_business" {
+	case "hall_business":
 		tag = "BUSINESS"
+	default:
+		tag = "NOTICIA"
 	}
 
 	newlink := fmt.Sprintf("https://www.bahianoticias.com.br/fotos/%s/%d/IMAGEM_%s_5.jpg", path, id, tag)

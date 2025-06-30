@@ -153,7 +153,8 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 		file = banner.ID + "_" + strconv.Itoa(i) + ".jpg"
 		pathFile := diretorio + file
 
-		if i == 0 {
+		switch i {
+		case 0:
 			err = bs.SaveImageForm(image, diretorio, file, config.Banner_pc_dimensions[0], config.Banner_pc_dimensions[1])
 
 			if err != nil {
@@ -164,7 +165,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 			if image != nil {
 				banner.Image1 = pathFile
 			}
-		} else if i == 1 {
+		case 1:
 			err = bs.SaveImageForm(image, diretorio, file, config.Banner_tablet_dimensions[0], config.Banner_tablet_dimensions[1])
 
 			if err != nil {
@@ -175,7 +176,7 @@ func (bs *BannerService) SaveImages(images []multipart.File, banner entity.Banne
 			if image != nil {
 				banner.Image2 = pathFile
 			}
-		} else if i == 2 {
+		case 2:
 			err = bs.SaveImageForm(image, diretorio, file, config.Banner_mobile_dimensions[0], config.Banner_mobile_dimensions[1])
 
 			if err != nil {
