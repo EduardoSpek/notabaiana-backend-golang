@@ -413,11 +413,12 @@ func (c *NewsController) AdminGetNewsBySlug(w http.ResponseWriter, r *http.Reque
 }
 
 func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
 	vars := mux.Vars(r)
 	slug := vars["slug"]
 
-	new, err := c.news_service.GetNewsBySlug(slug)
+	new, err := c.news_service.GetNewsBySlug(ctx, slug)
 
 	if err != nil {
 		msg := map[string]any{

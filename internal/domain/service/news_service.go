@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"html"
@@ -454,7 +455,7 @@ func (s *NewsService) AdminGetNewsBySlug(slug string) (*entity.News, error) {
 
 }
 
-func (s *NewsService) GetNewsBySlug(slug string) (*entity.News, error) {
+func (s *NewsService) GetNewsBySlug(ctx context.Context, slug string) (*entity.News, error) {
 
 	// err := s.Hit(slug)
 
@@ -462,7 +463,7 @@ func (s *NewsService) GetNewsBySlug(slug string) (*entity.News, error) {
 	// 	return &entity.News{}, err
 	// }
 
-	new, err := s.newsrepository.GetBySlug(slug)
+	new, err := s.newsrepository.GetBySlug(ctx, slug)
 
 	if err != nil {
 		return &entity.News{}, err

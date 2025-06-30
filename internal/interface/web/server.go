@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/middlewares"
 	"github.com/eduardospek/notabaiana-backend-golang/internal/interface/web/router"
@@ -27,7 +28,15 @@ func (serverweb *ServerWeb) Start() {
 
 	api.Use(middlewares.CorsMiddleware)
 
+	srv := &http.Server{
+		Handler:      api,
+		Addr:         ":" + os.Getenv("PORT"),
+		ReadTimeout:  5 * time.Second,  // tempo máximo para ler o request
+		WriteTimeout: 10 * time.Second, // tempo máximo para escrever a resposta
+		IdleTimeout:  60 * time.Second, // conexões keep-alive
+	}
+
 	fmt.Println("O Servidor foi iniciado na porta " + os.Getenv("PORT"))
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), api))
+	log.Fatal(srv.ListenAndServe())
 
 }

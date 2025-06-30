@@ -1,6 +1,10 @@
 package port
 
-import "github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+import (
+	"context"
+
+	"github.com/eduardospek/notabaiana-backend-golang/internal/domain/entity"
+)
 
 type NewsRepository interface {
 	Create(news *entity.News) (*entity.News, error)
@@ -10,7 +14,7 @@ type NewsRepository interface {
 	FindCategory(category string, page int) ([]*entity.News, error)
 	FindRecent() (*entity.News, error)
 	NewsExists(title string) error
-	GetBySlug(slug string) (*entity.News, error)
+	GetBySlug(ctx context.Context, slug string) (*entity.News, error)
 	GetByID(id string) (*entity.News, error)
 	AdminGetBySlug(slug string) (*entity.News, error)
 	NewsTruncateTable() error

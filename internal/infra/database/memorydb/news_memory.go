@@ -1,6 +1,7 @@
 package memorydb
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"time"
@@ -60,7 +61,7 @@ func (r *NewsMemoryRepository) GetByID(id string) (*entity.News, error) {
 	}
 	return &entity.News{}, ErrNotNewSlug
 }
-func (r *NewsMemoryRepository) GetBySlug(slug string) (*entity.News, error) {
+func (r *NewsMemoryRepository) GetBySlug(ctx context.Context, slug string) (*entity.News, error) {
 	for _, n := range r.Newsdb {
 		if slug == n.Slug {
 			return n, nil

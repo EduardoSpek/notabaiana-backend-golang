@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"sync"
@@ -194,31 +195,39 @@ func (repo *NewsPostgresRepository) AdminGetBySlug(slug string) (*entity.News, e
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) GetBySlug(slug string) (*entity.News, error) {
+func (repo *NewsPostgresRepository) GetBySlug(ctx context.Context, slug string) (*entity.News, error) {
 	repo.mutex.Lock()
 	defer repo.mutex.Unlock()
 
-	tx := repo.db.Begin()
-	defer tx.Rollback()
+	tx := repo.db.WithContext(ctx).Begin() // inicia transação com contexto
+	defer func() {
+		// rollback só se a transação ainda não foi committed
+		if r := recover(); r != nil || tx.Error != nil {
+			tx.Rollback()
+		}
+	}()
 
-	var news *entity.News
-	result := repo.db.Model(&entity.News{}).Where("visible = true AND slug = ?", slug).First(&news)
-
+	var news entity.News
+	result := tx.Where("visible = true AND slug = ?", slug).First(&news)
 	if result.Error != nil {
-		return &entity.News{}, result.Error
+		tx.Rollback()
+		return nil, result.Error
 	}
 
+	// Incrementa a view
 	news.Views += 1
 
-	result = repo.db.Save(&news)
-
+	result = tx.Save(&news)
 	if result.Error != nil {
-		return &entity.News{}, result.Error
+		tx.Rollback()
+		return nil, result.Error
 	}
 
-	tx.Commit()
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
 
-	return news, nil
+	return &news, nil
 }
 
 func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) ([]*entity.News, error) {
