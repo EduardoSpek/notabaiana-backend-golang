@@ -31,9 +31,9 @@ func (serverweb *ServerWeb) Start() {
 	srv := &http.Server{
 		Handler:      api,
 		Addr:         ":" + os.Getenv("PORT"),
-		ReadTimeout:  5 * time.Second,  // tempo máximo para ler o request
-		WriteTimeout: 10 * time.Second, // tempo máximo para escrever a resposta
-		IdleTimeout:  60 * time.Second, // conexões keep-alive
+		ReadTimeout:  2 * time.Second,  // tempo máximo para ler o request
+		WriteTimeout: 5 * time.Second,  // tempo máximo para escrever a resposta
+		IdleTimeout:  30 * time.Second, // conexões keep-alive
 	}
 
 	fmt.Println("O Servidor foi iniciado na porta " + os.Getenv("PORT"))
