@@ -79,7 +79,7 @@ func (r *NewsMemoryRepository) AdminFindAll(page, limit int) ([]*entity.News, er
 	return news, nil
 }
 
-func (r *NewsMemoryRepository) FindAll(page, limit int) ([]*entity.News, error) {
+func (r *NewsMemoryRepository) FindAll(ctx context.Context, page, limit int) ([]*entity.News, error) {
 	var news []*entity.News
 	for _, n := range r.Newsdb {
 		news = append(news, n)

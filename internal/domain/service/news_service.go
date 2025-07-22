@@ -160,23 +160,23 @@ func (s *NewsService) CleanNewsOld() error {
 
 }
 
-func (s *NewsService) StartScanDuplicateNews(minutes time.Duration) {
+func (s *NewsService) StartScanDuplicateNews(ctx context.Context, minutes time.Duration) {
 
-	go s.ScanDuplicateNews()
+	go s.ScanDuplicateNews(ctx)
 
 	ticker := time.NewTicker(minutes * time.Minute)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		go s.ScanDuplicateNews()
+		go s.ScanDuplicateNews(ctx)
 	}
 }
 
-func (s *NewsService) ScanDuplicateNews() error {
+func (s *NewsService) ScanDuplicateNews(ctx context.Context) error {
 
 	var listNewsDelete []*entity.News
 
-	news := s.FindAllNews(1, 100)
+	news := s.FindAllNews(ctx, 1, 100)
 
 	newsList := news.(*FindAllOutput)
 
@@ -557,7 +557,7 @@ func (s *NewsService) AdminFindAllNews(page, limit int) interface{} {
 
 }
 
-func (s *NewsService) FindAllNews(page, limit int) interface{} {
+func (s *NewsService) FindAllNews(ctx context.Context, page, limit int) interface{} {
 
 	var newsOutput []*entity.NewsFindAllOutput
 
@@ -566,7 +566,7 @@ func (s *NewsService) FindAllNews(page, limit int) interface{} {
 		limit = config.News_LimitPerPage
 	}
 
-	news, _ := s.newsrepository.FindAll(page, limit)
+	news, _ := s.newsrepository.FindAll(ctx, page, limit)
 
 	newsOutput = s.NewsConvertListOutput(news)
 

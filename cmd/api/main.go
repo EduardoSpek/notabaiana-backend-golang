@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -104,6 +105,8 @@ var (
 
 func main() {
 
+	ctx := context.Background()
+
 	cache := service.NewCache(10 * time.Minute)
 
 	logger, _ := zap.NewProduction()
@@ -177,7 +180,7 @@ func main() {
 	go news_service.StartCleanNewsOld(65 * 24)
 
 	//Função para limpar as notícias duplicadas
-	go news_service.StartScanDuplicateNews(5)
+	go news_service.StartScanDuplicateNews(ctx, 5)
 
 	//Função para limpar as downloads inativos
 	//go downloadCleanUsecase.StartCleanDownloads(60 * 24)

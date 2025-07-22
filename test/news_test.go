@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -122,7 +123,9 @@ func TestNewsService(t *testing.T) {
 
 	t.Run("Deve listar as noticias do banco", func(t *testing.T) {
 
-		lista := news_service.FindAllNews(1, 4)
+		ctx := context.Background()
+
+		lista := news_service.FindAllNews(ctx, 1, 4)
 
 		newsList := lista.(struct {
 			List_news  []entity.News    `json:"news"`

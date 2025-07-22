@@ -310,7 +310,7 @@ func (repo *NewsPostgresRepository) AdminFindAll(page, limit int) ([]*entity.New
 	return news, nil
 }
 
-func (repo *NewsPostgresRepository) FindAll(page, limit int) ([]*entity.News, error) {
+func (repo *NewsPostgresRepository) FindAll(ctx context.Context, page, limit int) ([]*entity.News, error) {
 	repo.mutex.RLock()
 	defer repo.mutex.RUnlock()
 

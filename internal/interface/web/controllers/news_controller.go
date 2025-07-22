@@ -435,6 +435,8 @@ func (c *NewsController) GetNewsBySlug(w http.ResponseWriter, r *http.Request) {
 
 func (c *NewsController) News(w http.ResponseWriter, r *http.Request) {
 
+	ctx := r.Context()
+
 	vars := mux.Vars(r)
 	pageStr := vars["page"]
 	qtdStr := vars["qtd"]
@@ -456,7 +458,7 @@ func (c *NewsController) News(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	listnews := c.news_service.FindAllNews(page, limit)
+	listnews := c.news_service.FindAllNews(ctx, page, limit)
 
 	c.Cache.Set(cacheString, listnews)
 
