@@ -316,7 +316,7 @@ func (repo *NewsPostgresRepository) FindAll(ctx context.Context, page, limit int
 
 	offset := (page - 1) * limit
 
-	tx := repo.db.Begin()
+	tx := repo.db.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	var news []*entity.News
