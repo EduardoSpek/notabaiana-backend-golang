@@ -120,7 +120,7 @@ func ChangeTitleWithGemini(prompt, title string) (string, error) {
 	defer client.Close()
 
 	// The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
-	model := client.GenerativeModel("gemini-2.5-flash-lite-preview-06-17")
+	model := client.GenerativeModel("gemini-2.5-flash-lite")
 	resp, err := model.GenerateContent(ctx, genai.Text(string(prompt+" "+title)))
 	if err != nil {
 		log.Fatal(err)
