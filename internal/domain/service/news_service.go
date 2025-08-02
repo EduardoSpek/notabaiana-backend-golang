@@ -86,7 +86,7 @@ func (s *NewsService) Delete(id string) error {
 		return err
 	}
 
-	removed := utils.RemoveImage("./app/images/" + news.Image)
+	removed := utils.RemoveImage("./images/" + news.Image)
 
 	if !removed {
 		fmt.Println("Delete News: não foi possível deletar a imagem")
@@ -245,7 +245,7 @@ func (s *NewsService) RemoveImages(news []*entity.News) {
 	for _, n := range news {
 
 		if n.Image != "" {
-			image := "./app/images/" + n.Image
+			image := "./images/" + n.Image
 			utils.RemoveImage(image)
 		}
 	}
