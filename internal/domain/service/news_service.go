@@ -421,7 +421,7 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		return &entity.News{}, err
 	}
 
-	newtext, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este texto matendo o contexto. Mantenha os assuntos principais. Baseado no texto, crie um titulo para a notícia seguindo boas práticas de SEO. Retorne o título e texto em formato JSON. O texto é: ", new.Text)
+	newtext, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este texto matendo o contexto. Mantenha os assuntos principais. Baseado no texto, crie um titulo para a notícia seguindo boas práticas de SEO. Retorne o título e o texto em formato JSON. O texto é: ", new.Text)
 
 	if err != nil {
 		fmt.Println("Erro ao obter o texto do gemini:", err)
@@ -430,8 +430,12 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 	var noticia Noticia
 	err = json.Unmarshal([]byte(newtext), &noticia)
 	if err == nil {
-		new.TitleAi = strings.TrimSpace(noticia.Titulo)
-		new.Text = strings.TrimSpace(noticia.Texto)
+		if noticia.Titulo != "" {
+			new.TitleAi = strings.TrimSpace(noticia.Titulo)
+		}
+		if noticia.Texto != "" { 
+			new.Text = strings.TrimSpace(noticia.Texto)
+		}
 	}
 
 	if embed != "" {
