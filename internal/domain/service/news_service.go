@@ -433,6 +433,7 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		if noticia.Titulo != "" {
 			new.TitleAi = strings.TrimSpace(noticia.Titulo)
 			new.Slug = entity.SlugTitle(new.TitleAi)
+			new = ChangeLink(new)
 		}
 		if noticia.Texto != "" { 
 			new.Text = strings.TrimSpace(noticia.Texto)
