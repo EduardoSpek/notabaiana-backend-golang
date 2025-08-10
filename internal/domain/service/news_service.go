@@ -421,7 +421,7 @@ func (s *NewsService) CreateNews(news *entity.News) (*entity.News, error) {
 		return &entity.News{}, err
 	}
 
-	newtext, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este texto matendo o contexto. Mantenha os assuntos principais. Baseado no texto, crie um titulo para a notícia seguindo boas práticas de SEO. Retorne o título e o texto em formato JSON. O texto é: ", new.Text)
+	newtext, err := utils.ChangeTitleWithGemini("Você é um jornalista, refaça este texto matendo o contexto. Mantenha os assuntos principais. Baseado no texto, crie um titulo para a notícia seguindo boas práticas de SEO. Não retorne o título com todas as palavras tendo a primeira letra maiúscula, siga a ortografia e gramática da língua portuguesa do Brasil. Retorne o título e o texto em formato JSON. O texto é: ", new.Text)
 
 	if err != nil {
 		fmt.Println("Erro ao obter o texto do gemini:", err)
