@@ -177,7 +177,7 @@ func main() {
 
 	//Função para limpar as notícias inativas
 	go news_service.StartCleanNews(60 * 24)
-	go news_service.StartCleanNewsOld(65 * 24)
+	//go news_service.StartCleanNewsOld(65 * 24)
 
 	//Função para limpar as notícias duplicadas
 	go news_service.StartScanDuplicateNews(ctx, 5)
