@@ -259,6 +259,11 @@ func (s *NewsService) NewsMake() (interface{}, error) {
 		return nil, err
 	}
 
+	title := news.Title
+	if news.TitleAI != "" {
+		title = news.TitleAI
+	}
+
 	newsOutput := struct {
 		ID    string `json:"id"`
 		Title string `json:"title"`
@@ -266,7 +271,7 @@ func (s *NewsService) NewsMake() (interface{}, error) {
 		Image string `json:"image"`
 	}{
 		ID:    news.ID,
-		Title: news.Title,
+		Title: title,
 		Link:  news.Link,
 		Image: news.Image,
 	}
