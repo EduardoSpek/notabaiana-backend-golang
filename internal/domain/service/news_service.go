@@ -260,8 +260,8 @@ func (s *NewsService) NewsMake() (interface{}, error) {
 	}
 
 	title := news.Title
-	if news.TitleAI != "" {
-		title = news.TitleAI
+	if news.TitleAi != "" {
+		title = news.TitleAi
 	}
 
 	newsOutput := struct {
