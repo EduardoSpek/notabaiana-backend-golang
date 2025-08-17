@@ -115,7 +115,8 @@ func ChangeTitleWithGemini(prompt, title string) (string, error) {
 	// Access your API key as an environment variable (see "Set up your API key" above)
 	client, err := genai.NewClient(ctx, option.WithAPIKey(os.Getenv("KEY_GEMINI")))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Erro na key/chave do Gemini: ", err)
+		return "", err
 	}
 	defer client.Close()
 
@@ -123,13 +124,15 @@ func ChangeTitleWithGemini(prompt, title string) (string, error) {
 	model := client.GenerativeModel("gemini-2.5-flash-lite")
 	resp, err := model.GenerateContent(ctx, genai.Text(string(prompt+" "+title)))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Erro ao gerar texto no Gemini: ", err)
+		return "", err
 	}
 
 	// Convert the response to a JSON string with indentation
 	respJSON, err := json.Marshal(resp.Candidates[0].Content.Parts[0])
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Erro ao converter JSON:", err)
+		return "", err
 	}
 
 	var jsonStr string
