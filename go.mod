@@ -1,6 +1,6 @@
 module github.com/eduardospek/notabaiana-backend-golang
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/gocolly/colly v1.2.0
