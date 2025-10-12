@@ -952,6 +952,8 @@ func listOfBlockedWords(titulo string) bool {
 		"MC Cabelinho",
 		"Poze",
 		"Podcast Bengala",
+		"Lucas Rangel",
+		"Wagner Moura",
 	}
 
 	for _, palavra := range palavras {
