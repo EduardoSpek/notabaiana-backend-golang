@@ -238,7 +238,7 @@ func (repo *NewsPostgresRepository) SearchNews(page int, str_search string) ([]*
 	offset := (page - 1) * limit
 
 	var news []*entity.News
-	repo.db.Model(&entity.News{}).Where("visible = true AND unaccent(title) ILIKE unaccent(?)", "%"+str_search+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
+	repo.db.Model(&entity.News{}).Where("visible = true AND unaccent(title) ILIKE unaccent(?) OR visible = true AND unaccent(title_ai) ILIKE unaccent(?)", "%"+str_search+"%", "%"+str_search+"%").Order("created_at DESC").Limit(limit).Offset(offset).Find(&news)
 
 	return news, nil
 }
