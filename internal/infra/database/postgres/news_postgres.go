@@ -248,7 +248,7 @@ func (repo *NewsPostgresRepository) GetTotalNewsBySearch(str_search string) int 
 	defer repo.mutex.RUnlock()
 
 	var count int64
-	repo.db.Model(&entity.News{}).Where("visible = true AND unaccent(title) ILIKE unaccent(?)", "%"+str_search+"%").Count(&count)
+	repo.db.Model(&entity.News{}).Where("visible = true AND unaccent(title) ILIKE unaccent(?) OR visible = true AND unaccent(title_ai) ILIKE unaccent(?)", "%"+str_search+"%", "%"+str_search+"%").Count(&count)
 
 	total := int(count)
 
